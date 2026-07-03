@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>品詞攻略｜こころの国語（明日のテスト用）</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#b8e4ff; --bg2:#f5faff; --bg3:#fff5fa;
+  --sky:#4a9eff; --mint:#66bb6a; --sakura:#ff8aa8; --gold:#ffb74d;
+  --ink:#1a2a4a; --sub:#5a6a8a; --line:rgba(70,120,200,.18);
+  --card:rgba(255,255,255,.86); --cardb:rgba(255,255,255,.95);
+  --red:#ff6b6b; --blue:#3c8cdb; --green:#4abf4a;
+  --hot:#ff5252; --hotbg:#fff0f0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;font-family:'Noto Sans JP',sans-serif;color:var(--ink);}
+body{
+  background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%);
+  background-attachment:fixed; min-height:100vh; overflow-x:hidden;
+}
+.cloud{position:fixed;color:rgba(255,255,255,.7);font-size:60px;pointer-events:none;animation:drift linear infinite;z-index:0;}
+@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(110vw)}}
+.petal{position:fixed;color:var(--sakura);opacity:.4;pointer-events:none;animation:fall linear infinite;z-index:0;font-size:18px;}
+@keyframes fall{from{transform:translateY(-20px) rotate(0)}to{transform:translateY(110vh) rotate(360deg)}}
+
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line); padding:10px 14px;}
+.htop{display:flex;align-items:center;gap:10px;}
+.htitle{font-weight:900;font-size:18px;flex:1;}
+.htitle span{color:var(--sky);}
+.htitle small{display:block;font-size:11px;color:var(--hot);font-weight:700;margin-top:2px;}
+.progress-wrap{margin-top:6px;}
+.progress-label{font-size:11px;color:var(--sub);display:flex;justify-content:space-between;margin-bottom:3px;}
+.progress-bar{height:10px;background:rgba(74,158,255,.12);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--hot),var(--sky),var(--mint));width:0%;transition:width .6s;}
+.badges-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:10.5px;color:var(--sub);}
+.badges-row span{background:rgba(255,255,255,.7);padding:2px 8px;border-radius:99px;border:1px solid var(--line);}
+
+nav.tabs{display:flex;overflow-x:auto;gap:4px;padding:8px 10px;background:rgba(255,255,255,.6);border-bottom:1px solid var(--line);}
+nav.tabs button{flex:0 0 auto;padding:8px 14px;border:none;background:transparent;border-radius:99px;font-weight:700;color:var(--sub);font-size:13px;cursor:pointer;font-family:inherit;}
+nav.tabs button.active{background:linear-gradient(135deg,var(--sky),var(--mint));color:#fff;box-shadow:0 4px 12px rgba(74,158,255,.3);}
+nav.tabs button.hot{background:linear-gradient(135deg,var(--hot),#ff8a65);color:#fff;}
+nav.tabs button.hot.active{background:linear-gradient(135deg,#d32f2f,var(--hot));}
+section.tab{display:none;padding:14px;max-width:760px;margin:0 auto;position:relative;z-index:1;}
+section.tab.active{display:block;}
+
+/* 明日ココ */
+.hot-hero{background:linear-gradient(135deg,#fff0f0,#fff5f0);border:2.5px solid var(--hot);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 6px 24px rgba(255,82,82,.18);}
+.hot-hero h2{margin:0 0 8px;color:var(--hot);font-size:20px;display:flex;align-items:center;gap:6px;}
+.hot-hero .lead{font-size:13.5px;line-height:1.7;margin:6px 0;}
+.hot-hero .lead b{color:var(--hot);}
+.hot-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;}
+.hot-card h3{margin:0 0 10px;color:var(--hot);font-size:15px;}
+.hot-table{width:100%;border-collapse:collapse;font-size:13px;}
+.hot-table th{background:rgba(255,82,82,.1);color:var(--hot);padding:6px 8px;text-align:left;border:1px solid var(--line);font-weight:700;}
+.hot-table td{padding:6px 8px;border:1px solid var(--line);vertical-align:top;line-height:1.6;}
+.hot-table td b{color:var(--hot);}
+.hot-flow{background:#fffbf0;border:2px solid var(--gold);border-radius:12px;padding:12px;margin:10px 0;font-size:13.5px;line-height:1.9;}
+.hot-flow b{color:#e67e00;}
+.hot-flow .arrow{color:var(--gold);font-weight:900;}
+.example-box{background:#f8fcff;border-left:4px solid var(--sky);padding:10px 12px;border-radius:6px;margin:8px 0;font-size:13.5px;line-height:1.8;}
+.example-box .ans{display:inline-block;background:#FFD833;color:#1a2a4a;padding:1px 8px;border-radius:4px;font-weight:900;margin-left:6px;}
+.example-box .ans.print-hide{background:#FFD833;color:#FFD833;}
+.print-tip{font-size:11px;color:var(--sub);margin-top:8px;text-align:right;}
+
+/* 攻略マップ */
+.map-intro{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.7;}
+.map-intro b{color:var(--sky);}
+.stage{position:relative;background:var(--cardb);border:1px solid var(--line);border-radius:16px;margin-bottom:14px;box-shadow:0 4px 14px rgba(74,158,255,.08);overflow:hidden;}
+.stage-head{padding:12px 14px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+.stage-num{flex:0 0 36px;height:36px;background:linear-gradient(135deg,var(--sky),var(--mint));color:#fff;font-weight:900;font-size:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.stage-title{flex:1;}
+.stage-title b{font-size:15px;display:block;margin-bottom:3px;}
+.stage-title .sum{font-size:12.5px;color:var(--sub);}
+.stage-arrow{font-size:18px;color:var(--sub);transition:transform .3s;}
+.stage.open .stage-arrow{transform:rotate(90deg);}
+.stage-body{display:none;padding:0 14px 14px;border-top:1px dashed var(--line);}
+.stage.open .stage-body{display:block;}
+.steps{margin:10px 0;padding-left:0;list-style:none;}
+.steps li{background:#f0f8ff;border-left:4px solid var(--sky);padding:8px 10px;margin-bottom:6px;border-radius:6px;font-size:13.5px;line-height:1.6;}
+.hint{background:#f0fff4;border-left:4px solid var(--mint);padding:8px 10px;border-radius:6px;font-size:13px;margin:8px 0;line-height:1.6;}
+.warn{background:#fff5f5;border-left:4px solid var(--red);padding:8px 10px;border-radius:6px;font-size:13px;margin:8px 0;line-height:1.6;}
+.wakatta{margin-top:10px;width:100%;padding:10px;background:linear-gradient(135deg,#ffa726,#ff7043);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;}
+.wakatta.done{background:linear-gradient(135deg,var(--mint),#43a047);}
+
+/* 暗記カード */
+.anki-card{background:var(--cardb);border:1px solid var(--line);border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 4px 14px rgba(74,158,255,.08);}
+.anki-card.hot{border:2px solid var(--hot);}
+.anki-header{padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;background:linear-gradient(135deg,rgba(74,158,255,.08),rgba(102,187,106,.06));}
+.anki-card.hot .anki-header{background:linear-gradient(135deg,rgba(255,82,82,.1),rgba(255,180,77,.08));}
+.anki-title{flex:1;font-weight:900;color:var(--ink);font-size:15px;}
+.anki-arrow{font-size:18px;color:var(--sub);transition:transform .3s;}
+.anki-card.open .anki-arrow{transform:rotate(90deg);}
+.anki-body{display:none;padding:14px;}
+.anki-card.open .anki-body{display:block;}
+.anki-body table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px;}
+.anki-body th,.anki-body td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top;}
+.anki-body th{background:rgba(74,158,255,.1);font-weight:700;color:var(--sky);font-size:12px;}
+.hide{display:inline-block;filter:blur(7px);opacity:.45;background:linear-gradient(90deg,rgba(74,158,255,.18),rgba(102,187,106,.18));border-radius:4px;padding:1px 6px;cursor:pointer;transition:all .55s;font-weight:700;}
+.hide.show{filter:blur(0);opacity:1;background:#FFD833;color:#1a2a4a;}
+td.hide{display:table-cell;}
+.formula-box{background:#fff9e6;border:2px solid var(--gold);border-radius:10px;padding:10px;margin:8px 0;font-size:13.5px;line-height:1.8;}
+.warn-box{background:#fff0f0;border:2px solid var(--red);border-radius:10px;padding:10px;margin:8px 0;font-size:13px;line-height:1.6;}
+.tip-box{background:#f0fff4;border:2px solid var(--mint);border-radius:10px;padding:10px;margin:8px 0;font-size:13px;line-height:1.6;}
+.anki-btns{display:flex;gap:8px;margin-top:10px;}
+.anki-reset-btn{flex:1;padding:9px;background:#f0f4fa;color:var(--sub);border:1px solid var(--line);border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit;}
+.anki-done-btn{flex:2;padding:9px;background:linear-gradient(135deg,#ffa726,#ff7043);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+.anki-done-btn.done{background:linear-gradient(135deg,var(--mint),#43a047);}
+
+/* 樹形図 */
+.tree{font-size:13px;line-height:2.1;background:#fff9e6;border:2px solid var(--gold);border-radius:12px;padding:14px 12px;font-family:'SF Mono','Menlo',monospace;}
+.tree .lvl1{color:var(--hot);font-weight:900;}
+.tree .lvl2{color:var(--sky);font-weight:700;}
+.tree .lvl3{color:#7a5500;font-weight:700;}
+.tree .leaf{background:#FFD833;color:#1a2a4a;padding:1px 7px;border-radius:4px;font-weight:900;}
+
+/* クイズ */
+.quiz-wrap{background:var(--cardb);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 4px 20px rgba(74,158,255,.08);}
+.quiz-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.quiz-head b{color:var(--sky);font-size:14px;}
+.enemy{text-align:center;font-size:64px;margin:14px 0;transition:transform .2s;}
+.enemy.hit{transform:scale(.85) rotate(-12deg);filter:hue-rotate(-30deg);}
+.enemy-name{text-align:center;font-size:12px;color:var(--sub);margin-bottom:8px;}
+.qtxt{background:#f8fcff;border-radius:10px;padding:12px;margin:10px 0;font-size:14.5px;line-height:1.7;border:1px solid var(--line);}
+.qcat{font-size:11px;color:#fff;background:var(--hot);padding:2px 8px;border-radius:99px;display:inline-block;margin-bottom:6px;}
+.choices{display:flex;flex-direction:column;gap:8px;}
+.choices button{padding:11px 14px;background:#fff;border:2px solid var(--line);border-radius:10px;font-size:13.5px;cursor:pointer;text-align:left;font-family:inherit;color:var(--ink);font-weight:500;transition:all .2s;}
+.choices button:hover{border-color:var(--sky);background:#f0f8ff;}
+.choices button.correct{background:linear-gradient(135deg,#a5e3a5,#7cc77c);border-color:var(--mint);color:#fff;font-weight:700;}
+.choices button.wrong{background:#ffd0d0;border-color:var(--red);color:#a02020;}
+.explain{background:#fff9e6;border-left:4px solid var(--gold);padding:10px 12px;border-radius:6px;margin-top:10px;font-size:13px;line-height:1.7;display:none;}
+.explain.show{display:block;}
+.next-btn{margin-top:10px;width:100%;padding:11px;background:linear-gradient(135deg,var(--sky),var(--mint));color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+.score-final{text-align:center;padding:20px;background:linear-gradient(135deg,#e0f4ff,#f0fff0);border-radius:14px;}
+.score-final h3{margin:0 0 10px;color:var(--sky);}
+.score-final .big{font-size:38px;font-weight:900;color:var(--sky);}
+
+/* toast */
+.toast{position:fixed;left:50%;top:80px;transform:translateX(-50%);background:linear-gradient(135deg,var(--mint),var(--sky));color:#fff;padding:10px 18px;border-radius:99px;font-weight:900;font-size:15px;z-index:100;animation:rise 1.5s ease-out forwards;pointer-events:none;}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,20px)}20%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-30px)}}
+
+@media(max-width:480px){
+  .htitle{font-size:15px;}
+  .hot-hero h2{font-size:17px;}
+}
+
+/* 印刷時：赤シート用に #FFD833 で答えを伏せる（実機で確認必要） */
+@media print{
+  body{background:#fff;}
+  .cloud,.petal{display:none;}
+  nav.tabs,header .progress-wrap,header .badges-row{display:none;}
+  section.tab{display:block !important;page-break-after:always;}
+  .anki-card,.stage{break-inside:avoid;}
+  .hide{filter:none;opacity:1;background:#FFD833;color:#FFD833;}
+}
+</style>
+</head>
+<body>
+
+<div class="cloud" style="top:8%;animation-duration:50s;animation-delay:0s;">☁️</div>
+<div class="cloud" style="top:30%;animation-duration:70s;animation-delay:-20s;font-size:40px;">☁️</div>
+<div class="cloud" style="top:60%;animation-duration:60s;animation-delay:-40s;font-size:50px;">☁️</div>
+<div class="petal" style="left:10%;animation-duration:18s;">🌸</div>
+<div class="petal" style="left:40%;animation-duration:22s;animation-delay:-8s;">🌸</div>
+<div class="petal" style="left:70%;animation-duration:20s;animation-delay:-14s;">🌸</div>
+
+<header>
+  <div class="htop">
+    <div class="htitle">
+      🌸 品詞攻略 <span>こころの国語</span>
+      <small>🔥 明日のテスト最優先版（塾長指示：436ページ＋れる・られる）</small>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label"><span>ばっちり度</span><span id="pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="pbar"></div></div>
+    <div class="badges-row">
+      <span>🔥 <span id="bg-hot">未</span></span>
+      <span>🗺️ <span id="bg-stage">0/0</span></span>
+      <span>📖 <span id="bg-anki">0/0</span></span>
+      <span>⚔️ <span id="bg-quiz">未</span></span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="hot active" data-tab="hot">🔥 明日ココ！</button>
+  <button data-tab="map">🗺️ 見分けフロー</button>
+  <button data-tab="anki">📖 暗記カード</button>
+  <button data-tab="quiz">⚔️ クイズ</button>
+</nav>
+
+<!-- ========== 明日ココ ========== -->
+<section class="tab active" id="tab-hot">
+  <div class="hot-hero">
+    <h2>🔥 明日のテストはココ！</h2>
+    <p class="lead">塾長の話：「品詞をぜんぶ覚える必要はない。<b>436ページ</b>を覚えるのと、明日のテストには<b>「れる・られる」の見分け（34回・土曜のやつ）</b>が出やすい。修学旅行で授業出てないから、ここを家で固めよう」</p>
+    <p class="lead">→ だから今夜やることは <b>2つだけ</b>：<br>　① 「れる・られる」の4つの意味を見分ける<br>　② 「品詞の種類を答えよ」型の判別フローを身につける</p>
+  </div>
+
+  <div class="hot-card">
+    <h3>① 「れる・られる」4つの意味</h3>
+    <table class="hot-table">
+      <tr><th>意味</th><th>見分けかた</th><th>例文（教科書465ページ）</th></tr>
+      <tr><td><b>受身</b></td><td>「〜される」と言いかえできる</td><td>バナナがカナリアに食べ<b>られる</b>。</td></tr>
+      <tr><td><b>可能</b></td><td>「〜できる」と言いかえできる</td><td>足はとても辛いカレーライスを食べ<b>られる</b>。</td></tr>
+      <tr><td><b>尊敬</b></td><td>主語が目上の人（先生・お客様など）</td><td>校長先生が来<b>られる</b>。</td></tr>
+      <tr><td><b>自発</b></td><td>「自然と」「ふと」が補える</td><td>長らく訪れていない故郷のことがしのば<b>れる</b>。</td></tr>
+    </table>
+    <div class="hot-flow">
+      <b>💡 見分けの順番（迷ったらこの順で試す）</b><br>
+      <span class="arrow">①</span> 「〜される」に言いかえできる？ <span class="arrow">→</span> <b>受身</b><br>
+      <span class="arrow">②</span> 「〜できる」に言いかえできる？ <span class="arrow">→</span> <b>可能</b><br>
+      <span class="arrow">③</span> 主語が目上の人？ <span class="arrow">→</span> <b>尊敬</b><br>
+      <span class="arrow">④</span> 「自然と・ふと」が入る？ <span class="arrow">→</span> <b>自発</b>
+    </div>
+    <div class="warn-box"><b>⚠️ ひっかけ：</b>「行ける」「食べれる」は<b>1語の可能動詞</b>。「行く＋れる」と分けない（教科書465ページ下の注）。</div>
+  </div>
+
+  <div class="hot-card">
+    <h3>② 「品詞の種類を答えよ」型 ／ 436ページの判別フロー</h3>
+    <div class="hot-flow">
+      <b>STEP 1</b>　その語、<b>一語で文節になれる？</b><br>
+      　・なれる <span class="arrow">→</span> <b>自立語</b>（次の STEP 2 へ）<br>
+      　・なれない（てにをは系）<span class="arrow">→</span> <b>付属語</b>　活用あり＝<b>助動詞</b>／活用なし＝<b>助詞</b><br>
+      <br>
+      <b>STEP 2</b>　自立語のうち、<b>活用する？</b>（〜ない／〜なかった と形が変わる？）<br>
+      　・する <span class="arrow">→</span> <b>動詞・形容詞・形容動詞</b>（用言）　次の STEP 3 へ<br>
+      　・しない <span class="arrow">→</span> 名詞・副詞・連体詞・接続詞・感動詞<br>
+      <br>
+      <b>STEP 3</b>　活用するなら、<b>言い切りの形</b>を見る：<br>
+      　・<b>ウ段</b>で終わる（走<b>る</b>・見<b>る</b>・進行す<b>る</b>）<span class="arrow">→</span> <b>動詞</b><br>
+      　・<b>「い」</b>で終わる（深<b>い</b>・美し<b>い</b>）<span class="arrow">→</span> <b>形容詞</b><br>
+      　・<b>「だ」</b>で終わる（静か<b>だ</b>・きれい<b>だ</b>）<span class="arrow">→</span> <b>形容動詞</b>
+    </div>
+    <div class="warn-box" style="margin-top:10px;"><b>⚠️ 特別ルール（無変化の助動詞）</b><br>
+    「<b>う</b>」「<b>よう</b>」「<b>まい</b>」 の3つだけは、<b>形が変わらない助動詞</b>＝特別に無変化が許されてる。<br>
+    付属語で活用しないと普通は助詞だけど、この3つは<b>助動詞</b>として扱う（例外として丸ごと覚える）。<br>
+    例：「あの山にもう一度登<b>ろう</b>（う）」「100年後にも理解され<b>よう</b>（よう）」「あの山に二度と登る<b>まい</b>（まい）」</div>
+  </div>
+
+  <div class="hot-card">
+    <h3>③ 例文で練習（タップで答えが見える）</h3>
+    <div class="example-box">
+      「友だちに笑わ<b>れる</b>。」
+      <span class="hide" onclick="this.classList.toggle('show')">受身（〜される＝笑われる）</span>
+    </div>
+    <div class="example-box">
+      「ぼくは早く起きら<b>れる</b>。」
+      <span class="hide" onclick="this.classList.toggle('show')">可能（〜できる＝起きられる）</span>
+    </div>
+    <div class="example-box">
+      「お客様が話さ<b>れる</b>。」
+      <span class="hide" onclick="this.classList.toggle('show')">尊敬（主語＝お客様＝目上）</span>
+    </div>
+    <div class="example-box">
+      「秋になると、いろいろなことが思い出さ<b>れる</b>。」
+      <span class="hide" onclick="this.classList.toggle('show')">自発（自然とそうなる）</span>
+    </div>
+    <div class="example-box">
+      「先生がこちらに来<b>られる</b>。」
+      <span class="hide" onclick="this.classList.toggle('show')">尊敬</span>
+    </div>
+    <div class="example-box">
+      「この音は遠くまで聞こ<b>えられる</b>。」… ではなく、<br>「この音は遠くまで聞こ<b>える</b>。」の「える」は？
+      <span class="hide" onclick="this.classList.toggle('show')">1語の可能動詞「聞こえる」（「聞く＋れる」と分けない）</span>
+    </div>
+    <p class="print-tip">📄 印刷したら、答えは #FFD833（薄い山吹）で塗りつぶし。赤シートで隠せるかは印刷して試す。</p>
+    <button class="anki-done-btn" id="hot-done-btn" onclick="markHot(this)">✋ 明日ココ、覚えた！</button>
+  </div>
+</section>
+
+<!-- ========== 見分けフロー（攻略マップ） ========== -->
+<section class="tab" id="tab-map">
+  <div class="map-intro">
+    <b>📍 使い方：</b>この4ステージで「どう見分けるか」のフローを読む → 暗記カードで事実を覚える → クイズで定着。<br>
+    <b>絞り込み済み</b>：塾長指示で「品詞ぜんぶの暗記は不要」「出るのは品詞の種類を答えよ型＋れる・られる」なので、その2つに直結するステージだけ残した。
+  </div>
+  <div id="stages"></div>
+</section>
+
+<!-- ========== 暗記カード ========== -->
+<section class="tab" id="tab-anki">
+  <div class="map-intro">
+    <b>📖 使い方：</b>答えは<b>うっすら隠れてる</b> → まず自分で答えを言ってみる → タップで答えがふわっと浮き出る → ぜんぶ言えるようになったら「✋ 覚えた！」。<br>
+    <b>1枚目（436ページ樹形図）と 2枚目（れる・られる）が最重要</b>。
+  </div>
+  <div id="ankiCards"></div>
+</section>
+
+<!-- ========== クイズ ========== -->
+<section class="tab" id="tab-quiz">
+  <div class="quiz-wrap" id="quizWrap"></div>
+</section>
+
+<script>
+const KEY='hinshi_';
+const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(KEY+k))??d}catch{return d}};
+const set=(k,v)=>localStorage.setItem(KEY+k,JSON.stringify(v));
+
+// ============ 攻略マップ（4ステージに絞り込み） ============
+const STAGES=[
+  {id:'s1',title:'★ 最優先：「れる・られる」4つの意味を見分ける',
+   summary:'🔥 明日のテスト中心。受身・可能・尊敬・自発を文脈で判別',
+   steps:[
+     'STEP 1: 「〜される」に言いかえできる → <b>受身</b>（バナナがカナリアに食べられる）',
+     'STEP 2: 「〜できる」に言いかえできる → <b>可能</b>（とても辛いカレーライスを食べられる）',
+     'STEP 3: 主語が目上の人 → <b>尊敬</b>（校長先生が来られる）',
+     'STEP 4: 「自然と・ふと」が補える → <b>自発</b>（しのばれる・思い出される）'
+   ],
+   hint:'💡 迷ったら ①受身→②可能→③尊敬→④自発 の順で当てはめる。最初に当てはまったのが正解。',
+   warn:'⚠️ 「行ける」「食べれる」「聞こえる」は<b>1語の可能動詞</b>。「行く＋れる」と分けない。教科書465ページの下の注に書いてある。'},
+
+  {id:'s2',title:'★ 436ページの判別フロー：「品詞の種類を答えよ」型',
+   summary:'🔥 塾長が指したやつ。3ステップで品詞が決まる',
+   steps:[
+     'STEP 1: その語、<b>一語で文節になれる？</b>　なれる→自立語／なれない（てにをは系）→付属語（活用ある＝助動詞・なし＝助詞）',
+     'STEP 2: 自立語で<b>活用する？</b>（〜ない／〜なかった と形が変わる？）　する→用言（次へ）／しない→名詞・副詞・連体詞・接続詞・感動詞',
+     'STEP 3: 言い切りを見る：<b>ウ段</b>→動詞／<b>い</b>→形容詞／<b>だ</b>→形容動詞'
+   ],
+   hint:'💡 長い文章を全部品詞分けする問題は出ない。出るのは「この語の品詞を答えなさい」型だけ（塾長談）。',
+   warn:'⚠️ ひっかけは「大きな」＝<b>連体詞</b>（形容動詞じゃない、活用しない）／「ある日」のあるは<b>連体詞</b>、「本がある」のあるは<b>動詞</b>（文脈で品詞が変わる）。'},
+
+  {id:'s3',title:'動詞・形容詞・形容動詞のウ段／い／だ判定（用言の見分け）',
+   summary:'用言の3つを言い切りの最後の音で判定',
+   steps:[
+     'STEP 1: 言い切りの形に戻す。「走り」→「走る」、「美しく」→「美しい」、「静かに」→「静かだ」',
+     'STEP 2: 最後の音を見る。<b>ウ段</b>→動詞／<b>い</b>→形容詞／<b>だ</b>→形容動詞',
+     'STEP 3: 動詞のウ段は「う・く・す・つ・ぬ・ふ・む・ゆ・る」'
+   ],
+   hint:'💡 「うれしく」→言い切り「うれしい」→<b>形容詞</b>。「きれいな」→言い切り「きれいだ」→<b>形容動詞</b>。',
+   warn:'⚠️ 「進行」は名詞、「進行する」で動詞。「立派さ」は名詞（転成名詞）、「立派だ」は形容動詞。'},
+
+  {id:'s4',title:'活用しない自立語：名詞・副詞・連体詞・接続詞・感動詞',
+   summary:'迷いやすい連体詞と副詞だけ押さえる',
+   steps:[
+     '<b>名詞</b>＝ものの名前、主語になる（東京・川・三人・きみ）',
+     '<b>副詞</b>＝主に<b>用言を修飾</b>（もっと走る・とても美しい）',
+     '<b>連体詞</b>＝<b>体言（名詞）を修飾</b>＋活用しない（この・大きな・ある日）',
+     '<b>接続詞</b>＝文と文をつなぐ（しかし・だから・そして）／<b>感動詞</b>＝独立語（あら・はい・おい）'
+   ],
+   hint:'💡 副詞か連体詞か迷ったら「次に来る言葉」を見る：用言（動詞/形容詞/形容動詞）なら副詞、体言（名詞）なら連体詞。',
+   warn:'⚠️ <b>「大きな」は連体詞</b>。「大きい」（形容詞）と別の言葉。活用しないから連体詞。「大きなだ」とは言えない。'}
+];
+
+// ============ 暗記カード（5枚に絞り込み） ============
+const ANKI=[
+  {id:'a1',hot:true,title:'🔥 ① 436ページの品詞分類（樹形図）',
+   html:`<p style="font-size:13px;line-height:1.7;margin:0 0 8px;">塾長が「ここを覚えればいい」と指したページ。タップで答えが見える。</p>
+   <div class="tree">
+<span class="lvl1">単語</span><br>
+├─ <span class="lvl2">自立語</span>（文節をつくれる）<br>
+│ 　├─ 活用ある＝<b>用言</b>：<span class="hide" onclick="this.classList.toggle('show')">動詞・形容詞・形容動詞</span><br>
+│ 　└─ 活用なし：<br>
+│ 　　　├─ 主語になる＝<b>体言</b>：<span class="hide" onclick="this.classList.toggle('show')">名詞</span><br>
+│ 　　　├─ 修飾語になる<br>
+│ 　　　│ 　├─ 用言を修飾：<span class="hide" onclick="this.classList.toggle('show')">副詞</span><br>
+│ 　　　│ 　└─ 体言を修飾：<span class="hide" onclick="this.classList.toggle('show')">連体詞</span><br>
+│ 　　　├─ 接続語になる：<span class="hide" onclick="this.classList.toggle('show')">接続詞</span><br>
+│ 　　　└─ 独立語になる：<span class="hide" onclick="this.classList.toggle('show')">感動詞</span><br>
+└─ <span class="lvl2">付属語</span>（自立語の後について文節をつくる）<br>
+　　├─ 活用ある：<span class="hide" onclick="this.classList.toggle('show')">助動詞</span><br>
+　　└─ 活用なし：<span class="hide" onclick="this.classList.toggle('show')">助詞</span>
+   </div>
+   <div class="tip-box"><b>💡 覚え方：</b>まず<span class="hide" onclick="this.classList.toggle('show')">自立語／付属語</span>に分ける → 自立語は<span class="hide" onclick="this.classList.toggle('show')">活用あり／なし</span>に分ける → 活用なしは<span class="hide" onclick="this.classList.toggle('show')">何になるか（主語／修飾／接続／独立）</span>で分ける。</div>`},
+
+  {id:'a2',hot:true,title:'🔥 ② 「れる・られる」4つの意味（明日のテスト本命）',
+   html:`<p style="font-size:12px;line-height:1.6;margin:0 0 6px;color:var(--sub);">例文を見て意味を当てる形に。タップで意味が見える。</p>
+   <table>
+     <tr><th>例文／見分けかた</th><th>意味</th></tr>
+     <tr><td>バナナがカナリアに食べられる／「〜される」と言いかえできる</td><td class="hide" onclick="this.classList.toggle('show')">受身</td></tr>
+     <tr><td>とても辛いカレーライスを食べられる／「〜できる」と言いかえできる</td><td class="hide" onclick="this.classList.toggle('show')">可能</td></tr>
+     <tr><td>校長先生が来られる／主語が目上</td><td class="hide" onclick="this.classList.toggle('show')">尊敬</td></tr>
+     <tr><td>故郷のことがしのばれる／「自然と・ふと」が補える</td><td class="hide" onclick="this.classList.toggle('show')">自発</td></tr>
+   </table>
+   <div class="formula-box"><b>💡 迷ったら 受身→可能→尊敬→自発 の順で当てはめる</b>。最初に当てはまったのが答え。</div>
+   <div class="warn-box"><b>⚠️ ひっかけ：</b>「行ける」「食べれる」「聞こえる」は<span class="hide" onclick="this.classList.toggle('show')">1語の可能動詞</span>。「行く＋れる」と分けない（教科書465ページの注）。</div>`},
+
+  {id:'a3',title:'③ 第33回・10品詞の表（例を見て品詞名を当てる）',
+   html:`<p style="font-size:12px;line-height:1.6;margin:0 0 6px;color:var(--sub);">例を見て品詞名を答える形に。タップで品詞名が見える。教科書の例語そのまま。</p>
+   <table>
+     <tr><th>例</th><th>品詞</th></tr>
+     <tr><td>読む・泣く・見る・起きる・来る・する・進行する</td><td class="hide" onclick="this.classList.toggle('show')">動詞</td></tr>
+     <tr><td>深い・青い・美しい・苦い・仰々しい・やさしい</td><td class="hide" onclick="this.classList.toggle('show')">形容詞</td></tr>
+     <tr><td>静かだ・きれいだ・朗らかだ・元気だ・和やかだ</td><td class="hide" onclick="this.classList.toggle('show')">形容動詞</td></tr>
+     <tr><td>冬・川・東京・法隆寺・三人・五羽・きみ・それ</td><td class="hide" onclick="this.classList.toggle('show')">名詞</td></tr>
+     <tr><td>もっと・まるで・もし・たいてい・だんだん</td><td class="hide" onclick="this.classList.toggle('show')">副詞</td></tr>
+     <tr><td>この・わが・いわゆる・大きな・とんだ・ある</td><td class="hide" onclick="this.classList.toggle('show')">連体詞</td></tr>
+     <tr><td>しかし・だから・また・そして・または・ただし・では</td><td class="hide" onclick="this.classList.toggle('show')">接続詞</td></tr>
+     <tr><td>あら・まあ・はい・いいえ・こんにちは・おい</td><td class="hide" onclick="this.classList.toggle('show')">感動詞</td></tr>
+     <tr><td>れる・られる・ない・まい・たい・そうだ・ようだ・らしい</td><td class="hide" onclick="this.classList.toggle('show')">助動詞</td></tr>
+     <tr><td>が・は・の・に・こそ・さえ・か・ので・ながら</td><td class="hide" onclick="this.classList.toggle('show')">助詞</td></tr>
+   </table>`},
+
+  {id:'a4',title:'④ 用言3つ：動詞・形容詞・形容動詞の見分け',
+   html:`<div class="formula-box">
+   <b>言い切りの最後の音</b>で決まる：<br>
+   ・<b>ウ段</b>（う・く・す・つ・ぬ・ふ・む・ゆ・る）→ <span class="hide" onclick="this.classList.toggle('show')">動詞</span>（読む・走る・進行する）<br>
+   ・<b>い</b> → <span class="hide" onclick="this.classList.toggle('show')">形容詞</span>（美しい・深い）<br>
+   ・<b>だ</b> → <span class="hide" onclick="this.classList.toggle('show')">形容動詞</span>（静かだ・きれいだ）
+   </div>
+   <div class="tip-box"><b>💡 活用形のままだとわからない：</b>「走り」「美しく」「静かに」はぜんぶ活用形。必ず<b>言い切り</b>に戻してから最後の音を見る。</div>`},
+
+  {id:'a5',title:'⑤ ひっかけ要注意リスト（こころが落としやすいやつ）',
+   html:`<div class="warn-box"><b>⚠️ 紛らわしい語</b><br>
+   ・「<b>大きな</b>」家 ＝ <span class="hide" onclick="this.classList.toggle('show')">連体詞</span>（形容動詞じゃない。活用しない）<br>
+   ・「<b>ある</b>日」 ＝ <span class="hide" onclick="this.classList.toggle('show')">連体詞</span>（次が名詞）／「本が<b>ある</b>」 ＝ <span class="hide" onclick="this.classList.toggle('show')">動詞</span>（言い切りウ段）<br>
+   ・「<b>きれいな</b>」（言い切り「きれいだ」）＝ <span class="hide" onclick="this.classList.toggle('show')">形容動詞</span><br>
+   ・「<b>うれしく</b>」（言い切り「うれしい」）＝ <span class="hide" onclick="this.classList.toggle('show')">形容詞</span><br>
+   ・「<b>立派さ</b>」 ＝ <span class="hide" onclick="this.classList.toggle('show')">名詞</span>（転成名詞）／「<b>立派だ</b>」 ＝ <span class="hide" onclick="this.classList.toggle('show')">形容動詞</span><br>
+   ・「<b>ちょっと</b>待って」 ＝ <span class="hide" onclick="this.classList.toggle('show')">副詞</span>（動詞「待って」を修飾）<br>
+   ・「<b>だが</b>」 ＝ <span class="hide" onclick="this.classList.toggle('show')">接続詞</span>
+   </div>
+   <div class="tip-box"><b>💡 迷ったときの手順：</b>① 言い切りに戻す ② 活用するか確かめる（〜ない／〜なかった） ③ 次の語が用言か体言か見る</div>`}
+];
+
+// ============ クイズ（18問・れる・られる中心） ============
+const QUIZ=[
+  // れる・られる（明日の本命）9問
+  {cat:'★れる・られる',q:'「バナナがカナリアに食べられる」の「られる」の意味は？',c:['受身','可能','尊敬','自発'],a:0,e:'「〜される」に言いかえできる（食べられる＝食べられている）→受身。教科書465ページ②。'},
+  {cat:'★れる・られる',q:'「とても辛いカレーライスを食べられる」の「られる」の意味は？',c:['受身','可能','尊敬','自発'],a:1,e:'「〜できる」に言いかえできる（食べることができる）→可能。教科書465ページ①。'},
+  {cat:'★れる・られる',q:'「校長先生が来られる」の「られる」の意味は？',c:['受身','可能','尊敬','自発'],a:2,e:'主語「校長先生」＝目上の人の動作→尊敬。教科書465ページ③。'},
+  {cat:'★れる・られる',q:'「長らく訪れていない故郷のことがしのばれる」の「れる」の意味は？',c:['受身','可能','尊敬','自発'],a:3,e:'「自然と」「ふと」が補える→自発。教科書465ページ④。'},
+  {cat:'★れる・られる',q:'「友だちに笑われる」の「れる」の意味は？',c:['受身','可能','尊敬','自発'],a:0,e:'「友だちに笑われる」＝笑われている／〜される＝受身。'},
+  {cat:'★れる・られる',q:'「ぼくは早く起きられる」の「られる」の意味は？',c:['受身','可能','尊敬','自発'],a:1,e:'「起きることができる」→可能。'},
+  {cat:'★れる・られる',q:'「お客様が話される」の「れる」の意味は？',c:['受身','可能','尊敬','自発'],a:2,e:'主語「お客様」＝目上→尊敬。'},
+  {cat:'★れる・られる',q:'「秋になると、いろいろなことが思い出される」の「れる」の意味は？',c:['受身','可能','尊敬','自発'],a:3,e:'「自然と思い出される」→自発。'},
+  {cat:'★れる・られる',q:'「この音は遠くまで聞こえる」の「える」は？',c:['受身の「れる」','可能の「れる」','1語の可能動詞','尊敬の「れる」'],a:2,e:'「聞こえる」は1語の可能動詞。「聞く＋れる」と分けない。教科書465ページの注。'},
+
+  // 品詞の種類（436ページ）9問
+  {cat:'品詞の種類',q:'「走る」の品詞は？',c:['動詞','形容詞','形容動詞','名詞'],a:0,e:'言い切り「走る」＝ウ段（る）→動詞。'},
+  {cat:'品詞の種類',q:'「美しい」の品詞は？',c:['動詞','形容詞','形容動詞','名詞'],a:1,e:'言い切り「美しい」＝「い」で終わる→形容詞。'},
+  {cat:'品詞の種類',q:'「静かに」の品詞は？',c:['副詞','形容動詞','動詞','形容詞'],a:1,e:'言い切り「静かだ」＝「だ」で終わる→形容動詞。「静かに」は活用形。'},
+  {cat:'品詞の種類',q:'「東京」の品詞は？',c:['動詞','名詞','形容詞','連体詞'],a:1,e:'ものの名前（地名）→名詞。'},
+  {cat:'品詞の種類',q:'「大きな家」の「大きな」の品詞は？',c:['形容詞','形容動詞','連体詞','副詞'],a:2,e:'活用しない＋体言（家）を修飾→連体詞。「大きい」（形容詞）と別の語！'},
+  {cat:'品詞の種類',q:'「ある日」の「ある」の品詞は？',c:['動詞','連体詞','形容詞','副詞'],a:1,e:'次が体言（日）＋活用しない→連体詞。「本がある」（動詞）と区別。'},
+  {cat:'品詞の種類',q:'「もし雨が降ったら」の「もし」の品詞は？',c:['連体詞','副詞','接続詞','助詞'],a:1,e:'用言「降ったら」を修飾＋「〜たら」を呼ぶ→副詞（呼応の副詞）。'},
+  {cat:'品詞の種類',q:'「本が」の「が」の品詞は？',c:['助動詞','助詞','接続詞','連体詞'],a:1,e:'付属語＋活用なし→助詞。'},
+  {cat:'品詞の種類',q:'「走らない」の「ない」の品詞は？',c:['形容詞','助動詞','助詞','副詞'],a:1,e:'「ぬ」に置きかえできる（走らぬ○）→助動詞「ない」（打ち消し）。'}
+];
+
+// ============ レンダリング ============
+function switchTab(t){
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('active',s.id==='tab-'+t));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+
+function renderStages(){
+  const done=get('stages',{});
+  const box=document.getElementById('stages');
+  box.innerHTML=STAGES.map((s,i)=>`
+    <div class="stage ${done[s.id]?'open':''}" data-id="${s.id}">
+      <div class="stage-head" onclick="this.parentElement.classList.toggle('open')">
+        <div class="stage-num">${i+1}</div>
+        <div class="stage-title">
+          <b>${s.title}</b>
+          <div class="sum">${s.summary}</div>
+        </div>
+        <div class="stage-arrow">▶</div>
+      </div>
+      <div class="stage-body">
+        <ul class="steps">${s.steps.map(st=>`<li>${st}</li>`).join('')}</ul>
+        <div class="hint">${s.hint}</div>
+        <div class="warn">${s.warn}</div>
+        <button class="wakatta ${done[s.id]?'done':''}" onclick="markStage('${s.id}',this)">${done[s.id]?'✓ わかった':'✋ わかった！'}</button>
+      </div>
+    </div>`).join('');
+}
+function markStage(id,btn){
+  const d=get('stages',{});
+  if(d[id])return;
+  d[id]=true;set('stages',d);
+  btn.classList.add('done');btn.textContent='✓ わかった';
+  showToast('+'+Math.round(25/STAGES.length)+'%');
+  updateProgress();
+}
+
+function renderAnki(){
+  const done=get('ankiRead',{});
+  const box=document.getElementById('ankiCards');
+  box.innerHTML=ANKI.map(c=>`
+    <div class="anki-card ${c.hot?'hot':''} ${done[c.id]?'open':''}">
+      <div class="anki-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="anki-title">${c.title}</div>
+        <div class="anki-arrow">▶</div>
+      </div>
+      <div class="anki-body" onclick="event.stopPropagation()">
+        ${c.html}
+        <div class="anki-btns">
+          <button class="anki-reset-btn" onclick="resetHide(this)">🔄 全部隠す</button>
+          <button class="anki-done-btn ${done[c.id]?'done':''}" data-id="${c.id}" onclick="markAnki(this)">${done[c.id]?'✓ 覚えた':'✋ 覚えた！'}</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function resetHide(btn){
+  btn.closest('.anki-card').querySelectorAll('.hide.show').forEach(el=>el.classList.remove('show'));
+}
+function markAnki(btn){
+  const id=btn.dataset.id;
+  const d=get('ankiRead',{});
+  if(d[id])return;
+  d[id]=true;set('ankiRead',d);
+  btn.classList.add('done');btn.textContent='✓ 覚えた';
+  showToast('+'+Math.round(25/ANKI.length)+'%');
+  updateProgress();
+}
+
+function markHot(btn){
+  if(get('hotDone',false))return;
+  set('hotDone',true);
+  btn.classList.add('done');btn.textContent='✓ 明日ココ、覚えた！';
+  btn.style.background='linear-gradient(135deg,var(--mint),#43a047)';
+  showToast('+25% 🔥');
+  updateProgress();
+}
+
+// ============ クイズ ============
+const ENEMIES=['👹','👺','👻','💀','🐉','🦹'];
+let qState={i:0,score:0,arr:[]};
+function startQuiz(){
+  qState={i:0,score:0,arr:[...QUIZ].sort(()=>Math.random()-0.5)};
+  renderQuiz();
+}
+function renderQuiz(){
+  const w=document.getElementById('quizWrap');
+  if(qState.i>=qState.arr.length){
+    const pct=Math.round(qState.score/qState.arr.length*100);
+    const ach=get('quizAch',false);
+    if(pct>=80&&!ach){set('quizAch',true);showToast('+25% ⚔️');updateProgress();confetti();}
+    w.innerHTML=`<div class="score-final">
+      <h3>🎉 バトル終了</h3>
+      <div class="big">${pct}%</div>
+      <p>${qState.score} / ${qState.arr.length} 問正解</p>
+      ${pct>=80?'<p style="color:var(--mint);font-weight:700;">⚔️ 撃破成功！明日のテスト準備OK</p>':'<p style="color:var(--sub);">80%以上で討伐。もう一度挑戦！</p>'}
+      <button class="next-btn" onclick="startQuiz()">もう一度</button>
+    </div>`;
+    return;
+  }
+  const q=qState.arr[qState.i];
+  const enemy=ENEMIES[qState.i%ENEMIES.length];
+  w.innerHTML=`<div class="quiz-head"><b>第${qState.i+1}問 / ${qState.arr.length}</b><span style="font-size:12px;color:var(--sub);">スコア ${qState.score}</span></div>
+    <div class="enemy" id="enemy">${enemy}</div>
+    <div class="enemy-name">ヒンシゴブリン Lv.${qState.i+1}</div>
+    <div class="qtxt"><span class="qcat">${q.cat}</span><br>${q.q}</div>
+    <div class="choices">${q.c.map((ch,j)=>`<button onclick="answer(${j})">${'①②③④'[j]} ${ch}</button>`).join('')}</div>
+    <div class="explain" id="explain"></div>
+    <button class="next-btn" id="nextBtn" style="display:none;" onclick="qState.i++;renderQuiz()">次へ →</button>`;
+}
+function answer(j){
+  const q=qState.arr[qState.i];
+  const btns=document.querySelectorAll('.choices button');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.a].classList.add('correct');
+  if(j===q.a){qState.score++;document.getElementById('enemy').classList.add('hit');}
+  else{btns[j].classList.add('wrong');}
+  const ex=document.getElementById('explain');
+  ex.innerHTML=`<b>解説：</b>${q.e}`;ex.classList.add('show');
+  document.getElementById('nextBtn').style.display='block';
+}
+
+// ============ 進捗 ============
+function updateProgress(){
+  const sc=Object.keys(get('stages',{})).length;
+  const ac=Object.keys(get('ankiRead',{})).length;
+  const qz=get('quizAch',false);
+  const hot=get('hotDone',false);
+  const pct=Math.min(100,
+    (hot?25:0) +
+    sc/STAGES.length*25 +
+    ac/ANKI.length*25 +
+    (qz?25:0)
+  );
+  document.getElementById('pbar').style.width=pct+'%';
+  document.getElementById('pct').textContent=Math.round(pct)+'%';
+  document.getElementById('bg-hot').textContent=hot?'✓':'未';
+  document.getElementById('bg-stage').textContent=sc+'/'+STAGES.length;
+  document.getElementById('bg-anki').textContent=ac+'/'+ANKI.length;
+  document.getElementById('bg-quiz').textContent=qz?'✓':'未';
+  if(hot && get('hotDoneBtn',null)==null){
+    const b=document.getElementById('hot-done-btn');
+    if(b){b.classList.add('done');b.textContent='✓ 明日ココ、覚えた！';b.style.background='linear-gradient(135deg,var(--mint),#43a047)';}
+    set('hotDoneBtn',true);
+  }
+}
+function showToast(t){
+  const el=document.createElement('div');
+  el.className='toast';el.textContent=t;document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1600);
+}
+function confetti(n=30){
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');
+    c.style.cssText=`position:fixed;width:10px;height:10px;pointer-events:none;z-index:99;left:${Math.random()*100}vw;top:-20px;background:${['#ff8aa8','#4a9eff','#66bb6a','#ffb74d','#ba68c8'][i%5]};animation:confetti-fall 3s linear forwards;animation-delay:${Math.random()*1.2}s;transform:rotate(${Math.random()*360}deg);`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3500);
+  }
+}
+const styleEl=document.createElement('style');
+styleEl.textContent='@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}';
+document.head.appendChild(styleEl);
+
+// init
+renderStages();
+renderAnki();
+startQuiz();
+updateProgress();
+</script>
+</body>
+</html>

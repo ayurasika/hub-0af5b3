@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="こころのハブ">
+<title>こころのハブ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%237b2ff7'/><text x='50' y='72' font-size='58' text-anchor='middle' fill='white'>🏠</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;background:#eaf4fb;color:#1a1a2e;min-height:100vh;padding-bottom:60px;}
+.wrap{max-width:560px;margin:0 auto;padding:0 12px;}
+
+/* header */
+.header{background:linear-gradient(135deg,#4a9bd9,#7b2ff7);color:#fff;padding:16px 16px 14px;border-radius:0 0 22px 22px;box-shadow:0 3px 12px rgba(74,155,217,.35);}
+.header h1{font-size:1.25rem;font-weight:900;}
+.header .date{font-size:.85rem;opacity:.92;margin-top:2px;}
+.header .week{display:inline-block;margin-top:6px;font-size:.7rem;background:rgba(255,255,255,.22);border-radius:12px;padding:2px 10px;}
+.header .sync{display:inline-block;margin-top:6px;margin-left:6px;font-size:.7rem;background:rgba(255,255,255,.22);border-radius:12px;padding:2px 10px;}
+
+/* cards */
+.card{background:#fff;border-radius:18px;margin-top:14px;padding:14px 16px;box-shadow:0 2px 10px rgba(30,60,120,.08);}
+.card h2{font-size:1.02rem;font-weight:900;display:flex;align-items:center;gap:8px;}
+.card h2 .badge{margin-left:auto;font-size:.68rem;font-weight:700;color:#888;}
+.sub{font-size:.72rem;color:#999;margin-top:2px;}
+
+/* checklist */
+.chk{margin-top:10px;}
+.chk .item{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:12px;border:2px solid #e6eef7;margin-bottom:8px;font-weight:700;font-size:.95rem;cursor:pointer;user-select:none;transition:.15s;}
+.chk .item .box{flex:0 0 auto;width:28px;height:28px;border-radius:9px;border:2.5px solid #b9cde2;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;background:#fff;transition:.15s;}
+.chk .item.done{background:#f0fbf4;border-color:#9fdcb8;color:#1f9d52;}
+.chk .item.done .box{background:#1f9d52;border-color:#1f9d52;}
+.dots{display:flex;gap:5px;margin-top:4px;padding-left:4px;align-items:center;}
+.dots .d{width:9px;height:9px;border-radius:50%;background:#dde8f2;}
+.dots .d.on{background:#1f9d52;}
+.dots .lbl{font-size:.62rem;color:#aaa;margin-left:4px;}
+
+/* accent per section */
+.am h2{color:#e8930c;} .pm h2{color:#2a7cc7;} .rika h2{color:#7b2ff7;} .kanji h2{color:#4472C4;} .yoji h2{color:#b8860b;} .hinshi h2{color:#2a9d8f;} .mama h2{color:#d84a7f;}
+
+/* 今日の四字熟語 */
+.yoji-today{margin-top:10px;text-align:center;}
+.yoji-today .word{font-size:2rem;font-weight:900;letter-spacing:.1em;color:#1a1a2e;}
+.yoji-today .yomi{font-size:.8rem;color:#b8860b;margin-top:2px;}
+.yoji-today .reveal{margin-top:8px;font-size:.85rem;line-height:1.7;color:#444;background:#fffae6;border-radius:12px;padding:10px 12px;text-align:left;display:none;}
+.yoji-today .reveal b{color:#b8860b;}
+.btnrow{display:flex;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap;}
+.btn{border:none;border-radius:20px;padding:9px 18px;font-family:inherit;font-size:.82rem;font-weight:900;cursor:pointer;background:#eef4fb;color:#2a7cc7;}
+.btn.main{background:#7b2ff7;color:#fff;}
+.btn.gold{background:#b8860b;color:#fff;}
+.btn.blue{background:#4472C4;color:#fff;}
+.btn.teal{background:#2a9d8f;color:#fff;}
+a.btn{text-decoration:none;display:inline-block;text-align:center;}
+
+/* 理科カンペ */
+.progress{margin-top:8px;height:10px;background:#efe6ff;border-radius:6px;overflow:hidden;}
+.progress .bar{height:100%;background:linear-gradient(90deg,#a56bff,#7b2ff7);width:0%;transition:.3s;}
+.plabel{font-size:.7rem;color:#7b2ff7;font-weight:700;margin-top:3px;text-align:right;}
+.qlist{margin-top:10px;display:none;}
+.qlist.open{display:block;}
+.q{border:2px solid #efe6ff;border-radius:12px;margin-bottom:8px;overflow:hidden;}
+.q .qhead{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;cursor:pointer;font-weight:700;font-size:.9rem;line-height:1.5;}
+.q .unit{flex:0 0 auto;font-size:.62rem;font-weight:900;color:#7b2ff7;background:#f3ebff;border-radius:8px;padding:2px 7px;margin-top:2px;white-space:nowrap;}
+.q.trap .qhead::after{content:"⚠";color:#d32f2f;margin-left:auto;}
+.q .ans{display:none;padding:0 12px 10px;font-size:.85rem;line-height:1.6;}
+.q .ans .a{color:#c0392b;font-weight:900;}
+.q .ans .why{margin-top:4px;color:#555;font-size:.78rem;background:#f8f5ff;border-radius:8px;padding:6px 9px;}
+.q .ans .why b{color:#7b2ff7;}
+.q .saidbtn{margin-top:8px;border:none;border-radius:14px;background:#f3ebff;color:#7b2ff7;font-family:inherit;font-weight:900;font-size:.75rem;padding:6px 14px;cursor:pointer;}
+.q.said{border-color:#c9a8ff;background:#fdfbff;}
+.q.said .qhead{color:#7b2ff7;}
+.q.open .ans{display:block;}
+
+/* 四字熟語ぜんぶ */
+.ylist{margin-top:10px;display:none;}
+.ylist.open{display:block;}
+.y{border-bottom:1px dashed #e8e2d5;padding:9px 4px;cursor:pointer;}
+.y .yw{font-weight:900;font-size:1rem;}
+.y .yw .cau{color:#d32f2f;font-size:.72rem;margin-left:6px;}
+.y .yd{display:none;font-size:.8rem;color:#555;line-height:1.6;margin-top:4px;}
+.y.open .yd{display:block;}
+.y .yd b{color:#b8860b;}
+
+/* ママ用 */
+.mama{border:2px dashed #f2c4d5;}
+.mlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.note{margin-top:10px;font-size:.72rem;color:#777;background:#fdf3f7;border-radius:10px;padding:8px 11px;line-height:1.7;}
+.opencount{font-size:.72rem;color:#d84a7f;font-weight:700;margin-top:8px;}
+.footer{text-align:center;font-size:.65rem;color:#aab;margin-top:24px;}
+</style>
+</head>
+<body>
+
+<div class="header"><div class="wrap">
+  <h1>🏠 こころのハブ</h1>
+  <div class="date" id="today"></div>
+  <div class="week" id="weekbadge"></div><div class="sync" id="syncbadge"></div>
+</div></div>
+
+<div class="wrap">
+
+  <!-- あさイチ -->
+  <div class="card am">
+    <h2>☀️ あさイチ <span class="badge">おきたらこれ</span></h2>
+    <div class="chk" id="chk-am"></div>
+    <div class="dots" id="dots-am"></div>
+  </div>
+
+  <!-- 塾から帰ったら -->
+  <div class="card pm">
+    <h2>🎒 じゅくから帰ったら <span class="badge">ただいまのあとに</span></h2>
+    <div class="chk" id="chk-pm"></div>
+    <div class="dots" id="dots-pm"></div>
+  </div>
+
+  <!-- 今日の四字熟語 -->
+  <div class="card yoji">
+    <h2>🍚 きょうの四字熟語 <span class="badge">ごはん中にママが使う</span></h2>
+    <div class="yoji-today">
+      <div class="word" id="yj-word"></div>
+      <div class="yomi" id="yj-yomi"></div>
+      <div class="reveal" id="yj-reveal"></div>
+      <div class="btnrow">
+        <button class="btn gold" onclick="yjToggle()">意味と例を見る</button>
+        <button class="btn" onclick="yjNext()">別のにする</button>
+        <button class="btn" onclick="toggle('ylist')">ぜんぶ見る（37語）</button>
+      </div>
+      <div class="ylist" id="ylist"></div>
+    </div>
+  </div>
+
+  <!-- 理科カンペ -->
+  <div class="card rika">
+    <h2>🔬 理科カンペ <span class="badge" id="rika-week"></span></h2>
+    <div class="sub">ママが読み上げる → こころが答える → 「言えた◯」を押す。⚠はひっかけ！</div>
+    <div class="progress"><div class="bar" id="rika-bar"></div></div>
+    <div class="plabel" id="rika-plabel"></div>
+    <div class="btnrow" style="justify-content:flex-start;">
+      <button class="btn main" onclick="toggle('qlist')">25問をひらく</button>
+      <a class="btn" href="tools/理科カンペ_印刷用.html">🖨 印刷用</a>
+    </div>
+    <div class="qlist" id="qlist"></div>
+  </div>
+
+  <!-- 漢字 -->
+  <div class="card kanji">
+    <h2>✏️ 漢字マスター <span class="badge" id="kanji-note"></span></h2>
+    <div class="sub" id="kanji-range"></div>
+    <div class="btnrow" style="justify-content:flex-start;">
+      <a class="btn blue" href="tools/漢字マスター.html">漢字マスターをひらく</a>
+    </div>
+  </div>
+
+  <!-- 品詞 -->
+  <div class="card hinshi">
+    <h2>🔤 品詞</h2>
+    <div class="btnrow" style="justify-content:flex-start;">
+      <a class="btn teal" href="tools/品詞_攻略.html">攻略（クイズ）</a>
+      <a class="btn" href="tools/品詞_説明.html">せつめい</a>
+    </div>
+  </div>
+
+  <!-- ママ用 -->
+  <div class="card mama">
+    <h2>👩 ママ用</h2>
+    <div class="chk" id="chk-mama"></div>
+    <div class="mlinks">
+      <a class="btn" href="tools/理科カンペ_印刷用.html">🖨 今週のカンペ印刷</a>
+      <a class="btn" href="tools/四字熟語カンペ_食事中用.html">🖨 四字熟語カンペ印刷</a>
+    </div>
+    <div class="note" id="toilet-note"></div>
+    <div class="opencount" id="opencount"></div>
+  </div>
+
+  <div class="footer">こころのハブ ｜ 毎週月曜あさに自動更新 ｜ こまったらママ→Claudeへ</div>
+</div>
+
+<script src="data/config.js"></script>
+<script src="data/rika-week.js"></script>
+<script>
+// ===== 四字熟語データ（四字熟語カンペ_食事中用.html より移植）=====
+const YOJI = [
+{y:"自由自在",yomi:"じゆうじざい",imi:"思いどおりにあやつれること",rei:"お姉ちゃん、スマホ自由自在に使いこなすね"},
+{y:"十人十色",yomi:"じゅうにんといろ",imi:"考えや好みは人それぞれ",rei:"好きなアイスは十人十色。レオはいつもチョコ一択だけど"},
+{y:"右往左往",yomi:"うおうさおう",imi:"あわてて右に左に動き回る",rei:"ねぼうした朝、家じゅう右往左往だったね"},
+{y:"適材適所",yomi:"てきざいてきしょ",imi:"その人に合った役目につける",rei:"重いの運ぶのはレオ、字を書くのはこころ。適材適所"},
+{y:"全知全能",yomi:"ぜんちぜんのう",imi:"なんでも知っててなんでもできる",rei:"ママは全知全能じゃないから、たまに間違えるよ"},
+{y:"一石二鳥",yomi:"いっせきにちょう",imi:"一つのことで二つの得をする",rei:"散歩はレオの運動とママの気分転換で一石二鳥"},
+{y:"以心伝心",yomi:"いしんでんしん",imi:"言わなくても気持ちが通じる",rei:"おやつの時間、ママと以心伝心で目が合ったね"},
+{y:"異口同音",yomi:"いくどうおん",imi:"みんなが口をそろえて同じことを言う",rei:"「おかわり！」ってみんな異口同音だったね",cau:1},
+{y:"一進一退",yomi:"いっしんいったい",imi:"進んだりもどったり",rei:"漢字テストの点、一進一退だね（でも上向き）"},
+{y:"半信半疑",yomi:"はんしんはんぎ",imi:"半分信じて半分うたがう",rei:"「宿題もう終わった」ってレオに半信半疑"},
+{y:"油断大敵",yomi:"ゆだんたいてき",imi:"油断は思わぬ失敗のもと",rei:"簡単な計算こそ油断大敵だよ"},
+{y:"臨機応変",yomi:"りんきおうへん",imi:"その場に合わせてうまく対応する",rei:"雨なら室内遊びに。臨機応変でいこう"},
+{y:"四苦八苦",yomi:"しくはっく",imi:"とても苦労すること",rei:"二重とびに四苦八苦してたね"},
+{y:"自業自得",yomi:"じごうじとく",imi:"自分の行いの報いを自分が受ける",rei:"夜ふかしして寝ぼう、自業自得だね〜"},
+{y:"心機一転",yomi:"しんきいってん",imi:"気持ちをすっかり入れかえる",rei:"新学期、心機一転がんばろう"},
+{y:"一喜一憂",yomi:"いっきいちゆう",imi:"ちょっとのことで喜んだり心配したり",rei:"テストの点に一喜一憂しなくていいよ"},
+{y:"単刀直入",yomi:"たんとうちょくにゅう",imi:"前置きなしにいきなり本題に入る",rei:"単刀直入に言うと、おやつ食べたい"},
+{y:"千差万別",yomi:"せんさばんべつ",imi:"いろいろさまざまで同じでない",rei:"クラスの好きな教科は千差万別だね"},
+{y:"起承転結",yomi:"きしょうてんけつ",imi:"話や文章の組み立て",rei:"作文は起承転結を意識するといいよ"},
+{y:"絶体絶命",yomi:"ぜったいぜつめい",imi:"追いつめられてどうにもならない",rei:"ゲームでHP1、絶体絶命だったね",cau:1},
+{y:"公明正大",yomi:"こうめいせいだい",imi:"正しく堂々としてかくしごとがない",rei:"じゃんけんは公明正大にね"},
+{y:"一部始終",yomi:"いちぶしじゅう",imi:"はじめからおわりまで全部",rei:"ケンカの一部始終をママに報告して"},
+{y:"我田引水",yomi:"がでんいんすい",imi:"自分に都合のいいように言う・する",rei:"「ぼくは悪くない」ってレオの我田引水"},
+{y:"朝令暮改",yomi:"ちょうれいぼかい",imi:"命令や方針がころころ変わる",rei:"ママのおやつルール、朝令暮改だなぁ"},
+{y:"一心不乱",yomi:"いっしんふらん",imi:"一つのことに集中して心を乱さない",rei:"ゲームに一心不乱だね。その集中、宿題にも！"},
+{y:"喜怒哀楽",yomi:"きどあいらく",imi:"よろこび・いかり・かなしみ・たのしみ。人の感情",rei:"レオは喜怒哀楽が顔に全部出るね"},
+{y:"大器晩成",yomi:"たいきばんせい",imi:"大物は時間をかけて後から伸びる",rei:"こころは大器晩成タイプ。コツコツ伸びてる"},
+{y:"因果応報",yomi:"いんがおうほう",imi:"よい行いにはよい報い、悪い行いには悪い報い",rei:"やさしくしたら助けてもらえた。因果応報だね"},
+{y:"古今東西",yomi:"ここんとうざい",imi:"昔から今まで、どこでも。いつでもどこでも",rei:"古今東西、子どもはおやつが好きだよ"},
+{y:"老若男女",yomi:"ろうにゃくなんにょ",imi:"年より・若者・男・女、すべての人",rei:"このお祭りは老若男女みんな楽しめるね",cau:1},
+{y:"用意周到",yomi:"よういしゅうとう",imi:"準備が行き届いて手ぬかりがない",rei:"遠足の持ち物、用意周到だね"},
+{y:"試行錯誤",yomi:"しこうさくご",imi:"いろいろ試し失敗しながら答えに近づく",rei:"あやとり、試行錯誤して覚えたね"},
+{y:"多種多様",yomi:"たしゅたよう",imi:"種類が多くてさまざま",rei:"図鑑には多種多様な虫がのってるね"},
+{y:"百発百中",yomi:"ひゃっぱつひゃくちゅう",imi:"ねらいが全部当たる",rei:"こころの漢字の山かけ、最近百発百中だね"},
+{y:"七転八起",yomi:"しちてんはっき",imi:"何度失敗しても立ち上がる",rei:"なわとび、七転八起でついに跳べたね"},
+{y:"八方美人",yomi:"はっぽうびじん",imi:"だれにでもいい顔をする人",rei:"八方美人より、本音を言える方がいいよ"},
+{y:"二束三文",yomi:"にそくさんもん",imi:"数が多くても値段がとても安い",rei:"フリマで二束三文で売っちゃったね"}
+];
+
+// ===== 基本 =====
+const CFG = window.HUB_CONFIG || {};
+const RIKA = window.RIKA_WEEK || {week:"", questions:[]};
+const SYNC_URL = CFG.syncUrl || "";
+const today = new Date();
+const dstr = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const TODAY = dstr(today);
+const youbi = ["日","月","火","水","木","金","土"][today.getDay()];
+
+// ===== 同期つきストレージ =====
+// shared = {キー: {v: 値, t: 更新時刻ms}}。ローカルにキャッシュしつつ、syncUrl があれば全端末で共有。
+let shared = {};
+try { shared = JSON.parse(localStorage.getItem("shared-cache") || "{}"); } catch(e){}
+let pushQueue = {}, pushTimer = null, lastSync = null;
+function cache(){ try{ localStorage.setItem("shared-cache", JSON.stringify(shared)); }catch(e){} }
+const store = {
+  get(k, def){ return (k in shared) ? shared[k].v : def; },
+  set(k, v){ shared[k] = {v: v, t: Date.now()}; cache(); queuePush(k); }
+};
+function queuePush(k){
+  if(!SYNC_URL) return;
+  pushQueue[k] = shared[k];
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(flushPush, 800);
+}
+function flushPush(){
+  if(!SYNC_URL || !Object.keys(pushQueue).length) return;
+  const body = JSON.stringify(pushQueue);
+  pushQueue = {};
+  fetch(SYNC_URL, {method:"POST", headers:{"Content-Type":"text/plain"}, body}).then(()=>{ lastSync = new Date(); syncBadge(); }).catch(()=>{});
+}
+async function syncPull(){
+  if(!SYNC_URL) return false;
+  try{
+    const r = await fetch(SYNC_URL);
+    const remote = await r.json();
+    let changed = false;
+    const localNewer = {};
+    for(const k in remote){
+      if(!(k in shared) || (remote[k].t||0) > (shared[k].t||0)){ shared[k] = remote[k]; changed = true; }
+    }
+    for(const k in shared){
+      if(!(k in remote) || (shared[k].t||0) > (remote[k].t||0)) localNewer[k] = shared[k];
+    }
+    if(Object.keys(localNewer).length){
+      fetch(SYNC_URL, {method:"POST", headers:{"Content-Type":"text/plain"}, body: JSON.stringify(localNewer)}).catch(()=>{});
+    }
+    if(changed) cache();
+    lastSync = new Date(); syncBadge();
+    return changed;
+  }catch(e){ return false; }
+}
+function syncBadge(){
+  const el = document.getElementById("syncbadge");
+  if(!SYNC_URL){ el.textContent = "同期：未設定（この端末のみ）"; return; }
+  el.textContent = lastSync ? `同期OK ${String(lastSync.getHours()).padStart(2,"0")}:${String(lastSync.getMinutes()).padStart(2,"0")}` : "同期中…";
+}
+
+// ===== 端末ID・起動記録（共有）=====
+let dev = null;
+try{ dev = localStorage.getItem("device-id"); }catch(e){}
+if(!dev){
+  const ua = navigator.userAgent;
+  const kind = /iPad/.test(ua) ? "iPad" : /iPhone/.test(ua) ? "iPhone" : /Macintosh/.test(ua) ? "Mac" : "端末";
+  dev = kind + "-" + Math.random().toString(36).slice(2,5);
+  try{ localStorage.setItem("device-id", dev); }catch(e){}
+}
+store.set(`open-${TODAY}-${dev}`, store.get(`open-${TODAY}-${dev}`, 0) + 1);
+
+// ===== ヘッダー =====
+document.getElementById("today").textContent = `${today.getMonth()+1}月${today.getDate()}日（${youbi}）`;
+document.getElementById("weekbadge").textContent = `今週のぶん：${CFG.week||RIKA.week} 生成`;
+syncBadge();
+
+// ===== チェックリスト =====
+function renderChecklist(items, mountId, dotsId){
+  const mount = document.getElementById(mountId);
+  mount.innerHTML = "";
+  (items||[]).forEach(it => {
+    const key = `chk-${TODAY}-${it.id}`;
+    const div = document.createElement("div");
+    div.className = "item" + (store.get(key,false) ? " done" : "");
+    div.innerHTML = `<div class="box">✓</div><div>${it.label}</div>`;
+    div.onclick = () => {
+      const now = !store.get(key,false);
+      store.set(key, now);
+      div.classList.toggle("done", now);
+      renderDots(items, dotsId);
+    };
+    mount.appendChild(div);
+  });
+  if(dotsId) renderDots(items, dotsId);
+}
+function renderDots(items, dotsId){
+  const el = dotsId && document.getElementById(dotsId);
+  if(!el) return;
+  let html = "";
+  for(let i=6;i>=0;i--){
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    const ds = dstr(d);
+    const all = (items||[]).length>0 && items.every(it => store.get(`chk-${ds}-${it.id}`,false));
+    html += `<div class="d${all?" on":""}"></div>`;
+  }
+  el.innerHTML = html + `<span class="lbl">← 7日間のあしあと</span>`;
+}
+
+// ===== 今日の四字熟語 =====
+const dayN = Math.floor(today.getTime()/86400000);
+function yjRender(){
+  const off = store.get(`yj-offset-${TODAY}`, 0);
+  const w = YOJI[(dayN + off) % YOJI.length];
+  document.getElementById("yj-word").textContent = w.y;
+  document.getElementById("yj-yomi").textContent = w.yomi;
+  const r = document.getElementById("yj-reveal");
+  r.style.display = "none";
+  r.innerHTML = `<b>意味：</b>${w.imi}<br><b>例：</b>「${w.rei}」${w.cau?"<br><b style='color:#d32f2f'>✍ 書きまちがい注意の語</b>":""}`;
+}
+function yjToggle(){
+  const r = document.getElementById("yj-reveal");
+  r.style.display = r.style.display==="none" ? "block" : "none";
+}
+function yjNext(){ store.set(`yj-offset-${TODAY}`, store.get(`yj-offset-${TODAY}`,0)+1); yjRender(); }
+
+// 四字熟語ぜんぶ（静的・1回だけ構築）
+const ylist = document.getElementById("ylist");
+YOJI.forEach(w => {
+  const div = document.createElement("div");
+  div.className = "y";
+  div.innerHTML = `<div class="yw">${w.y} <span style="font-size:.7rem;color:#b8860b;font-weight:400">${w.yomi}</span>${w.cau?'<span class="cau">✍注意</span>':""}</div><div class="yd"><b>意味：</b>${w.imi}<br><b>例：</b>「${w.rei}」</div>`;
+  div.onclick = () => div.classList.toggle("open");
+  ylist.appendChild(div);
+});
+
+// ===== 理科カンペ =====
+document.getElementById("rika-week").textContent = `${RIKA.week} の25問`;
+const qlist = document.getElementById("qlist");
+function rikaProgress(){
+  const said = RIKA.questions.filter(q => store.get(`rika-${RIKA.week}-${q.id}`,0) > 0).length;
+  document.getElementById("rika-bar").style.width = (RIKA.questions.length ? said/RIKA.questions.length*100 : 0) + "%";
+  document.getElementById("rika-plabel").textContent = `言えた ${said} / ${RIKA.questions.length}`;
+}
+function buildRika(){
+  const openIds = new Set([...qlist.querySelectorAll(".q.open")].map(el => el.dataset.id));
+  qlist.innerHTML = "";
+  RIKA.questions.forEach((q,i) => {
+    const cnt = store.get(`rika-${RIKA.week}-${q.id}`,0);
+    const div = document.createElement("div");
+    div.className = "q" + (q.trap?" trap":"") + (cnt>0?" said":"") + (openIds.has(q.id)?" open":"");
+    div.dataset.id = q.id;
+    div.innerHTML = `
+      <div class="qhead"><span class="unit">${q.unit}</span><span>${i+1}. ${q.q}</span></div>
+      <div class="ans">
+        <div class="a">${q.a}</div>
+        ${q.why ? `<div class="why"><b>なぜ？</b> ${q.why}</div>` : ""}
+        <button class="saidbtn">言えた ◯ ×${cnt}</button>
+      </div>`;
+    div.querySelector(".qhead").onclick = () => div.classList.toggle("open");
+    div.querySelector(".saidbtn").onclick = (e) => {
+      e.stopPropagation();
+      const n = store.get(`rika-${RIKA.week}-${q.id}`,0) + 1;
+      store.set(`rika-${RIKA.week}-${q.id}`, n);
+      e.target.textContent = `言えた ◯ ×${n}`;
+      div.classList.add("said");
+      rikaProgress();
+    };
+    qlist.appendChild(div);
+  });
+  rikaProgress();
+}
+
+// ===== 漢字・ママ用 =====
+const kw = CFG.kanjiWindow || [];
+document.getElementById("kanji-range").textContent =
+  kw.length ? `今週の2回ぶん：回${kw[0]}（${CFG.kanjiThemes?.[kw[0]]||""}）＋ 回${kw[1]}（${CFG.kanjiThemes?.[kw[1]]||""}）` : "";
+document.getElementById("kanji-note").textContent = "2週ループ";
+document.getElementById("toilet-note").innerHTML = `🚽 今週のトイレカード：${CFG.toiletCard||"—"}`;
+
+function renderOpenCount(){
+  let todayAll = 0, wkAll = 0;
+  for(const k in shared){
+    if(!k.startsWith("open-")) continue;
+    const dt = k.slice(5,15);
+    const diff = (today - new Date(dt+"T00:00:00")) / 86400000;
+    if(dt === TODAY) todayAll += shared[k].v;
+    if(diff >= 0 && diff < 7) wkAll += shared[k].v;
+  }
+  const scope = SYNC_URL ? "全端末" : "この端末";
+  document.getElementById("opencount").textContent = `📱 ハブを開いた回数（${scope}）：今日${todayAll}回 ／ 直近7日${wkAll}回（2週間後の見直しで使う数字）`;
+}
+
+// ===== まとめて描画（同期で状態が変わったら再実行）=====
+function renderAll(){
+  renderChecklist(CFG.checklist?.kokoro_am, "chk-am", "dots-am");
+  renderChecklist(CFG.checklist?.kokoro_pm, "chk-pm", "dots-pm");
+  renderChecklist(CFG.checklist?.ayumi, "chk-mama", null);
+  yjRender();
+  buildRika();
+  renderOpenCount();
+}
+renderAll();
+
+// 起動時に1回同期 → 以降1分ごと＆画面に戻ってきた時
+syncPull().then(changed => { if(changed) renderAll(); });
+setInterval(() => syncPull().then(c => { if(c) renderAll(); }), 60000);
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState === "visible") syncPull().then(c => { if(c) renderAll(); });
+});
+
+function toggle(id){ document.getElementById(id).classList.toggle("open"); }
+</script>
+</body>
+</html>

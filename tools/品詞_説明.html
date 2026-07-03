@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>品詞 説明スライド｜こころの国語</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#b8e4ff; --bg2:#f5faff; --bg3:#fff5fa;
+  --sky:#4a9eff; --mint:#66bb6a; --sakura:#ff8aa8; --gold:#ffb74d;
+  --ink:#1a2a4a; --sub:#5a6a8a; --line:rgba(70,120,200,.18);
+  --card:rgba(255,255,255,.92); --cardb:rgba(255,255,255,.98);
+  --red:#ff6b6b; --blue:#3c8cdb; --green:#4abf4a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;font-family:'Noto Sans JP',sans-serif;color:var(--ink);}
+body{
+  background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%);
+  background-attachment:fixed; min-height:100vh; overflow-x:hidden;
+}
+.cloud{position:fixed;color:rgba(255,255,255,.7);font-size:60px;pointer-events:none;animation:drift linear infinite;z-index:0;}
+@keyframes drift{from{transform:translateX(-150px)}to{transform:translateX(110vw)}}
+.petal{position:fixed;color:var(--sakura);opacity:.45;pointer-events:none;animation:fall linear infinite;z-index:0;font-size:16px;}
+@keyframes fall{from{transform:translateY(-20px) rotate(0)}to{transform:translateY(110vh) rotate(360deg)}}
+
+/* ヘッダー */
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line); padding:10px 14px;}
+.htop{display:flex;align-items:center;gap:10px;}
+.htitle{font-weight:900;font-size:16px;flex:1;line-height:1.3;}
+.htitle span{color:var(--sky);}
+.menubtn{background:none;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:18px;cursor:pointer;color:var(--sky);font-family:inherit;}
+.progress-wrap{margin-top:6px;}
+.progress-label{font-size:11px;color:var(--sub);display:flex;justify-content:space-between;margin-bottom:3px;}
+.progress-bar{height:8px;background:rgba(74,158,255,.12);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--mint),var(--sakura));width:0%;transition:width .5s;}
+
+/* メイン */
+main{max-width:760px;margin:0 auto;padding:14px;position:relative;z-index:1;min-height:calc(100vh - 180px);}
+
+.slide{display:none;animation:fadein .5s ease;}
+.slide.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(--cardb);border:1px solid var(--line);border-radius:20px;padding:20px 18px;box-shadow:0 6px 24px rgba(74,158,255,.10);}
+.card h2{margin:0 0 10px;color:var(--sky);font-size:22px;line-height:1.35;}
+.card h2 .num{display:inline-block;background:linear-gradient(135deg,var(--sky),var(--mint));color:#fff;font-size:13px;padding:3px 10px;border-radius:99px;vertical-align:middle;margin-right:8px;font-weight:700;}
+.card h3{color:var(--mint);font-size:16px;margin:14px 0 6px;border-left:5px solid var(--mint);padding-left:9px;}
+.card p{line-height:1.85;font-size:14.5px;margin:8px 0;}
+.card ul{line-height:1.85;font-size:14px;padding-left:22px;margin:6px 0;}
+.card li{margin-bottom:4px;}
+.kotae{color:var(--sky);font-weight:700;}
+
+.def{background:linear-gradient(135deg,#eef7ff,#fdf6ff);border:2px solid var(--sky);border-radius:14px;padding:12px 14px;margin:10px 0;font-size:14.5px;line-height:1.75;}
+.def b{color:var(--sky);}
+.ex{background:#f0fff4;border-left:5px solid var(--mint);padding:10px 12px;border-radius:8px;margin:10px 0;font-size:14px;line-height:1.85;}
+.ex b{color:var(--mint);}
+.warn{background:#fff5f5;border-left:5px solid var(--red);padding:10px 12px;border-radius:8px;margin:10px 0;font-size:13.5px;line-height:1.7;}
+.warn b{color:var(--red);}
+.tip{background:#fffaef;border-left:5px solid var(--gold);padding:10px 12px;border-radius:8px;margin:10px 0;font-size:13.5px;line-height:1.7;}
+.tip b{color:#e67e00;}
+
+.quiz{background:linear-gradient(135deg,#fff8fb,#fff0f7);border:2px dashed var(--sakura);border-radius:14px;padding:14px;margin:14px 0;}
+.quiz h4{margin:0 0 8px;color:var(--sakura);font-size:15px;}
+.quiz .q{font-size:15px;line-height:1.8;margin:6px 0 10px;}
+.quiz input[type=text]{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:15px;font-family:inherit;background:#fff;}
+.quiz .opts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
+.quiz .opts button{flex:1 1 calc(50% - 6px);padding:9px 8px;background:#fff;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;cursor:pointer;font-family:inherit;color:var(--ink);font-weight:500;}
+.quiz .opts button.sel{background:linear-gradient(135deg,var(--sky),var(--mint));color:#fff;border-color:transparent;}
+.quiz .check{margin-top:8px;width:100%;padding:10px;background:linear-gradient(135deg,var(--sakura),var(--gold));color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+.quiz .ans{display:none;margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.7;}
+.quiz .ans.show{display:block;animation:fadein .3s ease;}
+.quiz .ans b{color:var(--sky);}
+.quiz .ans.ng b{color:var(--red);}
+
+/* 表 */
+.tbl{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;background:#fff;border-radius:10px;overflow:hidden;}
+.tbl th,.tbl td{border:1px solid var(--line);padding:7px 8px;text-align:left;line-height:1.6;vertical-align:top;}
+.tbl th{background:linear-gradient(135deg,#eef7ff,#f5faff);color:var(--sky);font-weight:700;}
+.tbl tr:nth-child(even) td{background:#fafdff;}
+
+/* 樹形図 */
+.tree{font-size:13px;line-height:1.9;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;font-family:'Noto Sans JP',monospace;white-space:pre;overflow-x:auto;color:var(--ink);}
+
+/* 比較 */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;}
+.compare>div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13.5px;line-height:1.7;}
+.compare>div b{color:var(--sky);display:block;margin-bottom:4px;}
+
+/* ナビ */
+.nav{display:flex;gap:8px;margin-top:18px;}
+.nav button{flex:1;padding:12px;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+.nav .prev{background:#fff;border:1.5px solid var(--line);color:var(--sub);}
+.nav .next{background:linear-gradient(135deg,var(--sky),var(--mint));color:#fff;box-shadow:0 4px 12px rgba(74,158,255,.25);}
+.nav button:disabled{opacity:.4;cursor:not-allowed;}
+
+.pageno{text-align:center;font-size:11.5px;color:var(--sub);margin-top:10px;}
+
+/* 目次ドロワー */
+.drawer{position:fixed;top:0;right:-340px;width:320px;max-width:90vw;height:100%;background:#fff;z-index:100;box-shadow:-4px 0 20px rgba(0,0,0,.15);transition:right .3s;overflow-y:auto;}
+.drawer.open{right:0;}
+.drawer-head{padding:14px;border-bottom:1px solid var(--line);display:flex;align-items:center;}
+.drawer-head b{flex:1;color:var(--sky);font-size:16px;}
+.drawer-head button{background:none;border:none;font-size:24px;color:var(--sub);cursor:pointer;}
+.drawer ol{list-style:none;padding:0;margin:0;}
+.drawer ol li{border-bottom:1px solid var(--line);padding:11px 14px;font-size:13.5px;cursor:pointer;line-height:1.5;display:flex;gap:8px;}
+.drawer ol li:hover{background:#f0f8ff;}
+.drawer ol li .nn{color:var(--sky);font-weight:700;flex:0 0 28px;}
+.drawer ol li.cur{background:linear-gradient(135deg,#eef7ff,#fff0f7);font-weight:700;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99;display:none;}
+.overlay.show{display:block;}
+
+/* 完了モーダル */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal.show{display:flex;}
+.modal-card{background:#fff;border-radius:20px;padding:24px;max-width:340px;text-align:center;}
+.modal-card h3{color:var(--sakura);margin:0 0 10px;font-size:20px;}
+.modal-card p{font-size:14px;line-height:1.7;color:var(--sub);}
+.modal-card button{margin-top:12px;padding:10px 24px;background:linear-gradient(135deg,var(--sakura),var(--gold));color:#fff;border:none;border-radius:99px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;}
+
+@media(max-width:420px){
+  .card{padding:16px 14px;}
+  .card h2{font-size:19px;}
+  .compare{grid-template-columns:1fr;}
+  .quiz .opts button{flex:1 1 100%;}
+}
+</style>
+</head>
+<body>
+
+<!-- 雲・花びら -->
+<div class="cloud" style="top:8%;animation-duration:60s;">☁︎</div>
+<div class="cloud" style="top:30%;animation-duration:75s;animation-delay:-20s;font-size:40px;">☁︎</div>
+<div class="cloud" style="top:55%;animation-duration:90s;animation-delay:-40s;font-size:50px;">☁︎</div>
+<div class="petal" style="left:8%;animation-duration:18s;">❀</div>
+<div class="petal" style="left:35%;animation-duration:22s;animation-delay:-6s;">✿</div>
+<div class="petal" style="left:62%;animation-duration:25s;animation-delay:-12s;">❀</div>
+<div class="petal" style="left:85%;animation-duration:20s;animation-delay:-3s;">✿</div>
+
+<header>
+  <div class="htop">
+    <div class="htitle">品詞 説明スライド <span>こころの国語</span></div>
+    <button class="menubtn" onclick="toggleDrawer()" aria-label="目次">≡</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label"><span id="plabel">1 / 1</span><span id="ptitle"></span></div>
+    <div class="progress-bar"><div class="progress-fill" id="pfill"></div></div>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<div class="overlay" id="overlay" onclick="toggleDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head"><b>目次</b><button onclick="toggleDrawer()">×</button></div>
+  <ol id="toc"></ol>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <h3>全部読みきった！🌸</h3>
+    <p>ね、ここまでよくがんばったね。<br>品詞の地図はもう頭に入ったよ。<br>あとは「覚えるツール」と「反射ドリル」で、手を動かして馴染ませよう。</p>
+    <button onclick="closeModal()">閉じる</button>
+  </div>
+</div>
+
+<script>
+// ====== スライド定義 ======
+const slides = [
+  // 1. はじめに
+  { t:"はじめに", html:`
+    <h2><span class="num">1</span>品詞って、何のためにあるの？</h2>
+    <p>ね、こころ。「品詞」って聞くと、なんか難しそうな顔したくなるよね。でも、品詞って実は<b>言葉を仲間分けしただけ</b>のものなの。</p>
+    <div class="def"><b>品詞とは</b>：日本語の単語を、はたらき（仕事）の似ているものどうしでグループにしたもの。全部で<b>10種類</b>あるよ。</div>
+    <p>なぜ覚えるの？って思うかもしれない。理由はシンプル。</p>
+    <ul>
+      <li>テストで「次の文の動詞を全部書きぬきなさい」って聞かれるから</li>
+      <li>「ない」が動詞の一部か、それとも別の単語かを<b>見分ける問題</b>が出るから</li>
+      <li>文の組み立てが分かると、長文を読むスピードが上がるから</li>
+    </ul>
+    <div class="tip"><b>大事なこと：</b>品詞は「暗記」じゃなくて「見分け方を身につけるもの」。これからのスライドで、その見分け方をひとつずつ教えていくね。</div>
+  `},
+
+  // 2. 大枠の地図
+  { t:"10品詞の地図", html:`
+    <h2><span class="num">2</span>まずは地図を見よう（10品詞）</h2>
+    <p>こころ、いきなり全部覚えなくていい。最初に<b>「全体の地図」</b>だけ見ておくよ。これがあると、迷子にならない。</p>
+    <table class="tbl">
+      <tr><th>仲間</th><th>品詞</th><th>ざっくりの仕事</th></tr>
+      <tr><td rowspan="3"><b>用言</b><br>（動きや様子）</td><td>動詞</td><td>動き・存在（〜る で終わる）</td></tr>
+      <tr><td>形容詞</td><td>様子（〜い で終わる）</td></tr>
+      <tr><td>形容動詞</td><td>様子（〜だ で終わる）</td></tr>
+      <tr><td><b>体言</b></td><td>名詞</td><td>もの・人・ことの名前</td></tr>
+      <tr><td rowspan="4">活用しない<br>自立語</td><td>副詞</td><td>主に用言をくわしくする</td></tr>
+      <tr><td>連体詞</td><td>体言（名詞）をくわしくする</td></tr>
+      <tr><td>接続詞</td><td>文や語をつなぐ</td></tr>
+      <tr><td>感動詞</td><td>感動・呼びかけ・あいさつ</td></tr>
+      <tr><td rowspan="2"><b>付属語</b></td><td>助動詞</td><td>意味をそえる（活用する）</td></tr>
+      <tr><td>助詞</td><td>関係を示す（活用しない）</td></tr>
+    </table>
+    <div class="tip"><b>合言葉：</b>「<b>用言3つ・体言1つ・かざり&つなぎ4つ・付属2つ</b>」で10品詞。次のスライドで、自立語と付属語って何？を説明するよ。</div>
+  `},
+
+  // 3. 自立語と付属語
+  { t:"自立語と付属語", html:`
+    <h2><span class="num">3</span>自立語と付属語って？</h2>
+    <p>10品詞は、まず大きく<b>2つ</b>に分かれるよ。</p>
+    <div class="def"><b>自立語</b>：それ1語だけで意味が分かる単語。文の最初に来られる。<br>例：「<b>走る</b>」「<b>花</b>」「<b>きれいだ</b>」</div>
+    <div class="def"><b>付属語</b>：自立語にくっついて使う単語。1語だけでは意味が分からない。<br>例：「<b>を</b>」「<b>が</b>」「<b>ない</b>」「<b>そうだ</b>」</div>
+    <p>もうひとつ、大事な分け方が「<b>活用する／しない</b>」。活用とは、形が変わること。</p>
+    <div class="ex">「書く」→「書か（ない）」「書き（ます）」「書け（ば）」と形が変わる。これが<b>活用</b>。</div>
+    <h3>地図にすると</h3>
+    <div class="tree">単語
+├ 自立語
+│  ├ 活用する
+│  │  ├ 言い切りが「ウ段」 → <b>動詞</b>（走る・見る）
+│  │  ├ 言い切りが「〜い」 → <b>形容詞</b>（青い・楽しい）
+│  │  └ 言い切りが「〜だ」 → <b>形容動詞</b>（静かだ・元気だ）
+│  └ 活用しない
+│     ├ 主語になれる    → <b>名詞</b>（本・夢）
+│     ├ 用言をくわしくする → <b>副詞</b>（とても・ゆっくり）
+│     ├ 体言をくわしくする → <b>連体詞</b>（あの・大きな）
+│     ├ つなぐ        → <b>接続詞</b>（しかし・そして）
+│     └ 感動・呼びかけ   → <b>感動詞</b>（ああ・はい）
+└ 付属語
+   ├ 活用する  → <b>助動詞</b>（ない・た・そうだ）
+   └ 活用しない → <b>助詞</b>（が・を・に・は）</div>
+    <div class="tip"><b>言い切りって？</b>：その単語の「最後の形（〜だ／〜い／〜るで終わる、ふつうの形）」のこと。辞書に載っている形だよ。</div>
+  `},
+
+  // 4. 動詞 定義
+  { t:"動詞 ①定義", html:`
+    <h2><span class="num">4</span>動詞ってどんなもの？</h2>
+    <div class="def"><b>動詞</b>：動きや存在を表す自立語。<b>言い切りの形がウ段の音（〜る、〜く、〜む など）</b>で終わる。活用するよ。</div>
+    <h3>例</h3>
+    <div class="ex">走<b>る</b>／読<b>む</b>／泣<b>く</b>／見<b>る</b>／起き<b>る</b>／書<b>く</b>／飲<b>む</b>／泳<b>ぐ</b>／話<b>す</b>／立<b>つ</b>／進行（す<b>る</b>）／ある／いる／来る</div>
+    <p>「動詞」って名前のとおり、<b>動き</b>を表すのが基本。でも「ある」「いる」みたいに<b>存在</b>（〜があるよ／〜がいるよ）を表すのも動詞だよ。</p>
+    <div class="tip"><b>ウ段って？</b>：あいうえおの「う」の段。<b>る・く・ぐ・す・つ・ぬ・ぶ・む・う</b>のどれか。日本語の動詞は必ずこの音で言い切る。</div>
+  `},
+
+  // 5. 動詞 見分け方
+  { t:"動詞 ②見分け方", html:`
+    <h2><span class="num">5</span>動詞の見分け方</h2>
+    <p>こころ、文の中から動詞を見つけるときの<b>2ステップ</b>を教えるね。</p>
+    <ol>
+      <li>その単語を<b>言い切りの形</b>（最後の形）に直す</li>
+      <li>「<b>〜ウ段</b>」で終わるなら動詞</li>
+    </ol>
+    <div class="ex">「公園で<b>遊んだ</b>」<br>→ 言い切りは「<b>遊ぶ</b>」<br>→「ぶ」はウ段 → ✓ <span class="kotae">動詞</span></div>
+    <div class="ex">「ご飯を<b>食べて</b>いる」<br>→ 言い切りは「<b>食べる</b>」<br>→「る」はウ段 → ✓ <span class="kotae">動詞</span></div>
+    <div class="warn"><b>気をつけて：</b>「<b>大きい</b>」「<b>静かだ</b>」は動きを表すように見えても、言い切りが「い」「だ」だから動詞じゃない。形容詞・形容動詞だよ。</div>
+  `},
+
+  // 6. 動詞 ためしてみよう
+  { t:"動詞 ③ためしてみよう", html:`
+    <h2><span class="num">6</span>ためしてみよう（動詞）</h2>
+    <div class="quiz">
+      <h4>Q. 次の文の中の動詞を、すべて選んでね。</h4>
+      <div class="q">『 こころは 公園で 走り、 大きな 木を 見た。 』</div>
+      <div class="opts" data-multi="1">
+        <button data-a="0">こころ</button>
+        <button data-a="0">公園</button>
+        <button data-a="1">走り</button>
+        <button data-a="0">大きな</button>
+        <button data-a="0">木</button>
+        <button data-a="1">見た</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：「走り」「見た」</b><br>
+        「走り」は言い切ると「<b>走る</b>」、「見た」は言い切ると「<b>見る</b>」。どちらもウ段で終わる動詞だよ。「大きな」は連体詞、「こころ・公園・木」は名詞。
+      </div>
+    </div>
+  `},
+
+  // 7. 形容詞 定義
+  { t:"形容詞 ①定義", html:`
+    <h2><span class="num">7</span>形容詞ってどんなもの？</h2>
+    <div class="def"><b>形容詞</b>：人やものの<b>様子・状態</b>を表す自立語。<b>言い切りが「〜い」</b>で終わる。活用するよ。</div>
+    <h3>例</h3>
+    <div class="ex">青<b>い</b>／楽し<b>い</b>／大き<b>い</b>／うれし<b>い</b>／さむ<b>い</b>／おいし<b>い</b>／深<b>い</b>／美し<b>い</b>／仰々（ぎょうぎょう）し<b>い</b>／苦<b>い</b>／ない（無い）</div>
+    <p>「〜い」で言い切れるものはほぼ形容詞、と覚えていい。</p>
+    <div class="tip"><b>「ない」も形容詞？</b>：「お金がない」の「ない」（＝無い）は<b>形容詞</b>。でも「行か<b>ない</b>」の「ない」は<b>助動詞</b>。これ、ややこしいから後でしっかりやるね。</div>
+  `},
+
+  // 8. 形容詞 見分け方
+  { t:"形容詞 ②見分け方", html:`
+    <h2><span class="num">8</span>形容詞の見分け方</h2>
+    <ol>
+      <li>言い切りの形にする</li>
+      <li>「<b>〜い</b>」で終わるか？</li>
+      <li>「<b>とても〜</b>」をつけてみて、自然か？</li>
+    </ol>
+    <div class="ex">「空が<b>青かった</b>」<br>→ 言い切り「<b>青い</b>」／「<b>とても</b>青い」→ 自然 ✓<br>→ <span class="kotae">形容詞</span></div>
+    <div class="warn"><b>注意：</b>「<b>大きな</b>」は「い」じゃなくて「な」で終わってる。これは<b>連体詞</b>（後で説明）。形容詞「大きい」とは別物。</div>
+  `},
+
+  // 9. 形容詞 試し
+  { t:"形容詞 ③ためしてみよう", html:`
+    <h2><span class="num">9</span>ためしてみよう（形容詞）</h2>
+    <div class="quiz">
+      <h4>Q. 次のうち、形容詞はどれ？</h4>
+      <div class="opts" data-multi="1">
+        <button data-a="1">うれしい</button>
+        <button data-a="0">きれいだ</button>
+        <button data-a="1">寒かった</button>
+        <button data-a="0">あの</button>
+        <button data-a="1">おもしろい</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：「うれしい」「寒かった」「おもしろい」</b><br>
+        どれも言い切ると「うれしい・寒い・おもしろい」で<b>〜い</b>。<br>「きれいだ」は言い切り〜だ → 形容動詞。「あの」は連体詞だよ。
+      </div>
+    </div>
+  `},
+
+  // 10. 形容動詞 定義
+  { t:"形容動詞 ①定義", html:`
+    <h2><span class="num">10</span>形容動詞ってどんなもの？</h2>
+    <div class="def"><b>形容動詞</b>：様子や状態を表す自立語。<b>言い切りが「〜だ」</b>で終わる。活用するよ。</div>
+    <h3>例</h3>
+    <div class="ex">静か<b>だ</b>／元気<b>だ</b>／きれい<b>だ</b>／にぎやか<b>だ</b>／親切<b>だ</b>／じょうぶ<b>だ</b>／はなやか<b>だ</b>／朗らか<b>だ</b>／和やか<b>だ</b></div>
+    <p>「形容詞」と名前が似てるからまぎらわしいけど、<b>言い切りの音</b>で区別できるよ。</p>
+    <div class="compare">
+      <div><b>形容詞</b><br>言い切り「〜<b>い</b>」<br>青い・楽しい</div>
+      <div><b>形容動詞</b><br>言い切り「〜<b>だ</b>」<br>静かだ・元気だ</div>
+    </div>
+  `},
+
+  // 11. 形容動詞 見分け方
+  { t:"形容動詞 ②見分け方", html:`
+    <h2><span class="num">11</span>形容動詞の見分け方</h2>
+    <ol>
+      <li>言い切りにする</li>
+      <li>「〜<b>だ</b>」で終わるか？</li>
+      <li>「<b>とても〜</b>」がつけられるか？</li>
+    </ol>
+    <div class="ex">「教室は<b>静かに</b>なった」<br>→ 言い切り「<b>静かだ</b>」／「<b>とても</b>静かだ」→ 自然 ✓<br>→ <span class="kotae">形容動詞</span></div>
+    <div class="warn"><b>ひっかけ：</b>「これは本<b>だ</b>」の「だ」は形容動詞じゃない。「本」は<b>名詞</b>で、「だ」は<b>助動詞</b>（断定の「だ」）。形容動詞は1語で「静か<b>だ</b>」のような形を作るよ。</div>
+    <div class="tip"><b>見分けコツ：</b>言い切りに「とても」をつけて自然なら形容動詞の可能性が高い。「とても本だ」は変だから、これは名詞＋助動詞。</div>
+  `},
+
+  // 12. 形容動詞 試し
+  { t:"形容動詞 ③ためしてみよう", html:`
+    <h2><span class="num">12</span>ためしてみよう（形容動詞）</h2>
+    <div class="quiz">
+      <h4>Q. 「公園は とても きれいだった。」の中の<b>形容動詞</b>を選んでね。</h4>
+      <div class="opts">
+        <button data-a="0">公園</button>
+        <button data-a="0">とても</button>
+        <button data-a="1">きれいだった</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：「きれいだった」</b><br>
+        言い切りは「<b>きれいだ</b>」、〜だで終わる ✓ 「とてもきれいだ」も自然 ✓ → 形容動詞。<br>「公園」は名詞、「とても」は副詞だよ。
+      </div>
+    </div>
+  `},
+
+  // 13. 名詞（5分類）
+  { t:"名詞", html:`
+    <h2><span class="num">13</span>名詞</h2>
+    <div class="def"><b>名詞</b>：もの・人・ことの<b>名前</b>を表す自立語。活用<b>しない</b>。「が」「は」がついて<b>主語になれる</b>のが目印。</div>
+    <h3>5つの仲間</h3>
+    <ul>
+      <li><b>①固有名詞</b>：豊臣秀吉・太郎・日本・平成・北海道（ひとつだけの名前）</li>
+      <li><b>②普通名詞</b>：人間・世界・花・戦争・時計・コップ（ふつうの名前）</li>
+      <li><b>③数詞</b>：一人・二匹・三月・第四・五年・六回（数）</li>
+      <li><b>④代名詞</b>：それ・こちら・あそこ・かれ・あなた（名前のかわり）</li>
+      <li><b>⑤転成名詞</b>：動き・寒さ・元気（もとは動詞「動く」、形容詞「寒い」、形容動詞「元気だ」から名詞になったもの）</li>
+    </ul>
+    <div class="warn"><b>転成名詞は要注意！</b>「かなしさ」「うれしさ」「楽しみ」「読み」みたいに、<b>もとは別の品詞だったのが名詞になったもの</b>。今回テストでも「かなしさ」が出題されたよ。語尾の「さ」「み」がついて名詞化するパターンが多い。</div>
+    <div class="tip"><b>見分けコツ：</b>「<b>〜が</b>」「<b>〜は</b>」をつけて主語になるか？ なれば名詞の可能性大。「かなしさ<b>が</b>こみあげる」→ 自然 → 名詞（転成名詞）。</div>
+  `},
+
+  // 14. 副詞（3分類）
+  { t:"副詞 ①3つの仲間", html:`
+    <h2><span class="num">14</span>副詞</h2>
+    <div class="def"><b>副詞</b>：主に<b>用言（動詞・形容詞・形容動詞）</b>をくわしくする自立語。活用しない。</div>
+    <h3>3つの仲間</h3>
+    <ul>
+      <li><b>①状態の副詞</b>：「どんなふうに」を表す。<br>例：ゆっくり・にっこり・はっきり・どんどん</li>
+      <li><b>②程度の副詞</b>：「どのくらい」を表す。<br>例：とても・もっと・たいへん・たいてい・すこし</li>
+      <li><b>③呼応（陳述）の副詞</b>：後ろに決まった言葉が来る。<br>例：もし・まるで・おそらく・決して・たぶん・どうして</li>
+    </ul>
+    <div class="ex">「<b>ゆっくり</b>歩く」（状態）<br>「<b>とても</b>うれしい」（程度）<br>「<b>もっと</b>静かだ」（程度）<br>「<b>まるで</b>夢のようだ」（呼応）</div>
+    <div class="tip"><b>見分けコツ：</b>後ろに動詞や形容詞が来ていることが多い。「どんなふうに／どのくらい／（決まった言葉とセットで）」を答えるのが副詞。</div>
+  `},
+
+  // 15. 呼応の副詞 ★新規
+  { t:"呼応の副詞 ★中学受験頻出", html:`
+    <h2><span class="num">15</span>呼応（陳述）の副詞</h2>
+    <div class="def"><b>呼応の副詞</b>：後ろに<b>決まった言葉</b>が来る副詞。「○○ときたら、××で受ける」のペアで覚える！</div>
+    <h3>絶対覚えるペア</h3>
+    <table class="tbl">
+      <tr><th>副詞</th><th>後ろに来る言葉</th><th>例</th></tr>
+      <tr><td><b>もし</b></td><td>〜なら／〜たら（仮定）</td><td><b>もし</b>明日雨<b>なら</b>、外出しない</td></tr>
+      <tr><td><b>まるで</b></td><td>〜のようだ／みたいだ（たとえ）</td><td><b>まるで</b>夢の<b>ようだ</b></td></tr>
+      <tr><td><b>おそらく</b></td><td>〜だろう（推量）</td><td><b>おそらく</b>勝つ<b>だろう</b></td></tr>
+      <tr><td><b>たぶん</b></td><td>〜だろう（推量）</td><td><b>たぶん</b>来る<b>だろう</b></td></tr>
+      <tr><td><b>どうして</b></td><td>〜か（疑問）</td><td><b>どうして</b>泣くの<b>か</b></td></tr>
+      <tr><td><b>決して</b></td><td>〜ない（打ち消し）</td><td><b>決して</b>許さ<b>ない</b></td></tr>
+      <tr><td><b>たとえ</b></td><td>〜ても（仮定）</td><td><b>たとえ</b>負け<b>ても</b>くやしくない</td></tr>
+      <tr><td><b>なぜ</b></td><td>〜か（疑問）</td><td><b>なぜ</b>遅れた<b>か</b></td></tr>
+    </table>
+    <div class="warn"><b>中学受験で超頻出！</b>空欄補充問題で「もし□□雨なら…」のように出る。<b>ペアで暗記</b>するのが最強。</div>
+  `},
+
+  // 16. 呼応の副詞 ためしてみよう ★新規
+  { t:"呼応の副詞 ②ためしてみよう", html:`
+    <h2><span class="num">16</span>ためしてみよう（呼応の副詞）</h2>
+    <div class="quiz">
+      <h4>Q. 「もし明日雨___、私は外出しません。」の空欄に入る言葉は？</h4>
+      <div class="opts">
+        <button data-a="0">だろう</button>
+        <button data-a="1">なら</button>
+        <button data-a="0">ようだ</button>
+        <button data-a="0">ない</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：なら</b><br>
+        「もし」は<b>仮定</b>の呼応副詞。後ろは「〜なら／〜たら」とペアになる。「もし〜だろう」だと推量とまざって変、「もし〜ようだ」はたとえと混ざって変、「もし〜ない」はペアにならないよ。
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 「彼は___天使のようだ。」の空欄に入る言葉は？</h4>
+      <div class="opts">
+        <button data-a="0">もし</button>
+        <button data-a="1">まるで</button>
+        <button data-a="0">決して</button>
+        <button data-a="0">なぜ</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：まるで</b><br>
+        「〜のようだ」とペアになる呼応副詞は「<b>まるで</b>」。たとえを表すよ。
+      </div>
+    </div>
+  `},
+
+  // 15. 連体詞
+  { t:"連体詞", html:`
+    <h2><span class="num">17</span>連体詞</h2>
+    <div class="def"><b>連体詞</b>：<b>体言（名詞）だけ</b>をくわしくする自立語。活用しない。</div>
+    <h3>例（これは丸ごと覚えよう）</h3>
+    <div class="ex">この／その／あの／どの／<b>わが</b>（国）／<b>大きな／小さな／おかしな</b>／ある（日）／<b>いわゆる</b>／<b>とんだ</b>／<b>あらゆる</b>／<b>たいした</b></div>
+    <p>連体詞は数が少ないから、上の言葉だけ覚えればだいたい解ける。後ろに必ず<b>名詞</b>がつく。</p>
+    <div class="warn"><b>超重要な区別：</b>「<b>大きな</b>」は連体詞、「<b>大きい</b>」は形容詞。<br>・大きな箱（連体詞＋名詞）<br>・大きい箱（形容詞＋名詞）<br>「な」で終わるか「い」で終わるかでちがう品詞になる！</div>
+    <div class="tip"><b>見分けコツ：</b>その単語の後ろが<b>名詞</b>で、活用<b>しない</b>（形が変わらない）なら連体詞。「あの」を「あく」「あけば」とは言わないよね。</div>
+  `},
+
+  // 16. 接続詞
+  { t:"接続詞", html:`
+    <h2><span class="num">18</span>接続詞</h2>
+    <div class="def"><b>接続詞</b>：前後の文や語句を<b>つなぐ</b>自立語。活用しない。</div>
+    <h3>例</h3>
+    <div class="ex">そして／しかし／だから／けれども／また／さらに／つまり／なぜなら／ところで／または／<b>では</b></div>
+    <div class="ex">「雨が降った。<b>しかし</b>、試合は行われた。」<br>「お腹がすいた。<b>だから</b>、ご飯を食べた。」</div>
+    <div class="tip"><b>見分けコツ：</b>文の最初や、文と文のあいだに来て「で？」「でも？」みたいに<b>関係を示す</b>言葉。それ1語だけ抜いても文の意味は変わらない（つながりが弱くなるだけ）。</div>
+  `},
+
+  // 17. 感動詞
+  { t:"感動詞", html:`
+    <h2><span class="num">19</span>感動詞</h2>
+    <div class="def"><b>感動詞</b>：感動・呼びかけ・あいさつ・返事を表す自立語。活用しない。<b>独立語</b>になる。</div>
+    <h3>例</h3>
+    <div class="ex">ああ／あら／まあ／おお（感動）<br>もしもし／おい／ねえ（呼びかけ）<br>おはよう／こんにちは（あいさつ）<br>はい／いいえ／うん（返事）</div>
+    <div class="tip"><b>見分けコツ：</b>文の最初にポンと置かれて、後ろに「、」が来ることが多い。「<b>ああ</b>、きれいだなあ。」の「ああ」が感動詞。</div>
+  `},
+
+  // 18. 助動詞
+  { t:"助動詞", html:`
+    <h2><span class="num">20</span>助動詞</h2>
+    <div class="def"><b>助動詞</b>：<b>付属語</b>（自立語にくっつく）で、意味をそえる単語。<b>活用する</b>。</div>
+    <h3>主な助動詞</h3>
+    <div class="ex">れる・られる（受身・可能・尊敬・自発）<br>せる・させる（使役）<br>ない・ぬ（ん）（打ち消し）<br>た（過去・完了）<br>そうだ（伝聞・様態）<br>ようだ（たとえ・推定）<br>らしい（推定）<br>だ・です（断定）<br>ます（ていねい）<br>う・よう（意志・推量）<br>まい（打ち消しの意志・推量）</div>
+    <div class="tip"><b>付属語って？</b>：1語だけでは文の頭に来られない。必ず別の単語（動詞や形容詞）にくっついて使う。「<b>ない</b>」だけで文は始められないよね。</div>
+    <div class="warn"><b>助動詞は識別問題の主役。</b>これから「れる・られる」「そうだ」「ない」など、ひとつずつ見分け方を教えていくよ。</div>
+  `},
+
+  // 19. 助詞
+  { t:"助詞", html:`
+    <h2><span class="num">21</span>助詞</h2>
+    <div class="def"><b>助詞</b>：<b>付属語</b>で、語と語の<b>関係</b>を示したり、意味をそえたりする。<b>活用しない</b>。</div>
+    <h3>例</h3>
+    <div class="ex">が／を／に／へ／と／から／より／で／は／も／こそ／さえ／ばかり／だけ／ね／よ／か／の</div>
+    <div class="ex">「こころ<b>が</b>本<b>を</b>読む。」<br>→「が」は主語を、「を」は対象を示す助詞</div>
+    <div class="compare">
+      <div><b>助動詞</b><br>活用<b>する</b><br>ない・た・そうだ</div>
+      <div><b>助詞</b><br>活用<b>しない</b><br>が・を・に・の</div>
+    </div>
+    <div class="tip"><b>見分けコツ：</b>付属語のうち、形が変わらないのが助詞。「が」を「がっ」「がけ」とは言わない。</div>
+  `},
+
+  // 20. ややこしいペア①
+  { t:"ペア比較①大きい/大きな", html:`
+    <h2><span class="num">22</span>ペア比較① 「大きい」と「大きな」</h2>
+    <p>これ、テストでよく出るやつだよ。形が似てるのに<b>品詞がちがう</b>。</p>
+    <div class="compare">
+      <div><b>大きい</b>（形容詞）<br>言い切り「〜い」<br>活用する<br>例：箱が<b>大きい</b>／<b>大きい</b>箱<br>「大きく」「大きかった」と形が変わる</div>
+      <div><b>大きな</b>（連体詞）<br>「な」で固定<br>活用しない<br>例：<b>大きな</b>箱<br>「大きくな」「大きなかった」とは言わない</div>
+    </div>
+    <div class="tip"><b>見分け方：</b>後ろに「く」「かった」をつけて自然なら形容詞、「な」のまま固まってて変えられないなら連体詞。<br><br>仲間：「小さい／小さな」「おかしい／おかしな」も同じ関係だよ。</div>
+  `},
+
+  // 21. ペア比較②
+  { t:"ペア比較②ある", html:`
+    <h2><span class="num">23</span>ペア比較② 「ある日」と「本がある」</h2>
+    <div class="compare">
+      <div><b>ある日</b>（連体詞）<br>後ろに名詞（日）が来て、形が変わらない<br>「ある日のこと」<br>意味は「とある／なんとなくの」</div>
+      <div><b>本がある</b>（動詞）<br>言い切り「ある」、活用する<br>「あった」「あれば」と変わる<br>意味は「存在する」</div>
+    </div>
+    <div class="tip"><b>見分け方：</b>「あった」に変えて自然なら<b>動詞</b>、変えると意味が壊れるなら<b>連体詞</b>。<br>「本があった」○ → 動詞<br>「あった日のこと」× → 連体詞だった</div>
+  `},
+
+  // 22. ペア比較③
+  { t:"ペア比較③副詞/形容動詞", html:`
+    <h2><span class="num">24</span>ペア比較③ 「きれいに」と「とても」</h2>
+    <p>どっちも「〜に」とか連用みたいな形で出てきて、用言をくわしくしているように見える。でも品詞はちがう。</p>
+    <div class="compare">
+      <div><b>きれいに</b>（形容動詞の活用形）<br>言い切りは「<b>きれいだ</b>」<br>もとの形に「だ」がある<br>「とてもきれいだ」と言える</div>
+      <div><b>とても</b>（副詞）<br>言い切りが存在しない（活用しない）<br>「とてもだ」とは言わない<br>1語で固まっている</div>
+    </div>
+    <div class="ex">「花が<b>きれいに</b>咲く」→ 形容動詞「きれいだ」の連用形<br>「<b>とても</b>うれしい」→ 副詞</div>
+    <div class="tip"><b>見分け方：</b>「〜だ」に直せるか試す。直せれば形容動詞、直せなければ副詞。</div>
+  `},
+
+  // 23. 識別問題の前置き
+  { t:"識別問題のすすめ", html:`
+    <h2><span class="num">25</span>ここからが本番：識別問題</h2>
+    <p>ね、こころ。ここまでで10品詞の地図と、ややこしいペアを見てきた。ここからは、テストで一番点が取れる<b>「識別問題」</b>を教えるよ。</p>
+    <div class="def"><b>識別問題とは</b>：同じ「ない」「そうだ」「に」みたいに<b>同じ字なのに意味や品詞がちがう</b>言葉を、文の中で見分ける問題。</div>
+    <h3>この後やる識別</h3>
+    <ul>
+      <li>れる・られる（4つの意味）</li>
+      <li>そうだ（4つの意味）</li>
+      <li>ようだ（6つの意味）</li>
+      <li>う・よう・まい・と/ても</li>
+      <li>らしい（推定 vs 形容詞の一部）</li>
+      <li>ない（助動詞 vs 形容詞 vs 一部）</li>
+      <li>ある・の・に・で</li>
+      <li>が・から・ぐらい・ばかり・さえ・でも・か</li>
+    </ul>
+    <div class="tip"><b>合言葉：</b>識別問題は<b>「言いかえて自然か」</b>でだいたい解ける。意味で覚えて、言いかえで確認するよ。</div>
+  `},
+
+  // 24. れる・られる
+  { t:"れる・られる ①4つの意味", html:`
+    <h2><span class="num">26</span>れる・られる の4つの意味</h2>
+    <p>「れる」「られる」は<b>助動詞</b>。動詞のあとにくっつくよ。意味は<b>4種類</b>あって、これがテストの定番。</p>
+    <table class="tbl">
+      <tr><th>意味</th><th>言いかえ</th><th>例</th></tr>
+      <tr><td><b>受身</b></td><td>「〜される」</td><td>バナナがカナリヤに食べ<b>られる</b></td></tr>
+      <tr><td><b>可能</b></td><td>「〜できる」</td><td>足はとても辛いカレーライスを食べ<b>られる</b>（＝食べることができる）</td></tr>
+      <tr><td><b>尊敬</b></td><td>「〜なさる」</td><td>校長先生が来<b>られる</b></td></tr>
+      <tr><td><b>自発</b></td><td>「自然と〜する」</td><td>長らくおとずれていない故郷のことがしのば<b>れる</b></td></tr>
+    </table>
+    <div class="tip"><b>見分けの順番：</b><br>① 「〜される」と言いかえられる？ → <b>受身</b><br>② 「〜できる」と言いかえられる？ → <b>可能</b><br>③ 目上の人が主語？ → <b>尊敬</b><br>④ 自然と心に浮かぶ感じ？ → <b>自発</b></div>
+  `},
+
+  // 25. れる・られる 試し
+  { t:"れる・られる ②ためしてみよう", html:`
+    <h2><span class="num">27</span>ためしてみよう（れる・られる）</h2>
+    <div class="quiz">
+      <h4>Q. 「先生がにこやかに話さ<b>れる</b>。」の「れる」の意味は？</h4>
+      <div class="opts">
+        <button data-a="0">受身</button>
+        <button data-a="0">可能</button>
+        <button data-a="1">尊敬</button>
+        <button data-a="0">自発</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：尊敬</b><br>
+        主語が「先生」（目上の人）で、「話される」＝「話<b>しなさる</b>」と言いかえられる。だから尊敬だよ。<br>受身なら「〜される」じゃなくて「〜から〜される」みたいな形になる。
+      </div>
+    </div>
+  `},
+
+  // そうだ（4分類）
+  { t:"そうだ の見分け", html:`
+    <h2><span class="num">28</span>「そうだ」 4つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①伝聞</b><br>（〜と聞いた）</td><td>妹は悲しい<b>そうだ</b></td></tr>
+      <tr><td><b>②様態</b><br>（〜の感じ）</td><td>妹は悲し<b>そうだ</b></td></tr>
+      <tr><td><b>③副詞「そう」＋助動詞「だ」</b></td><td>なんだ<b>そう</b><b>だっ</b>たのか</td></tr>
+      <tr><td><b>④形容動詞の一部</b><br>（かわいそうだ など）</td><td>妹がかわい<b>そうだ</b></td></tr>
+    </table>
+    <div class="tip"><b>見分けコツ：</b><br>① 言い切り「悲しい」＋そうだ → <b>伝聞</b>（〜と聞いた）<br>② 語幹「悲し」＋そうだ → <b>様態</b>（〜の感じ）<br>③ 「そう」を「そのように」と言いかえて自然なら副詞＋助動詞<br>④ 「かわいそうだ」みたいに一語の形容動詞になっているもの</div>
+  `},
+
+  // ようだ（6分類）
+  { t:"ようだ の見分け", html:`
+    <h2><span class="num">29</span>「ようだ」 6つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①比喩（たとえ）</b></td><td>妹は天使の<b>ようだ</b>と言われたことがある</td></tr>
+      <tr><td><b>②推定</b></td><td>母は出かけている<b>ようだ</b></td></tr>
+      <tr><td><b>③例示</b></td><td>東京の<b>ような</b>大都市はにぎやかだ</td></tr>
+      <tr><td><b>④目的</b></td><td>母は買い物に行く<b>ように</b>と頼まれた</td></tr>
+      <tr><td><b>⑤願望</b></td><td>願いがかないます<b>ように</b></td></tr>
+      <tr><td><b>⑥状態</b><br>（「よう」（名詞）＋「に」）</td><td>猫はネコと書く<b>ように</b>…</td></tr>
+    </table>
+    <div class="tip"><b>見分けコツ：</b><br>① 「まるで」を入れて自然 → <b>比喩</b><br>② 「どうやら」を入れて自然 → <b>推定</b><br>③ 「たとえば」を入れて自然 → <b>例示</b><br>④ 「〜するために」と言える → <b>目的</b><br>⑤ お願い・祈りの文 → <b>願望</b><br>⑥ 「よう」が「ありさま」の意味で名詞っぽい → <b>状態</b></div>
+  `},
+
+  // う・よう（新規）
+  { t:"う・よう の見分け", html:`
+    <h2><span class="num">30</span>「う・よう」 2つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①意志</b><br>（〜しよう、と決める）</td><td>あの山に1度登<b>ろう</b>と決心する</td></tr>
+      <tr><td><b>②推量</b><br>（〜だろう）</td><td>私の考えは100年後にも理解され<b>よう</b></td></tr>
+    </table>
+    <div class="tip"><b>見分けコツ：</b><br>①「〜しようと思う・〜しようと決める」のように主語が「自分」で<b>決心</b>している → 意志<br>②「たぶん〜だろう」と言いかえられる → 推量</div>
+  `},
+
+  // まい（新規）
+  { t:"まい の見分け", html:`
+    <h2><span class="num">31</span>「まい」 2つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①打ち消しの意志</b><br>（〜しないぞ、と決める）</td><td>あの山に1度登る<b>まい</b>と決心する</td></tr>
+      <tr><td><b>②打ち消しの推量</b><br>（〜しないだろう）</td><td>私の考えは100年後にも理解され<b>まい</b></td></tr>
+    </table>
+    <div class="tip"><b>覚え方：</b>「う・よう」と「まい」は<b>ちょうど逆の関係</b>。<br>「う・よう」＝するぞ／するだろう<br>「まい」＝しないぞ／しないだろう</div>
+  `},
+
+  // と・ても（新規）
+  { t:"と・ても の見分け", html:`
+    <h2><span class="num">32</span>「と・ても」 の意味</h2>
+    <div class="def">助詞・助動詞の「と」「ても（でも）」は、文の中で<b>つなぎ</b>や<b>逆接</b>を表す。</div>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>逆接の仮定</b><br>（〜しても）</td><td>雨が降っ<b>ても</b>出かける</td></tr>
+      <tr><td><b>引用</b><br>（〜と言う／〜と思う）</td><td>「行く」<b>と</b>言った</td></tr>
+      <tr><td><b>共同・相手</b></td><td>友達<b>と</b>話す</td></tr>
+      <tr><td><b>並立</b></td><td>本<b>と</b>ノートを買う</td></tr>
+    </table>
+    <div class="tip"><b>見分けコツ：</b>「ても」は<b>「たとえ〜ても」</b>と仮定をつないで使うことが多い。「と」は引用・共同・並立のはたらき。</div>
+  `},
+
+  // 28. らしい
+  { t:"らしい の見分け", html:`
+    <h2><span class="num">33</span>「らしい」 助動詞か形容詞の一部か</h2>
+    <div class="compare">
+      <div><b>助動詞「らしい」</b>（推定）<br>「〜のようだ／たぶん〜」<br>例：向こうに立っているのが駅長<b>らしい</b>（推定）</div>
+      <div><b>形容詞の一部「〜らしい」</b><br>「いかにも〜のようすだ」<br>例：弟の服装は子ども<b>らしい</b>（＝「子どもらしい」で1つの形容詞）</div>
+    </div>
+    <div class="tip"><b>見分けコツ：</b>「らしい」を「のようだ」に直して<b>自然なら助動詞</b>、<b>変なら形容詞の一部</b>。<br>「駅長<b>のようだ</b>」○ → 助動詞<br>「子ども<b>のようだ</b>」も自然そうに聞こえるけど、ここでは「子どもらしい服装」＝「子どもにふさわしい」の意味だから、ひとつの形容詞として扱うよ。</div>
+  `},
+
+  // 29. ない
+  { t:"ない の3パターン", html:`
+    <h2><span class="num">34</span>「ない」 3つの見分け</h2>
+    <table class="tbl">
+      <tr><th>パターン</th><th>見分け方</th><th>例</th></tr>
+      <tr><td><b>助動詞</b>（打ち消し）</td><td>「ぬ」に置きかえられる</td><td>行か<b>ない</b>（→行か<b>ぬ</b> ○）</td></tr>
+      <tr><td><b>形容詞「ない」</b>（無い）</td><td>「ぬ」に置きかえられない／「は」を入れられる</td><td>お金が<b>ない</b>（→お金が<b>ぬ</b> ×／お金は<b>ない</b> ○）</td></tr>
+      <tr><td><b>形容詞の一部</b></td><td>「ない」を取ると意味が変／1語の形容詞の語尾</td><td>あぶ<b>ない</b>／きた<b>ない</b>／少<b>ない</b></td></tr>
+    </table>
+    <div class="tip"><b>合言葉：「ぬ」に変えてみる。</b><br>変えられる → 助動詞<br>変えられない → 形容詞（無い）か、形容詞の一部</div>
+    <div class="ex">「彼は来<b>ない</b>」→「彼は来<b>ぬ</b>」○ → <b>助動詞</b><br>「時間が<b>ない</b>」→「時間が<b>ぬ</b>」× → <b>形容詞</b><br>「危<b>ない</b>道」→「危<b>ぬ</b>道」× → <b>形容詞の一部</b></div>
+  `},
+
+  // 30. ない 試し
+  { t:"ない ためしてみよう", html:`
+    <h2><span class="num">35</span>ためしてみよう（ない）</h2>
+    <div class="quiz">
+      <h4>Q. 「宿題がまだ終わら<b>ない</b>。」の「ない」は？</h4>
+      <div class="opts">
+        <button data-a="1">助動詞（打ち消し）</button>
+        <button data-a="0">形容詞「ない」</button>
+        <button data-a="0">形容詞の一部</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：助動詞（打ち消し）</b><br>
+        「終わらない」→「終わら<b>ぬ</b>」と言いかえられる ✓ だから打ち消しの助動詞だよ。
+      </div>
+    </div>
+  `},
+
+  // 31. ある の見分け
+  { t:"ある の見分け", html:`
+    <h2><span class="num">36</span>「ある」 動詞？連体詞？</h2>
+    <div class="compare">
+      <div><b>動詞「ある」</b><br>「存在する」の意味<br>活用する（あった・あれば）<br>例：本が<b>ある</b>／お金は<b>ある</b></div>
+      <div><b>連体詞「ある」</b><br>「とある／なんとなくの」<br>活用しない<br>例：<b>ある</b>日のこと／<b>ある</b>人から聞いた</div>
+    </div>
+    <div class="tip"><b>見分け方：</b>「あった」に直して自然 → <b>動詞</b>。「ある」のうしろが名詞で「あった」にできない → <b>連体詞</b>。</div>
+  `},
+
+  // 32. の の見分け
+  { t:"の の見分け", html:`
+    <h2><span class="num">37</span>助詞「の」 3つの仕事</h2>
+    <table class="tbl">
+      <tr><th>仕事</th><th>言いかえ</th><th>例</th></tr>
+      <tr><td><b>連体修飾</b></td><td>「〜という／〜のもつ」</td><td>こころ<b>の</b>本</td></tr>
+      <tr><td><b>主語</b></td><td>「が」に直せる</td><td>背<b>の</b>高い人（＝背<b>が</b>高い人）</td></tr>
+      <tr><td><b>体言の代用</b></td><td>「もの・こと」に直せる</td><td>赤い<b>の</b>がいい（＝赤いものがいい）</td></tr>
+    </table>
+    <div class="tip"><b>合言葉：</b>「<b>が</b>」に直して自然 → 主語の「の」。「<b>もの</b>」に直して自然 → 体言代用。どちらでもなければ普通の連体修飾。</div>
+  `},
+
+  // 33. に の見分け
+  { t:"に の見分け", html:`
+    <h2><span class="num">38</span>「に」 助詞か助動詞か形容動詞か</h2>
+    <table class="tbl">
+      <tr><th>パターン</th><th>見分け</th><th>例</th></tr>
+      <tr><td><b>助詞「に」</b></td><td>場所・時間・相手などを示す</td><td>学校<b>に</b>行く／3時<b>に</b>会う</td></tr>
+      <tr><td><b>形容動詞の活用</b></td><td>「〜だ」に直せる（連用形）</td><td>静か<b>に</b>歩く（＝静かだ）</td></tr>
+      <tr><td><b>助動詞「だ」の連用</b></td><td>「〜だ」（断定）の形</td><td>彼は学生<b>に</b>なる（〜だ→に）</td></tr>
+    </table>
+    <div class="tip"><b>見分けの第一歩：</b>「<b>〜だ</b>」に直して自然か？ 直せれば形容動詞か助動詞の活用。直せなければ助詞。</div>
+  `},
+
+  // 34. で の見分け
+  { t:"で の見分け", html:`
+    <h2><span class="num">39</span>「で」 助詞か助動詞か形容動詞か</h2>
+    <table class="tbl">
+      <tr><th>パターン</th><th>見分け</th><th>例</th></tr>
+      <tr><td><b>助詞「で」</b></td><td>場所・道具・原因を示す</td><td>公園<b>で</b>遊ぶ／バス<b>で</b>行く</td></tr>
+      <tr><td><b>形容動詞の活用</b></td><td>「〜だ」に直せる</td><td>元気<b>で</b>過ごす（＝元気だ）</td></tr>
+      <tr><td><b>助動詞「だ」の連用</b></td><td>断定の「だ」が変化した形</td><td>これは本<b>で</b>、あれはノートだ</td></tr>
+    </table>
+    <div class="tip"><b>見分け方：</b>「に」と同じ要領。<b>「〜だ」に直せるか</b>でまず分ける。</div>
+  `},
+
+  // が の見分け
+  { t:"が の見分け", html:`
+    <h2><span class="num">40</span>「が」 2つの仕事</h2>
+    <ul>
+      <li><b>主語を示す助詞</b>：花<b>が</b>咲く</li>
+      <li><b>逆接の接続助詞</b>：行った<b>が</b>、いなかった（「けれども」と同じ）</li>
+    </ul>
+    <div class="tip"><b>見分け方：</b>後ろに動詞・形容詞が来て主語っぽい → 主語の「が」。前後の文で逆の意味になっていたら逆接の「が」。</div>
+  `},
+
+  // から（3分類）
+  { t:"から の見分け", html:`
+    <h2><span class="num">41</span>「から」 3つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①起点</b><br>（場所・時間の出発点）</td><td>駅<b>から</b>歩く／昨日<b>から</b>雨だ</td></tr>
+      <tr><td><b>②原因・理由</b></td><td>寒い<b>から</b>、家にいる</td></tr>
+      <tr><td><b>③材料</b></td><td>木<b>から</b>できた机</td></tr>
+    </table>
+    <div class="tip"><b>見分けコツ：</b>「〜なので」と言いかえられる → <b>原因・理由</b>。「〜で作られた」と言いかえられる → <b>材料</b>。場所や時間の出発点 → <b>起点</b>。</div>
+  `},
+
+  // ぐらい（新規）
+  { t:"ぐらい の見分け", html:`
+    <h2><span class="num">42</span>「ぐらい（くらい）」 3つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①程度</b></td><td>家までは歩いて10分<b>ぐらい</b>だ</td></tr>
+      <tr><td><b>②同程度</b><br>（同じくらい）</td><td>赤組と白組は同じ<b>ぐらい</b>強い</td></tr>
+      <tr><td><b>③一つの例</b><br>（〜くらいは）</td><td>あいさつ<b>ぐらい</b>はしなさい</td></tr>
+    </table>
+    <div class="tip"><b>見分け方：</b>「だいたいの量・時間」を表す → <b>程度</b>。「同じくらい」と言える → <b>同程度</b>。「せめて〜は」の意味 → <b>一つの例</b>。</div>
+  `},
+
+  // ばかり（6分類）
+  { t:"ばかり の見分け", html:`
+    <h2><span class="num">43</span>「ばかり」 6つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①程度</b></td><td>今十円<b>ばかり</b>持っている</td></tr>
+      <tr><td><b>②限定</b></td><td>弟はゲーム<b>ばかり</b>している</td></tr>
+      <tr><td><b>③直後</b></td><td>たった今、コンサート会場に着いた<b>ばかり</b>です</td></tr>
+      <tr><td><b>④状態</b><br>（今にも〜するばかりだ）</td><td>教室中が騒ぎが始まった<b>ばかり</b>だ</td></tr>
+      <tr><td><b>⑤原因・理由</b></td><td>情報を伝えるため<b>ばかり</b>に混乱を招かせてしまった</td></tr>
+      <tr><td><b>⑥もうとよい時</b></td><td>今だと<b>ばかり</b>議論の口火を切った</td></tr>
+    </table>
+    <div class="tip"><b>見分けコツ：</b>「だいたい〜くらい」→ 程度／「〜だけ」→ 限定／「〜したばかり」→ 直後／「〜のせいで」→ 原因・理由／「ここぞとばかり」→ もうとよい時。</div>
+  `},
+
+  // さえ（3分類）
+  { t:"さえ の見分け", html:`
+    <h2><span class="num">44</span>「さえ」 3つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①一例を挙げて他を類推</b><br>（〜すら）</td><td>友達は私を見ること<b>さえ</b>しなかった</td></tr>
+      <tr><td><b>②限定</b><br>（〜だけ）</td><td>この問題を<b>さえ</b>解ければ、宿題が終わる</td></tr>
+      <tr><td><b>③添加（加える）</b><br>（〜まで）</td><td>風が吹けたうえに、雨<b>さえ</b>降ってきた</td></tr>
+    </table>
+    <div class="tip"><b>見分け方：</b>「〜すら」と言いかえられる → 類推／「〜だけで」と言いかえられる → 限定／「〜までも」と言いかえられる → 添加。</div>
+  `},
+
+  // でも（3分類）
+  { t:"でも の見分け", html:`
+    <h2><span class="num">45</span>「でも」 3つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①一例を挙げて他を類推</b></td><td>これから素人に<b>でも</b>できると親方は言った</td></tr>
+      <tr><td><b>②限定</b><br>（限定するつもりだったことを示す）</td><td>お茶<b>でも</b>飲もうか</td></tr>
+      <tr><td><b>③例外なく</b><br>（〜でもみんな）</td><td>博士は何<b>でも</b>知っている</td></tr>
+    </table>
+    <div class="tip"><b>見分けコツ：</b>「〜であっても」と言える → 類推／「〜なんかを」 → 限定（軽い提案）／「〜のすべて」 → 例外なく。</div>
+  `},
+
+  // か（8分類）
+  { t:"か の見分け", html:`
+    <h2><span class="num">46</span>「か」 8つの意味</h2>
+    <table class="tbl">
+      <tr><th>意味</th><th>例</th></tr>
+      <tr><td><b>①疑問</b></td><td>地震はこの後くるのだろう<b>か</b></td></tr>
+      <tr><td><b>②質問</b></td><td>あなたはそれ<b>か</b>？</td></tr>
+      <tr><td><b>③反語</b></td><td>君の言うことなどあるもの<b>か</b>！</td></tr>
+      <tr><td><b>④感動・詠嘆</b></td><td>なんだ、そうだったの<b>か</b></td></tr>
+      <tr><td><b>⑤不確か</b></td><td>ペットの小鳥はどこ<b>か</b>へ行ってしまった</td></tr>
+      <tr><td><b>⑥う・よう＋か</b></td><td>さあ、早く食べよう<b>か</b></td></tr>
+      <tr><td><b>⑦勧誘・誘う</b></td><td>こうしてに食事でもします<b>か</b></td></tr>
+      <tr><td><b>⑧並立</b></td><td>彼が来る<b>か</b>来ない<b>か</b>は決まっていない</td></tr>
+    </table>
+    <div class="tip"><b>合言葉：</b>文末「？」→ 疑問・質問／文末「！」→ 反語・感動／「どこか・なにか」→ 不確か／「〜か〜か」→ 並立。</div>
+  `},
+
+  // 37. 識別 ためしてみよう
+  { t:"識別 ためしてみよう", html:`
+    <h2><span class="num">47</span>識別 まとめテスト</h2>
+    <div class="quiz">
+      <h4>Q. 「公園は とても きれい<b>に</b> なった。」の「に」は？</h4>
+      <div class="opts">
+        <button data-a="0">場所を示す助詞</button>
+        <button data-a="1">形容動詞「きれいだ」の活用</button>
+        <button data-a="0">助動詞「だ」の活用</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：形容動詞「きれいだ」の活用</b><br>
+        「きれいに」を「<b>きれいだ</b>」に直すと自然 ✓ だから形容動詞の連用形。「きれいに＋なる」で「だんだんきれいな状態になる」という意味だよ。
+      </div>
+    </div>
+  `},
+
+  // 38. まとめ
+  { t:"まとめ", html:`
+    <h2><span class="num">48</span>10品詞 ふりかえり</h2>
+    <p>ね、こころ。ここまで読み切ったね。最後にもう一度、10品詞の地図をおさらいするよ。</p>
+    <table class="tbl">
+      <tr><th>品詞</th><th>ひと言で</th><th>見分け方</th></tr>
+      <tr><td>動詞</td><td>動き・存在</td><td>言い切り＝ウ段</td></tr>
+      <tr><td>形容詞</td><td>様子（〜い）</td><td>言い切り＝〜い</td></tr>
+      <tr><td>形容動詞</td><td>様子（〜だ）</td><td>言い切り＝〜だ＋「とても」が自然</td></tr>
+      <tr><td>名詞</td><td>名前</td><td>「が」がついて主語になれる</td></tr>
+      <tr><td>副詞</td><td>用言をくわしく</td><td>「どんなふうに／どのくらい」</td></tr>
+      <tr><td>連体詞</td><td>名詞をくわしく</td><td>活用しない＋後ろが名詞（大きな・あの・ある）</td></tr>
+      <tr><td>接続詞</td><td>つなぐ</td><td>文の頭・文と文の間</td></tr>
+      <tr><td>感動詞</td><td>感動・呼びかけ</td><td>文の頭で独立</td></tr>
+      <tr><td>助動詞</td><td>意味そえる付属語</td><td>付属語で活用する</td></tr>
+      <tr><td>助詞</td><td>関係を示す付属語</td><td>付属語で活用しない</td></tr>
+    </table>
+    <div class="tip"><b>これからのこと：</b>このスライドは「教える」役。次に「<b>覚えるツール</b>」と「<b>反射ドリル</b>」をやって、見た瞬間に答えられる状態にしていこう。<br><br>大丈夫、品詞は<b>見分け方を持っている人が勝つ</b>。こころはもう、その地図を手に入れたよ。</div>
+    <button class="check" style="margin-top:14px;background:linear-gradient(135deg,var(--mint),var(--sky));" onclick="finishAll()">全部読んだ！🌸</button>
+  `},
+];
+
+// ====== 状態 ======
+const STORAGE_KEY='hinshi_setsumei_v1';
+let cur=0;
+try{
+  const v=parseInt(localStorage.getItem(STORAGE_KEY)||'0',10);
+  if(!isNaN(v)&&v>=0&&v<slides.length) cur=v;
+}catch(e){}
+
+const main=document.getElementById('main');
+const pfill=document.getElementById('pfill');
+const plabel=document.getElementById('plabel');
+const ptitle=document.getElementById('ptitle');
+const tocEl=document.getElementById('toc');
+
+function render(){
+  main.innerHTML='';
+  slides.forEach((s,i)=>{
+    const div=document.createElement('div');
+    div.className='slide'+(i===cur?' active':'');
+    div.innerHTML=`
+      <div class="card">${s.html}</div>
+      <div class="nav">
+        <button class="prev" ${i===0?'disabled':''} onclick="go(${i-1})">← 前へ</button>
+        <button class="next" ${i===slides.length-1?'disabled':''} onclick="go(${i+1})">次へ →</button>
+      </div>
+      <div class="pageno">${i+1} / ${slides.length}</div>
+    `;
+    main.appendChild(div);
+  });
+  // 目次
+  tocEl.innerHTML='';
+  slides.forEach((s,i)=>{
+    const li=document.createElement('li');
+    if(i===cur) li.className='cur';
+    li.innerHTML=`<span class="nn">${i+1}</span><span>${s.t}</span>`;
+    li.onclick=()=>{ go(i); toggleDrawer(); };
+    tocEl.appendChild(li);
+  });
+  updateProgress();
+  // クイズオプションのクリックハンドラ
+  document.querySelectorAll('.quiz .opts button').forEach(b=>{
+    b.onclick=()=>{
+      const opts=b.parentElement;
+      const multi=opts.dataset.multi==='1';
+      if(multi){
+        b.classList.toggle('sel');
+      }else{
+        opts.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));
+        b.classList.add('sel');
+      }
+    };
+  });
+}
+
+function updateProgress(){
+  const pct=((cur+1)/slides.length)*100;
+  pfill.style.width=pct+'%';
+  plabel.textContent=`${cur+1} / ${slides.length}`;
+  ptitle.textContent=slides[cur].t;
+}
+
+function go(i){
+  if(i<0||i>=slides.length) return;
+  cur=i;
+  try{localStorage.setItem(STORAGE_KEY,String(cur));}catch(e){}
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function checkQuiz(btn){
+  const quiz=btn.parentElement;
+  const opts=quiz.querySelector('.opts');
+  const ans=quiz.querySelector('.ans');
+  const multi=opts.dataset.multi==='1';
+  const buttons=[...opts.querySelectorAll('button')];
+  let ok=true;
+  buttons.forEach(b=>{
+    const correct=b.dataset.a==='1';
+    const selected=b.classList.contains('sel');
+    if(correct!==selected) ok=false;
+  });
+  ans.classList.add('show');
+  ans.classList.toggle('ng',!ok);
+  // 視覚マーク
+  buttons.forEach(b=>{
+    const correct=b.dataset.a==='1';
+    if(correct) b.style.boxShadow='0 0 0 2px var(--mint)';
+    else b.style.boxShadow='none';
+  });
+  if(ok){
+    ans.insertAdjacentHTML('afterbegin','<div style="color:var(--mint);font-weight:700;margin-bottom:6px;">⭕ 正解！</div>');
+  }else{
+    ans.insertAdjacentHTML('afterbegin','<div style="color:var(--red);font-weight:700;margin-bottom:6px;">もう一度かくにん</div>');
+  }
+  btn.style.display='none';
+}
+
+function toggleDrawer(){
+  document.getElementById('drawer').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+function finishAll(){
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+}
+
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('drawer').classList.contains('open')) return;
+  if(e.key==='ArrowRight') go(cur+1);
+  else if(e.key==='ArrowLeft') go(cur-1);
+});
+
+render();
+</script>
+</body>
+</html>

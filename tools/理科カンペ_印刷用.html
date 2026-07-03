@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>理科 復習プリント 2026-07-03の週</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    color:#1a1a2e;background:#fff;
+  }
+  .page{max-width:190mm;margin:0 auto;padding:10mm 8mm;}
+  .printbtn{
+    position:fixed;top:12px;right:12px;z-index:99;
+    background:#1f9d52;color:#fff;border:none;border-radius:24px;
+    padding:10px 20px;font-size:.9rem;font-weight:900;cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+  }
+  /* ===== 1ページ目：トイレ5問 ===== */
+  .toilet h1{font-size:1.6rem;font-weight:900;text-align:center;color:#1f9d52;margin-bottom:2px;}
+  .toilet .sub{text-align:center;font-size:.75rem;color:#888;margin-bottom:12px;}
+  .tq{
+    border:2.5px solid #1f9d52;border-radius:14px;
+    padding:14px 18px;margin-bottom:12px;
+    font-size:1.45rem;font-weight:900;line-height:1.5;
+    display:flex;gap:12px;align-items:center;
+  }
+  .tq .no{
+    flex:0 0 auto;width:38px;height:38px;border-radius:50%;
+    background:#1f9d52;color:#fff;font-size:1.1rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .tq.trap{border-color:#d32f2f;border-style:dashed;}
+  .tq.trap .no{background:#d32f2f;}
+  .tq svg{flex:0 0 auto;}
+  .toilet-ans{
+    margin-top:16px;text-align:center;
+    transform:rotate(180deg);
+    font-size:.68rem;color:#999;line-height:1.6;
+  }
+  /* ===== 2ページ目〜：カンペ ===== */
+  .kanpe{page-break-before:always;}
+  .kanpe h1{font-size:1.15rem;font-weight:900;color:#7b2ff7;margin-bottom:2px;}
+  .kanpe .sub{font-size:.72rem;color:#888;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;}
+  th,td{border:1px solid #ccc;padding:4px 7px;text-align:left;vertical-align:top;line-height:1.45;}
+  th{background:#f3ebff;font-weight:800;white-space:nowrap;}
+  td.no{width:30px;text-align:center;color:#888;}
+  td.unit{width:50px;font-size:.7rem;color:#888;white-space:nowrap;}
+  td.q{font-weight:700;}
+  td.a{color:#c0392b;font-weight:700;}
+  td.hint{font-size:.72rem;color:#555;}
+  tr.trap td.q::before{content:"⚠ ";color:#d32f2f;}
+  @media print{
+    @page{size:A4 portrait;margin:8mm;}
+    .printbtn{display:none;}
+  }
+</style>
+</head>
+<body>
+<button class="printbtn" onclick="window.print()">🖨 印刷する</button>
+
+<!-- ========== 2ページ目〜：カンペ ========== -->
+<div class="page kanpe" style="page-break-before:auto;">
+  <h1>📋 あゆみのカンペ（今週の25問）</h1>
+  <div class="sub">2026-07-03の週 ／ 隙間1分で2〜3問、声に出して出題 → 間違えたら「ひとこと」を言ってあげる ／ 全部聞けなくてOK</div>
+  <table>
+    <tr><th>#</th><th>単元</th><th>問題（読み上げる）</th><th>答え</th><th>ひとこと</th></tr>
+    <tr><td class="no">1</td><td class="unit">星</td><td class="q">地軸の傾きは何度？</td><td class="a">23.4°</td><td class="hint">公転面の垂直に対しての傾き</td></tr>
+    <tr><td class="no">2</td><td class="unit">星</td><td class="q">夏至の南中高度の公式は？</td><td class="a">90°−緯度＋23.4°</td><td class="hint">北緯35°なら78.4°</td></tr>
+    <tr><td class="no">3</td><td class="unit">星</td><td class="q">冬至の日の出の方角は？</td><td class="a">南寄りの東</td><td class="hint">日の入りは南寄りの西</td></tr>
+    <tr><td class="no">4</td><td class="unit">星</td><td class="q">春の大三角の星と星座は？</td><td class="a">スピカ（おとめ座）・アルクトゥルス（うしかい座）・デネボラ（しし座）</td><td class="hint"></td></tr>
+    <tr><td class="no">5</td><td class="unit">星</td><td class="q">青白い星の代表2つは？</td><td class="a">リゲル・スピカ</td><td class="hint">青白い＝表面温度が高い</td></tr>
+    <tr class="trap"><td class="no">6</td><td class="unit">月</td><td class="q">左半分が光っている半月の名前は？</td><td class="a">下弦の月</td><td class="hint"></td></tr>
+    <tr><td class="no">7</td><td class="unit">月</td><td class="q">上弦の月の月の入りは何時ごろ？</td><td class="a">0時（真夜中）</td><td class="hint"></td></tr>
+    <tr><td class="no">8</td><td class="unit">月</td><td class="q">一晩中見える月は？</td><td class="a">満月</td><td class="hint">18時に出て6時に沈むから</td></tr>
+    <tr><td class="no">9</td><td class="unit">月</td><td class="q">日食のとき、太陽はどちら側から欠けていく？</td><td class="a">右側から</td><td class="hint">月が右から左へ動いて太陽を隠すため</td></tr>
+    <tr><td class="no">10</td><td class="unit">月</td><td class="q">太陽の直径は月の直径の約何倍？</td><td class="a">約400倍</td><td class="hint">距離も約400倍なので見かけの大きさがほぼ同じ。これが皆既日食が起こるしくみ</td></tr>
+    <tr><td class="no">11</td><td class="unit">気象</td><td class="q">地温の最高は何時ごろ？</td><td class="a">午後1時ごろ（正午過ぎ）</td><td class="hint"></td></tr>
+    <tr class="trap"><td class="no">12</td><td class="unit">気象</td><td class="q">下降するとき100mで何℃上がる？</td><td class="a">1℃</td><td class="hint">下降は雲の有無に関係なく常に1℃</td></tr>
+    <tr><td class="no">13</td><td class="unit">気象</td><td class="q">気団の覚え方ルール2つは？</td><td class="a">大陸＝乾／海＝湿、北＝冷／南＝暖</td><td class="hint"></td></tr>
+    <tr><td class="no">14</td><td class="unit">気象</td><td class="q">温暖前線の記号は？</td><td class="a">●●●（半円）</td><td class="hint"></td></tr>
+    <tr><td class="no">15</td><td class="unit">気体</td><td class="q">酸素の重さは空気の何倍？</td><td class="a">約1.1倍（重い）</td><td class="hint"></td></tr>
+    <tr><td class="no">16</td><td class="unit">気体</td><td class="q">水上置換のメリット3つは？</td><td class="a">純粋に集まる／量がわかる／空気と混ざらない</td><td class="hint"></td></tr>
+    <tr><td class="no">17</td><td class="unit">気体</td><td class="q">比例計算の3ステップは？</td><td class="a">①折れ点確認→②過不足判定→③足りない方で計算</td><td class="hint"></td></tr>
+    <tr><td class="no">18</td><td class="unit">水溶液</td><td class="q">塩酸にとけてるのは？</td><td class="a">塩化水素（気体）</td><td class="hint"></td></tr>
+    <tr class="trap"><td class="no">19</td><td class="unit">水溶液</td><td class="q">炭酸水のにおいは？</td><td class="a">においなし</td><td class="hint">気体がとけてるのに例外！二酸化炭素はにおいなし</td></tr>
+    <tr><td class="no">20</td><td class="unit">水溶液</td><td class="q">100℃でホウ酸は何gとける？</td><td class="a">38.0g</td><td class="hint">食塩100℃の39gと同じくらい</td></tr>
+    <tr><td class="no">21</td><td class="unit">光</td><td class="q">光源って何？</td><td class="a">自分で光を出すもの（太陽・電灯・ろうそく・ホタル）</td><td class="hint"></td></tr>
+    <tr><td class="no">22</td><td class="unit">光</td><td class="q">反射の法則は？</td><td class="a">入射角＝反射角</td><td class="hint"></td></tr>
+    <tr><td class="no">23</td><td class="unit">光</td><td class="q">ピンホールの穴を大きくすると？</td><td class="a">明るくなるがぼやける</td><td class="hint"></td></tr>
+    <tr class="trap"><td class="no">24</td><td class="unit">光</td><td class="q">水中の物はどう見える？</td><td class="a">実際より浅く（うき上がって）見える</td><td class="hint">ストローが折れて見えるのもこれ（屈折）</td></tr>
+    <tr><td class="no">25</td><td class="unit">光</td><td class="q">焦点って何？</td><td class="a">光軸に平行な光が集まる点</td><td class="hint">レンズから焦点までを焦点距離という</td></tr>
+    <!-- 行の形：
+    <tr><td class="no">1</td><td class="unit">光</td><td class="q">月は光源？</td><td class="a">光源ではない</td><td class="hint">太陽の光を反射してるだけ</td></tr>
+    ひっかけ問題は <tr class="trap"> にする
+    -->
+  </table>
+</div>
+</body>
+</html>
