@@ -2,7 +2,7 @@
 window.HUB_CONFIG = {
   week: "2026-07-03",
   // 同期先URL（Google Apps Scriptの /exec URL）。空なら端末ごと保存。設定手順: hub-sync/設定手順.md
-  syncUrl: "",
+  syncUrl: "https://script.google.com/macros/s/AKfycbzDqRXupanKHMZRrGSdX-VGAShS-tTTmBmkAsW5FTSaP5MW4jjZrFd9s9EHBmV6fmHa/exec",
   // 漢字2週ループ：[前回, 今回] ※回番号が違ったらあゆみ→Claudeに一言（config修正します）
   kanjiWindow: [35, 36],
   kanjiThemes: { 35: "歴史（日本史）", 36: "歴史（日本史②）" },
