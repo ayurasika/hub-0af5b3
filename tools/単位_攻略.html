@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>単位のせかい 〜イメージでつかむ単位換算〜</title>
+<!--
+  ■ このファイルの構成（あとで編集する人へ）
+  ・タブ切替の1ページツール。セクション = .sec（id: key / area / vol / weight / speed / len / quiz）
+  ・面積ズーム階段 … AREA_LEVELS 配列 + zoomNext()/zoomReset()
+  ・体積3Dアニメ … buildCube() が10層のスラブを生成。CSS変数 --S(一辺) --h(1層の高さ)
+  ・クイズ問題の追加 … 下の QUIZ 配列に足すだけ（q=問題文, a=答えの数, u=単位, hint=ヒント）
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Hiragino Sans","ヒラギノ角ゴ ProN",sans-serif;color:#222;background:#f4f4f8;line-height:1.7;padding:18px 14px 60px;}
+.wrap{max-width:780px;margin:0 auto;}
+h1{font-size:22px;color:#1a3a8a;margin-bottom:4px;}
+.lead{font-size:14px;color:#555;margin-bottom:14px;}
+.card{background:#fff;border-radius:16px;padding:18px 20px;margin-bottom:18px;box-shadow:0 2px 10px rgba(0,0,0,.07);}
+.card h2{font-size:17px;color:#1a3a8a;margin-bottom:10px;}
+.big{font-size:15.5px;background:#fffbe8;border:1.5px solid #f0e0a0;border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.big b{color:#b8860b;}
+.note{font-size:13px;color:#666;margin-top:8px;}
+button{font-family:inherit;}
+
+/* ── タブ ── */
+.tabs{position:sticky;top:0;z-index:50;display:flex;gap:6px;flex-wrap:wrap;background:#f4f4f8;padding:8px 0 10px;margin-bottom:6px;}
+.tabs button{border:2px solid #c9d4ee;background:#fff;color:#1a3a8a;border-radius:20px;padding:6px 13px;font-size:13px;font-weight:bold;cursor:pointer;}
+.tabs button.on{background:#1a3a8a;color:#fff;border-color:#1a3a8a;}
+.sec{display:none;}
+.sec.on{display:block;animation:fadein .3s;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* ── 🔑 ひみつ ── */
+.keyrow{display:flex;gap:10px;justify-content:center;align-items:flex-end;flex-wrap:wrap;margin:14px 0;}
+.keyitem{text-align:center;font-size:13px;font-weight:bold;color:#444;}
+.keyitem svg{display:block;margin:0 auto 4px;}
+.keyarrow{font-size:15px;font-weight:bold;color:#c0392b;padding-bottom:34px;}
+.anchorlist{list-style:none;font-size:14.5px;}
+.anchorlist li{padding:5px 0;border-bottom:1px dashed #e0e4ee;}
+.anchorlist b{color:#1a3a8a;}
+
+/* ── 🟦 面積ズーム ── */
+.zoomouter{display:flex;gap:18px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.zoomstage{position:relative;width:min(290px,84vw);aspect-ratio:1;flex:none;border-radius:8px;overflow:hidden;}
+.zsq{position:absolute;inset:0;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.zsq .zname{font-size:26px;font-weight:bold;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.35);}
+.zgrid{position:absolute;inset:0;background-image:
+  linear-gradient(to right, rgba(255,255,255,.7) 1.5px, transparent 1.5px),
+  linear-gradient(to bottom, rgba(255,255,255,.7) 1.5px, transparent 1.5px);
+  background-size:10% 10%;pointer-events:none;}
+.zprev{position:absolute;left:0;bottom:0;width:10%;height:10%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;color:#fff;border-radius:2px;box-shadow:0 0 0 2px #fff;}
+.zshrink{position:absolute;inset:0;transform-origin:bottom left;transition:transform 1.3s cubic-bezier(.5,0,.3,1);border-radius:4px;display:flex;align-items:center;justify-content:center;z-index:5;}
+.zshrink .zname{font-size:26px;font-weight:bold;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.35);transition:font-size 1.3s;}
+.zoominfo{flex:1;min-width:220px;font-size:14.5px;}
+.zoominfo .zlevelname{font-size:22px;font-weight:bold;color:#1a3a8a;}
+.zoominfo .zside{font-size:15px;margin:4px 0;}
+.zoominfo .zarea{font-size:16px;margin:6px 0;font-weight:bold;}
+.zoominfo .zarea .num{font-size:22px;letter-spacing:1px;}
+.zoominfo .zarea .new0{color:#c0392b;animation:pop0 .6s;display:inline-block;}
+@keyframes pop0{0%{transform:scale(2.2);}100%{transform:scale(1);}}
+.zoominfo .zanchor{background:#eef4ff;border-radius:10px;padding:8px 12px;font-size:14px;margin-top:8px;}
+.zoombtns{display:flex;gap:10px;margin-top:14px;}
+.zoombtns button{border:none;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:bold;cursor:pointer;}
+.zbNext{background:#1a3a8a;color:#fff;flex:1;}
+.zbNext:disabled{background:#aab4cc;cursor:default;}
+.zbReset{background:#e8ebf4;color:#1a3a8a;}
+.zsteps{display:flex;gap:4px;align-items:center;justify-content:center;margin-top:12px;font-size:13px;font-weight:bold;flex-wrap:wrap;}
+.zsteps .zchip{padding:3px 10px;border-radius:14px;background:#e8ebf4;color:#888;}
+.zsteps .zchip.done{color:#fff;}
+.zsteps .x100{color:#c0392b;font-size:12px;}
+
+/* ── 🧊 体積3D ── */
+.scene{width:100%;max-width:360px;height:320px;margin:6px auto 0;perspective:1100px;}
+.spin{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(-24deg) rotateY(-32deg);}
+.cube{position:absolute;left:50%;top:52%;width:0;height:0;transform-style:preserve-3d;--S:210px;--h:21px;}
+@media(max-width:430px){.cube{--S:170px;--h:17px;}.scene{height:270px;}}
+.face{position:absolute;left:0;top:0;}
+/* 空き箱（うすい入れ物） */
+.ghost{width:var(--S);height:var(--S);border:2px dashed rgba(110,140,200,.55);background:rgba(140,170,230,.05);}
+.g-front{transform:translate(-50%,-50%) translateZ(calc(var(--S)/2 + 2px));}
+.g-right{transform:translate(-50%,-50%) rotateY(90deg) translateZ(calc(var(--S)/2 + 2px));}
+.g-top{transform:translate(-50%,-50%) rotateX(90deg) translateZ(calc(var(--S)/2 + 2px));}
+.g-back{border:none;background:rgba(140,170,230,.14);transform:translate(-50%,-50%) translateZ(calc(var(--S)/-2));}
+.g-left{border:none;background:rgba(140,170,230,.20);transform:translate(-50%,-50%) rotateY(90deg) translateZ(calc(var(--S)/-2));}
+.g-bottom{border:none;background:rgba(140,170,230,.26);transform:translate(-50%,-50%) rotateX(90deg) translateZ(calc(var(--S)/-2));}
+/* 1層ぶんのスラブ（--k は 1〜10、下から数える） */
+.slab{position:absolute;left:0;top:0;transform-style:preserve-3d;--vo:calc(var(--S)/2 - (var(--k) - .5)*var(--h));}
+.slab .face{transition:opacity .25s;}
+.slab.hide .face{opacity:0;}
+.s-front{width:var(--S);height:var(--h);
+  transform:translate(-50%,-50%) translateY(var(--vo)) translateZ(calc(var(--S)/2));
+  background-image:linear-gradient(to right, rgba(255,255,255,.5) 1.5px, transparent 1.5px);
+  background-size:calc(var(--S)/10) 100%;border-top:1px solid rgba(255,255,255,.6);}
+.s-right{width:var(--S);height:var(--h);
+  transform:translate(-50%,-50%) translateY(var(--vo)) rotateY(90deg) translateZ(calc(var(--S)/2));
+  background-image:linear-gradient(to right, rgba(0,0,0,.12) 1.5px, transparent 1.5px);
+  background-size:calc(var(--S)/10) 100%;border-top:1px solid rgba(255,255,255,.4);}
+.s-top{width:var(--S);height:var(--S);
+  transform:translate(-50%,-50%) rotateX(90deg) translateZ(calc(var(--k)*var(--h) - var(--S)/2));
+  background-image:
+   linear-gradient(to right, rgba(255,255,255,.55) 1.5px, transparent 1.5px),
+   linear-gradient(to bottom, rgba(255,255,255,.55) 1.5px, transparent 1.5px);
+  background-size:calc(var(--S)/10) calc(var(--S)/10);}
+/* 水（1Lキューブ）の色 */
+.water .s-front{background-color:#57a7ee;}
+.water .s-right{background-color:#3e7fc7;}
+.water .s-top{background-color:#8ecafc;}
+/* 牛乳パック（1m³キューブ）の色 */
+.milk .s-front{background-color:#f3e9d2;}
+.milk .s-right{background-color:#d7c8a4;}
+.milk .s-top{background-color:#fdf7e8;}
+.cubectl{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:4px;}
+.cubectl button{border:none;border-radius:10px;padding:9px 18px;font-size:14.5px;font-weight:bold;cursor:pointer;background:#1a3a8a;color:#fff;}
+.cubectl button.sub{background:#e8ebf4;color:#1a3a8a;}
+.cubectl input[type=range]{width:170px;}
+.cuberead{text-align:center;font-size:15px;margin-top:10px;min-height:58px;}
+.cuberead .cnt{font-size:24px;font-weight:bold;color:#1a3a8a;}
+.cuberead .done{font-size:17px;font-weight:bold;color:#2e7d4f;animation:pop0 .5s;}
+.cubedim{text-align:center;font-size:13px;color:#666;margin-top:2px;}
+.vchain{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:14.5px;font-weight:bold;margin-top:10px;}
+.vchain .vbox{background:#eef4ff;border:1.5px solid #c9d4ee;border-radius:10px;padding:5px 12px;color:#1a3a8a;}
+.vchain .x1000{color:#c0392b;font-size:12.5px;}
+
+/* ── ⚖️ 重さ・💧水 ── */
+.ladder{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:15px;font-weight:bold;margin:10px 0;}
+.ladder .lbox{background:#eef4ff;border:1.5px solid #c9d4ee;border-radius:10px;padding:6px 14px;color:#1a3a8a;}
+.ladder .lx{color:#c0392b;font-size:12.5px;text-align:center;line-height:1.3;}
+.ladder .lx.warn{background:#fdecea;border-radius:8px;padding:2px 6px;}
+.waterrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+.watercard{background:#eaf6ff;border:1.5px solid #b8dcf5;border-radius:12px;padding:10px 14px;text-align:center;font-size:14px;flex:1;min-width:140px;}
+.watercard .w1{font-size:17px;font-weight:bold;color:#1a3a8a;}
+.watercard .w2{color:#c0392b;font-weight:bold;}
+
+/* ── 🏃 速さ ── */
+.spdval{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0;}
+.spdbox{background:#eef4ff;border-radius:12px;padding:10px 16px;text-align:center;flex:1;min-width:110px;}
+.spdbox .t{font-size:13px;color:#666;}
+.spdbox .v{font-size:21px;font-weight:bold;color:#1a3a8a;}
+.spdbox .v small{font-size:13px;}
+.spdslider{display:flex;align-items:center;gap:10px;justify-content:center;}
+.spdslider input{flex:1;max-width:340px;}
+.presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+.presets button{border:2px solid #c9d4ee;background:#fff;border-radius:16px;padding:5px 12px;font-size:13px;font-weight:bold;color:#1a3a8a;cursor:pointer;}
+.spdsteps{text-align:center;font-size:15px;font-weight:bold;margin-top:12px;}
+.spdsteps .d60{color:#c0392b;font-size:13px;}
+
+/* ── 🎯 クイズ ── */
+.q{font-size:15.5px;margin-bottom:6px;}
+.q .num{font-weight:bold;color:#1a3a8a;}
+.qrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+.qrow input{width:92px;font-size:18px;text-align:center;border:2px solid #c9d4ee;border-radius:8px;padding:5px;}
+.qrow .unit{font-weight:bold;}
+.qrow button{background:#1a3a8a;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:14px;font-weight:bold;cursor:pointer;}
+.fb{font-size:14px;font-weight:bold;}
+.fb.ok{color:#2e7d4f;}
+.fb.ng{color:#c0392b;}
+.hint{font-size:13px;color:#888;margin:0 0 14px 2px;}
+.score{font-size:16px;font-weight:bold;color:#1a3a8a;text-align:center;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🗺️ 単位のせかい</h1>
+<p class="lead">覚えるんじゃなくて「見える」ようにするページ。順番に遊んでいくと、単位換算のからくりがつかめる。</p>
+
+<div class="tabs">
+  <button class="on" data-sec="key">🔑 ひみつ</button>
+  <button data-sec="area">🟦 面積</button>
+  <button data-sec="vol">🧊 かさ</button>
+  <button data-sec="weight">⚖️ 重さと水</button>
+  <button data-sec="speed">🏃 速さ</button>
+  <button data-sec="len">📏 長さ・時間</button>
+  <button data-sec="quiz">🎯 クイズ</button>
+</div>
+
+<!-- ═══════ 🔑 ひみつ ═══════ -->
+<div class="sec on" id="sec-key">
+<div class="card">
+<h2>🔑 単位換算の たった1つのひみつ</h2>
+<div class="big">長さが <b>10倍</b> になると…<br>
+面積は <b>100倍</b>（10×10）、体積は <b>1000倍</b>（10×10×10）になる！</div>
+<div class="keyrow">
+  <div class="keyitem">
+    <svg width="80" height="70" viewBox="0 0 80 70"><line x1="10" y1="60" x2="70" y2="60" stroke="#1a3a8a" stroke-width="5" stroke-linecap="round"/></svg>
+    長さ<br>×10
+  </div>
+  <div class="keyarrow">→</div>
+  <div class="keyitem">
+    <svg width="80" height="70" viewBox="0 0 80 70"><rect x="12" y="8" width="56" height="56" fill="#5b8def" rx="3"/><path d="M12 22h56M12 36h56M12 50h56M26 8v56M40 8v56M54 8v56" stroke="#fff" stroke-width="1.4" opacity=".7"/></svg>
+    面積<br>×100
+  </div>
+  <div class="keyarrow">→</div>
+  <div class="keyitem">
+    <svg width="90" height="70" viewBox="0 0 90 70">
+      <g><polygon points="20,20 60,20 60,60 20,60" fill="#57a7ee"/><polygon points="20,20 34,8 74,8 60,20" fill="#8ecafc"/><polygon points="60,20 74,8 74,48 60,60" fill="#3e7fc7"/>
+      <path d="M20 33h40M20 47h40M33 20v40M47 20v40" stroke="#fff" stroke-width="1.3" opacity=".6"/></g>
+    </svg>
+    体積<br>×1000
+  </div>
+</div>
+<p style="font-size:14.5px;">だから、単位換算は<b>暗記じゃない</b>。「前の単位の四角（箱）が、<b>何こ入るか</b>」を思いうかべるゲーム。<br>
+このページの 🟦面積 と 🧊かさ で、実際に「入っていくところ」を見てみよう。</p>
+</div>
+
+<div class="card">
+<h2>📌 きほんの「実物アンカー」</h2>
+<p style="font-size:14px;color:#555;margin-bottom:8px;">単位を見たら、この実物を思い出す。テスト中の「答えがヘンじゃないか確認」に使える。</p>
+<ul class="anchorlist">
+  <li>🎲 <b>1cm³ = 1mL</b> … サイコロ1こ・角砂糖1こ</li>
+  <li>🥛 <b>1L</b> … 牛乳パック1本（サイコロ1000こ分）</li>
+  <li>🛁 <b>お風呂1杯</b> … 約200L</li>
+  <li>🧊 <b>1m³</b> … 牛乳パック1000本！ お風呂5杯分</li>
+  <li>🧺 <b>1㎡</b> … 1人用レジャーシート（1m×1m）</li>
+  <li>🏫 <b>1a</b>（アール）… 学校の教室 約1.5こ分</li>
+  <li>⚾ <b>1ha</b>（ヘクタール）… 学校の運動場ぜんぶくらい（甲子園のグラウンドで約1.3ha）</li>
+  <li>🎡 <b>1km²</b> … 東京ディズニーランド 約2こ分</li>
+  <li>🪙 <b>1g</b> … 1円玉1まい</li>
+  <li>🥛 <b>1kg</b> … 牛乳パック1本（水1Lの重さ！）</li>
+  <li>🚗 <b>1t</b> … 軽自動車1台くらい</li>
+</ul>
+</div>
+</div>
+
+<!-- ═══════ 🟦 面積 ═══════ -->
+<div class="sec" id="sec-area">
+<div class="card">
+<h2>🟦 面積ズームのぼり — 1㎡ から 1km² まで</h2>
+<div class="big">面積の単位は、辺が10倍ずつ大きくなる正方形の階段。<br>
+1段のぼるごとに <b>×100（0が2こふえる）</b>。</div>
+
+<div class="zoomouter">
+  <div class="zoomstage" id="zoomStage"></div>
+  <div class="zoominfo">
+    <div class="zlevelname" id="zName"></div>
+    <div class="zside" id="zSide"></div>
+    <div class="zarea" id="zArea"></div>
+    <div class="zanchor" id="zAnchor"></div>
+    <div class="zoombtns">
+      <button class="zbNext" id="zNext" onclick="zoomNext()">🔍 ズームアウト（次の単位へ）</button>
+      <button class="zbReset" onclick="zoomReset()">↩ 最初から</button>
+    </div>
+  </div>
+</div>
+<div class="zsteps" id="zSteps"></div>
+<p class="note">💡 ズームアウトすると、さっきまで見ていた正方形が「左下の1マス」になる。マスは全部で100こ（10×10）。これが「×100」の正体。</p>
+</div>
+
+<div class="card">
+<h2>⚠️ 面積のひっかけポイント</h2>
+<p style="font-size:14.5px;">
+・<b>1㎡ = 10000cm²</b>（100cm×100cmだから。「100cm²」じゃない！）<br>
+・a と ha の間だけ覚えにくい → <b>「㎡ → a → ha → km² ぜんぶ ×100」</b>と一本の階段で覚えるとまちがえない。<br>
+・<b>1ha = 10000㎡</b>（a をとばして2段 = ×100×100）
+</p>
+</div>
+</div>
+
+<!-- ═══════ 🧊 かさ ═══════ -->
+<div class="sec" id="sec-vol">
+<div class="card">
+<h2>🧊 その1：サイコロ1000こで牛乳パック（1L）</h2>
+<div class="big">🎲 1辺1cmのサイコロ（<b>1cm³ = 1mL</b>）を、1辺10cmの箱に詰めていくよ。<br>何こ入るかな？</div>
+<div class="scene"><div class="spin"><div class="cube water" id="cubeL"></div></div></div>
+<div class="cubedim">箱の大きさ：タテ10cm × ヨコ10cm × 高さ10cm　（1だん = 10×10 = 100こ）</div>
+<div class="cubectl">
+  <button id="playL" onclick="cubePlay('L')">▶ 詰めていく！</button>
+  <button class="sub" onclick="cubeSet('L',0)">↩ からっぽに</button>
+  <input type="range" min="0" max="10" value="0" id="rngL" oninput="cubeSet('L',+this.value)">
+</div>
+<div class="cuberead" id="readL"></div>
+<div class="vchain">
+  <span class="vbox">1cm³ = 1mL</span><span class="x1000">×1000→</span>
+  <span class="vbox">1000cm³ = 1L 🥛</span>
+</div>
+</div>
+
+<div class="card">
+<h2>🧊 その2：牛乳パック1000本で 1m³</h2>
+<div class="big">今度は 🥛牛乳パック（1L）を、1辺1mの大きな箱に詰めるよ。<br>さっきと<b>まったく同じこと</b>が、1000倍のスケールで起きる。</div>
+<div class="scene"><div class="spin"><div class="cube milk" id="cubeM"></div></div></div>
+<div class="cubedim">箱の大きさ：タテ1m × ヨコ1m × 高さ1m　（1だん = 100本）</div>
+<div class="cubectl">
+  <button id="playM" onclick="cubePlay('M')">▶ 詰めていく！</button>
+  <button class="sub" onclick="cubeSet('M',0)">↩ からっぽに</button>
+  <input type="range" min="0" max="10" value="0" id="rngM" oninput="cubeSet('M',+this.value)">
+</div>
+<div class="cuberead" id="readM"></div>
+<div class="vchain">
+  <span class="vbox">1mL = 1cm³</span><span class="x1000">×1000→</span>
+  <span class="vbox">1L</span><span class="x1000">×1000→</span>
+  <span class="vbox">1m³ = 1kL</span>
+</div>
+<p class="note">🛁 お風呂1杯が約200L。1m³ = 1000L = <b>お風呂5杯分</b>の水が入る！</p>
+</div>
+
+<div class="card">
+<h2>⚠️ かさのひっかけ：dL（デシリットル）</h2>
+<div class="ladder">
+  <span class="lbox">1mL</span><span class="lx">×100</span>
+  <span class="lbox">1dL</span><span class="lx">×10</span>
+  <span class="lbox">1L</span><span class="lx">×1000</span>
+  <span class="lbox">1kL=1m³</span>
+</div>
+<p style="font-size:14.5px;">dLだけ階段の高さがちがう（1L = 10dL、1dL = 100mL）。<b>「牛乳パックをコップ10ぱいに分けた1ぱい」</b>が1dL。</p>
+</div>
+</div>
+
+<!-- ═══════ ⚖️ 重さと水 ═══════ -->
+<div class="sec" id="sec-weight">
+<div class="card">
+<h2>⚖️ 重さの階段 — きれいに ×1000 ずつ</h2>
+<div class="ladder">
+  <span class="lbox">1mg</span><span class="lx">×1000</span>
+  <span class="lbox">1g 🪙</span><span class="lx">×1000</span>
+  <span class="lbox">1kg 🥛</span><span class="lx">×1000</span>
+  <span class="lbox">1t 🚗</span>
+</div>
+<ul class="anchorlist">
+  <li>🐜 <b>1mg</b> … アリ1匹くらい（超かるい）</li>
+  <li>🪙 <b>1g</b> … 1円玉1まい</li>
+  <li>🎒 <b>1kg</b> … 1Lの牛乳パック1本（ランドセルは教科書入りで約4kg）</li>
+  <li>🚗 <b>1t</b> … 軽自動車1台（ゾウは約5t）</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>💧 水のひみつ — かさと重さがつながる！</h2>
+<div class="big">水は「<b>かさの単位＝重さの単位</b>」になる魔法の物質。<br>これを知ってると2つの単位がいっぺんに覚えられる。</div>
+<div class="waterrow">
+  <div class="watercard">🎲<br><span class="w1">水 1cm³(1mL)</span><br>＝ <span class="w2">1g</span></div>
+  <div class="watercard">🥛<br><span class="w1">水 1L</span><br>＝ <span class="w2">1kg</span></div>
+  <div class="watercard">🧊<br><span class="w1">水 1m³</span><br>＝ <span class="w2">1t</span></div>
+</div>
+<p class="note">サイコロ1この水が1円玉1まいの重さ。牛乳パック1本が1kg。お風呂(200L)の水は200kg＝大人3人分より重い！</p>
+</div>
+</div>
+
+<!-- ═══════ 🏃 速さ ═══════ -->
+<div class="sec" id="sec-speed">
+<div class="card">
+<h2>🏃 速さの単位変身マシン</h2>
+<div class="big">時速 → 分速 → 秒速 は <b>÷60、÷60</b>。もどるときは <b>×60、×60</b>。<br>km と m のつけかえ（×1000）も忘れずに。</div>
+
+<div class="spdslider">
+  <input type="range" min="1" max="300" value="36" id="spdRng" oninput="spdDraw()">
+</div>
+<div class="spdval">
+  <div class="spdbox"><div class="t">時速</div><div class="v"><span id="spdH"></span><small> km</small></div></div>
+  <div class="spdbox"><div class="t">分速</div><div class="v"><span id="spdM"></span><small> m</small></div></div>
+  <div class="spdbox"><div class="t">秒速</div><div class="v"><span id="spdS"></span><small> m</small></div></div>
+</div>
+<div class="presets">
+  <button onclick="spdSet(4)">🚶 歩く人（時速4km）</button>
+  <button onclick="spdSet(15)">🚲 自転車（時速15km）</button>
+  <button onclick="spdSet(36)">⭐ 時速36km（テストの定番）</button>
+  <button onclick="spdSet(60)">🚗 車（時速60km）</button>
+  <button onclick="spdSet(285)">🚄 新幹線（時速285km）</button>
+</div>
+<div class="spdsteps">時速◯km <span class="d60">─ ×1000してkm→m ─</span> 時速◯m <span class="d60">─ ÷60 ─</span> 分速◯m <span class="d60">─ ÷60 ─</span> 秒速◯m</div>
+<p class="note">⭐ <b>時速36km = 秒速10m</b> はテスト超頻出。「36って見たら10」までセットで覚えるとお得。</p>
+</div>
+</div>
+
+<!-- ═══════ 📏 長さ・時間 ═══════ -->
+<div class="sec" id="sec-len">
+<div class="card">
+<h2>📏 長さの階段 — ここだけ段の高さがバラバラ！</h2>
+<div class="ladder">
+  <span class="lbox">1mm</span><span class="lx warn">×10</span>
+  <span class="lbox">1cm</span><span class="lx warn">×100</span>
+  <span class="lbox">1m</span><span class="lx warn">×1000</span>
+  <span class="lbox">1km</span>
+</div>
+<p style="font-size:14.5px;">重さ（×1000ずつ）とちがって、長さは <b>10 → 100 → 1000</b> と段の高さがちがう。ここがひっかけの巣。</p>
+<ul class="anchorlist">
+  <li>💅 <b>1mm</b> … つめの先のうすさ</li>
+  <li>👆 <b>1cm</b> … 人さし指のはば</li>
+  <li>🚪 <b>1m</b> … 大また1歩</li>
+  <li>🚶 <b>1km</b> … 歩いて約15分</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>⏰ 時間 — 60進法のなかま</h2>
+<div class="ladder">
+  <span class="lbox">1秒</span><span class="lx">×60</span>
+  <span class="lbox">1分</span><span class="lx">×60</span>
+  <span class="lbox">1時間</span><span class="lx">×24</span>
+  <span class="lbox">1日</span>
+</div>
+<p style="font-size:14.5px;">時間だけは10進法じゃない（×60、×60、×24）。だから速さの換算で ÷60 が出てくる。<br>
+<b>0.5時間 = 30分</b>、<b>0.1時間 = 6分</b>（60分の1/10）… 小数の時間に注意！</p>
+</div>
+</div>
+
+<!-- ═══════ 🎯 クイズ ═══════ -->
+<div class="sec" id="sec-quiz">
+<div class="card">
+<h2>🎯 反射クイズ</h2>
+<p style="font-size:14px;color:#555;margin-bottom:12px;">イメージできてれば勝てる。まちがえたら、その単位のタブにもどって見直そう。</p>
+<div id="quizArea"></div>
+<div class="score" id="quizScore"></div>
+</div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ══════════ タブ ══════════ */
+document.querySelectorAll('.tabs button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.sec').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    document.getElementById('sec-'+b.dataset.sec).classList.add('on');
+  };
+});
+
+/* ══════════ 🟦 面積ズーム ══════════ */
+const AREA_LEVELS=[
+ {name:'1m²',   side:'1m × 1m',        m2:1,       color:'#5b8def', anchor:'🧺 1人用レジャーシートくらい', chip:'m²'},
+ {name:'1a（アール）', side:'10m × 10m',  m2:100,     color:'#4fae6d', anchor:'🏫 学校の教室 約1.5こ分', chip:'a'},
+ {name:'1ha（ヘクタール）', side:'100m × 100m', m2:10000, color:'#e8a13c', anchor:'⚾ 学校の運動場ぜんぶくらい（甲子園のグラウンドで約1.3ha）', chip:'ha'},
+ {name:'1km²',  side:'1000m（1km）× 1km', m2:1000000, color:'#b06fd4', anchor:'🎡 東京ディズニーランド 約2こ分', chip:'km²'},
+];
+let zLvl=0, zBusy=false;
+const zStage=document.getElementById('zoomStage');
+
+function zoomDrawStatic(){
+  const L=AREA_LEVELS[zLvl];
+  zStage.innerHTML='';
+  const sq=document.createElement('div');
+  sq.className='zsq'; sq.style.background=L.color;
+  sq.innerHTML='<div class="zname">'+L.name+'</div>';
+  zStage.appendChild(sq);
+  if(zLvl>0){
+    const g=document.createElement('div'); g.className='zgrid'; zStage.appendChild(g);
+    const p=document.createElement('div'); p.className='zprev';
+    p.style.background=AREA_LEVELS[zLvl-1].color;
+    p.textContent=AREA_LEVELS[zLvl-1].chip;
+    zStage.appendChild(p);
+  }
+  zoomInfo(false);
+}
+function zoomInfo(withPop){
+  const L=AREA_LEVELS[zLvl];
+  document.getElementById('zName').textContent=L.name;
+  document.getElementById('zSide').textContent='1辺 '+L.side+' の正方形';
+  let numStr=L.m2.toLocaleString('ja-JP');
+  if(withPop && zLvl>0){
+    // 新しく増えた末尾2つの0を赤くポップさせる
+    numStr=numStr.replace(/00$/,'<span class="new0">0</span><span class="new0">0</span>');
+  }
+  document.getElementById('zArea').innerHTML='＝ <span class="num">'+numStr+'</span> m²';
+  document.getElementById('zAnchor').textContent=L.anchor;
+  document.getElementById('zNext').disabled=(zLvl>=AREA_LEVELS.length-1);
+  // 階段チップ
+  const st=document.getElementById('zSteps');
+  st.innerHTML=AREA_LEVELS.map((l,i)=>{
+    const c=i<=zLvl?'zchip done':'zchip';
+    const bg=i<=zLvl?'style="background:'+l.color+'"':'';
+    return '<span class="'+c+'" '+bg+'>'+l.chip+'</span>'+(i<AREA_LEVELS.length-1?'<span class="x100">×100→</span>':'');
+  }).join('');
+}
+function zoomNext(){
+  if(zBusy||zLvl>=AREA_LEVELS.length-1)return;
+  zBusy=true;
+  const cur=AREA_LEVELS[zLvl];
+  zLvl++;
+  const nxt=AREA_LEVELS[zLvl];
+  // 下地：次のレベルの正方形＋グリッド
+  zStage.innerHTML='';
+  const sq=document.createElement('div');
+  sq.className='zsq'; sq.style.background=nxt.color;
+  sq.innerHTML='<div class="zname">'+nxt.name+'</div>';
+  zStage.appendChild(sq);
+  const g=document.createElement('div'); g.className='zgrid'; g.style.opacity='0'; g.style.transition='opacity .8s .5s';
+  zStage.appendChild(g);
+  // 前レベルの正方形が縮んでいくオーバーレイ
+  const sh=document.createElement('div');
+  sh.className='zshrink'; sh.style.background=cur.color;
+  sh.innerHTML='<div class="zname">'+cur.name+'</div>';
+  zStage.appendChild(sh);
+  requestAnimationFrame(()=>{requestAnimationFrame(()=>{
+    sh.style.transform='scale(0.1)';
+    sh.querySelector('.zname').style.fontSize='8px';
+    g.style.opacity='1';
+  });});
+  setTimeout(()=>{ zoomDrawStatic(); zoomInfo(true); zBusy=false; },1450);
+  zoomInfo(true);
+}
+function zoomReset(){ if(zBusy)return; zLvl=0; zoomDrawStatic(); }
+zoomDrawStatic();
+
+/* ══════════ 🧊 体積3Dキューブ ══════════ */
+function buildCube(id){
+  const cube=document.getElementById(id);
+  for(let k=1;k<=10;k++){
+    const slab=document.createElement('div');
+    slab.className='slab hide'; slab.style.setProperty('--k',k);
+    ['s-front','s-right','s-top'].forEach(c=>{
+      const f=document.createElement('div'); f.className='face '+c; slab.appendChild(f);
+    });
+    cube.appendChild(slab);
+  }
+  // 入れ物（ゴースト）— 後ろの面を先、点線の面を後に
+  ['g-bottom','g-left','g-back','g-front','g-right','g-top'].forEach(c=>{
+    const f=document.createElement('div'); f.className='face ghost '+c; cube.appendChild(f);
+  });
+}
+buildCube('cubeL'); buildCube('cubeM');
+
+const CUBES={
+ L:{el:'cubeL',rng:'rngL',read:'readL',play:'playL',n:0,timer:null,
+    fmt:n=>{
+      if(n===0)return'からっぽ（0こ）';
+      const c=n*100;
+      let s='<span class="cnt">'+c.toLocaleString()+'</span> こ ＝ '+c.toLocaleString()+'cm³ ＝ '+c.toLocaleString()+'mL';
+      if(n===10)s+='<br><span class="done">🎉 1000こピッタリ！ 1000cm³ ＝ 1000mL ＝ 1L（牛乳パック1本）</span>';
+      return s;
+    }},
+ M:{el:'cubeM',rng:'rngM',read:'readM',play:'playM',n:0,timer:null,
+    fmt:n=>{
+      if(n===0)return'からっぽ（0本）';
+      const c=n*100;
+      let s='<span class="cnt">'+c.toLocaleString()+'</span> 本 ＝ '+c.toLocaleString()+'L';
+      if(n===10)s+='<br><span class="done">🎉 1000本ピッタリ！ 1000L ＝ 1m³ ＝ 1kL（お風呂5杯分）</span>';
+      return s;
+    }},
+};
+function cubeSet(key,n){
+  const C=CUBES[key]; C.n=n;
+  clearInterval(C.timer); C.timer=null;
+  document.getElementById(C.play).textContent='▶ 詰めていく！';
+  const slabs=document.getElementById(C.el).querySelectorAll('.slab');
+  slabs.forEach((s,i)=>s.classList.toggle('hide',i>=n));
+  document.getElementById(C.rng).value=n;
+  document.getElementById(C.read).innerHTML=C.fmt(n);
+}
+function cubePlay(key){
+  const C=CUBES[key];
+  if(C.timer){ cubeSet(key,C.n); return; } // 再生中なら停止
+  if(C.n>=10)cubeSet(key,0);
+  document.getElementById(C.play).textContent='⏸ とめる';
+  C.timer=setInterval(()=>{
+    if(C.n>=10){ clearInterval(C.timer); C.timer=null;
+      document.getElementById(C.play).textContent='▶ 詰めていく！'; return; }
+    C.n++;
+    const slabs=document.getElementById(C.el).querySelectorAll('.slab');
+    slabs.forEach((s,i)=>s.classList.toggle('hide',i>=C.n));
+    document.getElementById(C.rng).value=C.n;
+    document.getElementById(C.read).innerHTML=C.fmt(C.n);
+  },550);
+}
+cubeSet('L',0); cubeSet('M',0);
+
+/* ══════════ 🏃 速さ ══════════ */
+function spdDraw(){
+  const h=+document.getElementById('spdRng').value;
+  const mMin=h*1000/60, mSec=h*1000/3600;
+  const f=x=>Number.isInteger(x)?x.toLocaleString():(Math.round(x*10)/10).toLocaleString();
+  document.getElementById('spdH').textContent=h.toLocaleString();
+  document.getElementById('spdM').textContent=f(mMin);
+  document.getElementById('spdS').textContent=f(mSec);
+}
+function spdSet(v){ document.getElementById('spdRng').value=v; spdDraw(); }
+spdDraw();
+
+/* ══════════ 🎯 クイズ ══════════
+   問題を増やすときはこの配列に足すだけ。
+   q=問題文（□が答えの場所）, a=答えの数値, u=□のあとの単位, hint=まちがえた時のヒント */
+const QUIZ=[
+ {q:'250cm³ ＝ □mL', a:250, u:'mL', hint:'cm³とmLは同じもの！サイコロのかさ'},
+ {q:'3L ＝ □mL', a:3000, u:'mL', hint:'牛乳パック1本=1000mL'},
+ {q:'1m³ ＝ □L', a:1000, u:'L', hint:'牛乳パック1000本の箱'},
+ {q:'2a ＝ □m²', a:200, u:'m²', hint:'1a=100m²（教室1.5こ分が2つ）'},
+ {q:'3.5ha ＝ □a', a:350, u:'a', hint:'ha→a は ×100'},
+ {q:'1km² ＝ □ha', a:100, u:'ha', hint:'面積の階段は1段×100'},
+ {q:'1m² ＝ □cm²', a:10000, u:'cm²', hint:'100cm×100cm。「100」じゃないよ！'},
+ {q:'水1L の重さ ＝ □kg', a:1, u:'kg', hint:'水のひみつ：1L=1kg'},
+ {q:'時速36km ＝ 秒速□m', a:10, u:'m', hint:'36000m÷60÷60。テストの定番！'},
+ {q:'時速18km ＝ 分速□m', a:300, u:'m', hint:'18000m÷60'},
+ {q:'0.4L ＝ □mL', a:400, u:'mL', hint:'1L=1000mLの0.4こ分'},
+ {q:'2500m² ＝ □a', a:25, u:'a', hint:'m²→a は ÷100'},
+ {q:'7dL ＝ □mL', a:700, u:'mL', hint:'1dL=100mL（コップ1ぱい）'},
+ {q:'0.3時間 ＝ □分', a:18, u:'分', hint:'60分×0.3。時間は60進法！'},
+];
+const qArea=document.getElementById('quizArea');
+QUIZ.forEach((it,i)=>{
+  const d=document.createElement('div');
+  d.innerHTML='<div class="q"><span class="num">Q'+(i+1)+'.</span> '+it.q.replace('□','□')+'</div>'
+   +'<div class="qrow"><input type="number" inputmode="decimal" step="any" id="qi'+i+'">'
+   +'<span class="unit">'+it.u+'</span>'
+   +'<button onclick="qCheck('+i+')">こたえ合わせ</button>'
+   +'<span class="fb" id="qf'+i+'"></span></div>'
+   +'<p class="hint" id="qh'+i+'"></p>';
+  qArea.appendChild(d);
+});
+const qDone=new Array(QUIZ.length).fill(false);
+function qCheck(i){
+  const v=parseFloat(document.getElementById('qi'+i).value);
+  const fb=document.getElementById('qf'+i), h=document.getElementById('qh'+i);
+  if(isNaN(v)){ fb.textContent='数字を入れてね'; fb.className='fb ng'; return; }
+  if(Math.abs(v-QUIZ[i].a)<1e-9){
+    fb.textContent='⭕ せいかい！'; fb.className='fb ok'; h.textContent=''; qDone[i]=true;
+  }else{
+    fb.textContent='❌ もういちど'; fb.className='fb ng'; h.textContent='💡 '+QUIZ[i].hint;
+  }
+  const n=qDone.filter(Boolean).length;
+  document.getElementById('quizScore').textContent=n+' / '+QUIZ.length+' 問クリア'+(n===QUIZ.length?' 🎉 全問クリア！単位マスター認定！':'');
+}
+</script>
+</body>
+</html>

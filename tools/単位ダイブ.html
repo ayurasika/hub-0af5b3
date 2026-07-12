@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>単位ダイブ 〜スケールの旅〜</title>
+<!--
+  ■ 単位ダイブ：トンネル×粒子の没入型アトラクション
+  ・canvas 2D の疑似3Dトンネル。カメラが奥へ飛び、ゲート（単位）をくぐって旅をする
+  ・ROUTES = 旅のコース（長さ/面積/かさ/重さ）。ゲートを足すのはデータを足すだけ
+  ・QUIZ = ゲートくぐりクイズ。3つのゲートから正解を選んで突っこむ
+  ・調整パラメータは CONF にまとめてある（速度・粒子数など）
+  ※Opusで編集する時は ROUTES / QUIZ / CONF だけ触れば安全。エンジン部は変更不要
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;background:#05081a;}
+body{font-family:"Hiragino Sans","ヒラギノ角ゴ ProN",sans-serif;color:#eaf0ff;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;}
+#cv{position:fixed;inset:0;display:block;}
+
+/* ── 共通オーバーレイ ── */
+.ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;z-index:10;padding:20px;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .5s;}
+.ov.on{opacity:1;pointer-events:auto;}
+.glass{background:rgba(10,16,44,.72);border:1px solid rgba(140,170,255,.35);
+  border-radius:22px;backdrop-filter:blur(8px);box-shadow:0 0 40px rgba(80,120,255,.25);
+  padding:26px 30px;max-width:520px;width:min(92vw,520px);}
+
+/* ── タイトル画面 ── */
+#titleScr h1{font-size:clamp(34px,9vw,58px);font-weight:800;letter-spacing:.06em;
+  background:linear-gradient(180deg,#fff 20%,#8fc6ff 60%,#5b8def);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 18px rgba(110,160,255,.8));margin-bottom:6px;}
+#titleScr .sub{font-size:14.5px;color:#aebcf0;margin-bottom:26px;letter-spacing:.12em;}
+.menu{display:flex;flex-direction:column;gap:11px;width:min(86vw,340px);}
+.menu button{position:relative;border:1.5px solid;border-radius:14px;padding:13px 18px;
+  font-size:16.5px;font-weight:bold;cursor:pointer;color:#fff;letter-spacing:.05em;
+  background:rgba(12,20,52,.75);transition:transform .15s, box-shadow .15s;font-family:inherit;}
+.menu button:hover{transform:scale(1.04);}
+.menu button small{display:block;font-size:11.5px;font-weight:normal;opacity:.75;margin-top:2px;}
+.m-nagasa{border-color:#4fd8ff;box-shadow:0 0 14px rgba(79,216,255,.35);}
+.m-menseki{border-color:#7cff9e;box-shadow:0 0 14px rgba(124,255,158,.35);}
+.m-kasa{border-color:#ffd24f;box-shadow:0 0 14px rgba(255,210,79,.35);}
+.m-omosa{border-color:#ff8fb3;box-shadow:0 0 14px rgba(255,143,179,.35);}
+.m-quiz{border-color:#c49bff;box-shadow:0 0 18px rgba(196,155,255,.5);
+  background:linear-gradient(135deg,rgba(70,40,130,.85),rgba(30,20,70,.85));}
+
+/* ── ゲート通過カード ── */
+#gateCard .mult{display:inline-block;font-size:clamp(30px,8vw,44px);font-weight:800;
+  color:#ffd24f;filter:drop-shadow(0 0 12px rgba(255,210,79,.9));
+  animation:multIn .7s cubic-bezier(.2,1.6,.4,1);margin-bottom:2px;}
+@keyframes multIn{0%{transform:scale(.2) rotate(-8deg);opacity:0;}100%{transform:scale(1);opacity:1;}}
+#gateCard .unit{font-size:clamp(40px,11vw,64px);font-weight:800;line-height:1.15;
+  filter:drop-shadow(0 0 16px currentColor);}
+#gateCard .eq{font-size:clamp(17px,4.5vw,22px);font-weight:bold;color:#cfe0ff;margin:8px 0 2px;}
+#gateCard .anchor{font-size:clamp(15px,4vw,18px);color:#ffe9b0;margin-top:8px;}
+#gateCard .anchor .em{font-size:clamp(30px,8vw,42px);display:block;margin-bottom:2px;}
+#gateCard .warn{margin-top:10px;font-size:13.5px;color:#ff9d9d;background:rgba(120,20,40,.35);
+  border:1px solid rgba(255,120,120,.4);border-radius:10px;padding:6px 10px;display:inline-block;}
+.gobtn{margin-top:20px;border:none;border-radius:30px;padding:13px 34px;font-size:17px;
+  font-weight:800;cursor:pointer;color:#0a1030;font-family:inherit;letter-spacing:.05em;
+  background:linear-gradient(135deg,#9fd4ff,#e0c2ff);
+  box-shadow:0 0 22px rgba(150,190,255,.7);animation:pulse 1.6s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+
+/* ── HUD ── */
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;display:none;
+  padding:14px 16px;pointer-events:none;}
+#hud.on{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+#hudNow{font-size:13px;color:#9fb2e8;background:rgba(8,14,40,.6);border-radius:20px;
+  padding:6px 14px;border:1px solid rgba(120,150,255,.25);}
+#hudNow b{color:#fff;font-size:15px;}
+#hudDots{display:flex;gap:6px;align-items:center;background:rgba(8,14,40,.6);
+  border-radius:20px;padding:9px 14px;border:1px solid rgba(120,150,255,.25);}
+#hudDots span{width:9px;height:9px;border-radius:50%;background:#2a3766;}
+#hudDots span.done{background:#7cc4ff;box-shadow:0 0 7px #7cc4ff;}
+#exitBtn{position:fixed;top:12px;right:12px;z-index:20;display:none;
+  border:1px solid rgba(150,170,255,.4);background:rgba(10,16,44,.7);color:#aebcf0;
+  border-radius:20px;padding:6px 14px;font-size:12.5px;cursor:pointer;font-family:inherit;}
+#exitBtn.on{display:block;}
+
+/* ── クイズHUD ── */
+#quizHud{position:fixed;top:0;left:0;right:0;z-index:5;display:none;text-align:center;padding:16px;}
+#quizHud.on{display:block;}
+#quizQ{display:inline-block;font-size:clamp(19px,5.5vw,27px);font-weight:800;color:#fff;
+  background:rgba(14,20,54,.8);border:1.5px solid rgba(196,155,255,.55);border-radius:16px;
+  padding:12px 26px;box-shadow:0 0 24px rgba(150,100,255,.35);}
+#quizMeta{margin-top:8px;font-size:13.5px;color:#b9a8e8;}
+@media(max-width:520px){#quizQ{margin-top:40px;}}
+#quizTip{position:fixed;bottom:18px;left:0;right:0;z-index:5;text-align:center;display:none;
+  font-size:13.5px;color:#9fb2e8;animation:pulse 2s infinite;}
+#quizTip.on{display:block;}
+
+/* ── 判定フィードバック ── */
+#judge{position:fixed;inset:0;z-index:8;display:none;align-items:center;justify-content:center;
+  flex-direction:column;pointer-events:none;text-align:center;padding:20px;}
+#judge.on{display:flex;}
+#judgeMark{font-size:clamp(60px,16vw,110px);font-weight:800;animation:multIn .5s;}
+#judgeTxt{font-size:clamp(15px,4.5vw,20px);font-weight:bold;margin-top:4px;
+  background:rgba(10,16,44,.8);border-radius:14px;padding:10px 20px;}
+
+/* ── 結果 ── */
+#resultScr .rank{font-size:clamp(46px,13vw,76px);animation:multIn .8s;}
+#resultScr .rtitle{font-size:clamp(22px,6vw,30px);font-weight:800;margin:4px 0 8px;}
+#resultScr .rscore{font-size:17px;color:#cfe0ff;margin-bottom:4px;}
+#outroScr .ladder{font-size:clamp(16px,4.6vw,21px);font-weight:800;line-height:2;color:#fff;}
+#outroScr .ladder .x{color:#ffd24f;font-size:.75em;padding:0 2px;}
+#outroScr .msg{font-size:14.5px;color:#cfe0ff;margin-top:12px;}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hud"><div id="hudNow"></div><div id="hudDots"></div></div>
+<div id="quizHud"><div id="quizQ"></div><div id="quizMeta"></div></div>
+<div id="quizTip">👆 正解だと思うゲートをタップして突っこめ！</div>
+<button id="exitBtn" onclick="toTitle()">✕ やめる</button>
+
+<div class="ov on" id="titleScr">
+  <h1>単位ダイブ</h1>
+  <div class="sub">— ちいさな世界から おおきな世界へ —</div>
+  <div class="menu">
+    <button class="m-nagasa" onclick="startRoute('nagasa')">📏 長さトンネル<small>1mm → 1km　4つのゲート</small></button>
+    <button class="m-menseki" onclick="startRoute('menseki')">🟩 面積トンネル<small>1m² → 1km²　×100の旅</small></button>
+    <button class="m-kasa" onclick="startRoute('kasa')">🥛 かさトンネル<small>サイコロ1こ → お風呂5杯</small></button>
+    <button class="m-omosa" onclick="startRoute('omosa')">⚖️ 重さトンネル<small>アリ1匹 → 軽自動車</small></button>
+    <button class="m-quiz" onclick="startQuiz()">🚀 ゲートくぐりクイズ<small>正解のゲートに突っこめ！全10問</small></button>
+  </div>
+</div>
+
+<div class="ov" id="gateCard"><div class="glass" id="gateCardIn"></div></div>
+
+<div class="ov" id="outroScr"><div class="glass" id="outroIn"></div></div>
+
+<div id="judge"><div id="judgeMark"></div><div id="judgeTxt"></div></div>
+
+<div class="ov" id="resultScr"><div class="glass" id="resultIn"></div></div>
+
+<script>
+'use strict';
+/* ══════════════ 調整パラメータ ══════════════ */
+const CONF={
+  particles:260,      // トンネル粒子の数
+  stars:110,          // 背景の星の数
+  baseSpeed:950,      // 通常の飛行速度
+  boostSpeed:3000,    // ゲート通過直後のブースト
+  idleSpeed:55,       // カード表示中のゆっくり流れ
+  quizSpeed:820,      // クイズ中の接近速度
+  depth:3000,         // トンネルの奥行き
+  gateSpawnZ:2700,    // ゲートの出現距離
+};
+
+/* ══════════════ 旅のデータ（ここを編集すればコースが変わる） ══════════════ */
+const ROUTES={
+ nagasa:{name:'長さトンネル',color:'#4fd8ff',
+  gates:[
+   {unit:'1mm',emoji:'💅',anchor:'つめの先のうすさ',eq:'スタート地点：1mmの世界'},
+   {unit:'1cm',emoji:'👆',anchor:'人さし指のはば',mult:'×10',eq:'1cm ＝ 10mm'},
+   {unit:'1m',emoji:'🚪',anchor:'大また1歩',mult:'×100',eq:'1m ＝ 100cm',warn:'⚠️ さっきは×10、今度は×100。長さは段の高さがバラバラ！'},
+   {unit:'1km',emoji:'🚶',anchor:'歩いて約15分',mult:'×1000',eq:'1km ＝ 1000m'},
+  ],
+  ladder:'1mm <span class="x">×10</span> 1cm <span class="x">×100</span> 1m <span class="x">×1000</span> 1km',
+  outro:'長さの階段は ×10 → ×100 → ×1000。<br>段の高さがバラバラなのが長さのワナ！'},
+ menseki:{name:'面積トンネル',color:'#7cff9e',
+  gates:[
+   {unit:'1m²',emoji:'🧺',anchor:'1人用レジャーシート',eq:'スタート地点：1m×1mの正方形'},
+   {unit:'1a',emoji:'🏫',anchor:'学校の教室 約1.5こ分',mult:'×100',eq:'1a ＝ 100m²（辺が10倍で面積100倍）'},
+   {unit:'1ha',emoji:'⚾',anchor:'学校の運動場ぜんぶ',mult:'×100',eq:'1ha ＝ 100a ＝ 10000m²'},
+   {unit:'1km²',emoji:'🎡',anchor:'ディズニーランド約2こ分',mult:'×100',eq:'1km² ＝ 100ha'},
+  ],
+  ladder:'m² <span class="x">×100</span> a <span class="x">×100</span> ha <span class="x">×100</span> km²',
+  outro:'面積は1段のぼるごとに ×100（0が2こふえる）。<br>ぜんぶ同じリズムだから、一本の階段で覚えよう！'},
+ kasa:{name:'かさトンネル',color:'#ffd24f',
+  gates:[
+   {unit:'1mL',emoji:'🎲',anchor:'サイコロ1こ（1cm³）',eq:'スタート地点：1cm³ ＝ 1mL'},
+   {unit:'1L',emoji:'🥛',anchor:'牛乳パック1本',mult:'×1000',eq:'1L ＝ 1000mL ＝ サイコロ1000こ'},
+   {unit:'1m³',emoji:'🛁',anchor:'お風呂5杯分（1kL）',mult:'×1000',eq:'1m³ ＝ 1000L ＝ 牛乳パック1000本'},
+  ],
+  ladder:'mL(cm³) <span class="x">×1000</span> L <span class="x">×1000</span> m³(kL)',
+  outro:'かさは1段 ×1000（0が3こ）。<br>仲間はずれのdLだけ注意：1L ＝ 10dL、1dL ＝ 100mL。'},
+ omosa:{name:'重さトンネル',color:'#ff8fb3',
+  gates:[
+   {unit:'1mg',emoji:'🐜',anchor:'アリ1匹くらい',eq:'スタート地点：超かるい世界'},
+   {unit:'1g',emoji:'🪙',anchor:'1円玉1まい',mult:'×1000',eq:'1g ＝ 1000mg'},
+   {unit:'1kg',emoji:'🥛',anchor:'牛乳パック1本＝水1L！',mult:'×1000',eq:'1kg ＝ 1000g'},
+   {unit:'1t',emoji:'🚗',anchor:'軽自動車1台',mult:'×1000',eq:'1t ＝ 1000kg'},
+  ],
+  ladder:'mg <span class="x">×1000</span> g <span class="x">×1000</span> kg <span class="x">×1000</span> t',
+  outro:'重さはきれいに ×1000 ずつ。<br>そして魔法の合言葉：<b>水1L＝1kg、水1m³＝1t</b>（かさと重さがつながる！）'},
+};
+
+/* ══════════════ クイズデータ（問題を足すのはここ） ══════════════ */
+const QUIZ=[
+ {q:'3L ＝ ？',choices:['3000mL','300mL','30mL'],correct:0,hint:'1L=1000mL（牛乳パック）'},
+ {q:'1m³ ＝ ？',choices:['100L','1000L','10L'],correct:1,hint:'牛乳パック1000本の箱！'},
+ {q:'2a ＝ ？',choices:['20m²','2000m²','200m²'],correct:2,hint:'1a=100m²（教室1.5こ分）'},
+ {q:'1ha ＝ ？',choices:['100a','10a','1000a'],correct:0,hint:'面積の階段は1段×100'},
+ {q:'1m² ＝ ？',choices:['100cm²','1000cm²','10000cm²'],correct:2,hint:'100cm×100cm＝10000！'},
+ {q:'水1Lの重さは？',choices:['100g','1kg','10kg'],correct:1,hint:'水は かさ＝重さ'},
+ {q:'時速36km ＝ 秒速？',choices:['10m','36m','6m'],correct:0,hint:'36000m÷60÷60'},
+ {q:'7dL ＝ ？',choices:['70mL','700mL','7000mL'],correct:1,hint:'1dL=100mL（コップ1ぱい）'},
+ {q:'1km² ＝ ？',choices:['10ha','1000ha','100ha'],correct:2,hint:'km²→haも×100'},
+ {q:'0.3時間 ＝ ？',choices:['18分','30分','3分'],correct:0,hint:'60分×0.3。時間は60進法'},
+];
+
+/* ══════════════ エンジン ══════════════ */
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W,H,CX,CY,F,DPR;
+function resize(){
+  DPR=Math.min(devicePixelRatio||1,2);
+  W=innerWidth;H=innerHeight;
+  cv.width=W*DPR;cv.height=H*DPR;
+  cv.style.width=W+'px';cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  CX=W/2;CY=H/2;F=Math.min(W,H)*0.95;
+}
+addEventListener('resize',resize);resize();
+
+/* 状態: title / fly / card / outro / quiz / quizPass / judge / result */
+let state='title';
+let speed=CONF.idleSpeed, camX=0, camXTarget=0, camY=0, camYTarget=0;
+let flashT=0, flashCol='255,255,255', shakeT=0;
+let route=null, gateIdx=0, gate=null;      // 旅モード
+let qIdx=0, qGates=[], qScore=0, qChosen=-1, qOrder=[]; // クイズモード
+let accent='#7cc4ff';
+let sway=0;
+
+/* ── 粒子 ── */
+const parts=[],stars=[],sprites=[];
+function rnd(a,b){return a+Math.random()*(b-a);}
+for(let i=0;i<CONF.particles;i++){
+  const a=Math.random()*Math.PI*2, r=rnd(360,900);
+  parts.push({a,r,z:rnd(1,CONF.depth),tw:Math.random()*6});
+}
+for(let i=0;i<CONF.stars;i++){
+  stars.push({x:Math.random(),y:Math.random(),s:rnd(.4,1.6),tw:Math.random()*6});
+}
+
+/* ── ゲートオブジェクト ── */
+function makeGate(data,x,z){return {d:data,x:x||0,z:z||CONF.gateSpawnZ,rot:0,passed:false};}
+
+/* ── 描画ヘルパー ── */
+function proj(x,y,z){const s=F/z;return {x:CX+(x-camX)*s,y:CY+(y-camY)*s,s};}
+function hex2rgb(h){const n=parseInt(h.slice(1),16);return ((n>>16)&255)+','+((n>>8)&255)+','+(n&255);}
+
+/* ── メインループ ── */
+let last=performance.now();
+function loop(t){
+  const dt=Math.min((t-last)/1000,.25);last=t; // タブ復帰やコマ落ち時も進行が破綻しない上限
+  sway+=dt;
+  update(dt);
+  draw(t/1000);
+  requestAnimationFrame(loop);
+}
+
+function update(dt){
+  // 速度の目標値へなめらかに
+  let target=CONF.idleSpeed;
+  if(state==='fly'){
+    target=CONF.baseSpeed;
+    if(gate&&gate.z<620)target=CONF.baseSpeed*.45; // ゲート直前は減速して見せる
+  }
+  if(state==='quiz'){
+    target=CONF.quizSpeed;
+    if(qGates.length&&qGates[0].z<1500)target=0;  // 選ぶまでホバリング
+  }
+  if(state==='quizPass')target=CONF.boostSpeed*.8;
+  if(boostT>0){boostT-=dt;target=CONF.boostSpeed;}
+  speed+=(target-speed)*Math.min(dt*3.2,1);
+  camX+=(camXTarget-camX)*Math.min(dt*5,1);
+  camY+=(camYTarget-camY)*Math.min(dt*5,1);
+
+  // 粒子
+  for(const p of parts){
+    p.z-=speed*dt;
+    if(p.z<1){p.z+=CONF.depth;p.a=Math.random()*Math.PI*2;p.r=rnd(360,900);}
+  }
+  // 倍率スプライト
+  for(let i=sprites.length-1;i>=0;i--){
+    sprites[i].z-=speed*dt;
+    if(sprites[i].z<20)sprites.splice(i,1);
+  }
+  // ゲート接近
+  if(state==='fly'&&gate){
+    gate.z-=speed*dt;gate.rot+=dt*.5;
+    if(gate.z<=52){passGate();}
+  }
+  if(state==='quiz'||state==='quizPass'){
+    for(const g of qGates){
+      g.z-=speed*dt;g.rot+=dt*.5;
+      if(state==='quiz')g.z=Math.max(g.z,1250); // 選ぶまで通り過ぎない床（3つ並んで見える距離）
+    }
+    if(state==='quizPass'&&qGates.length&&qGates[0].z<=60)judgeQuiz();
+  }
+  if(flashT>0)flashT-=dt*2.2;
+  if(shakeT>0)shakeT-=dt*2.5;
+}
+
+/* ── 描画 ── */
+function draw(t){
+  // 背景
+  const g=ctx.createRadialGradient(CX,CY,0,CX,CY,Math.max(W,H)*.75);
+  g.addColorStop(0,'#0d1436');g.addColorStop(.55,'#070c24');g.addColorStop(1,'#03040f');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+  ctx.save();
+  if(shakeT>0)ctx.translate(rnd(-14,14)*shakeT,rnd(-14,14)*shakeT);
+  const swx=Math.sin(sway*.6)*8, swy=Math.cos(sway*.45)*6; // ふわっとした揺れ
+  ctx.translate(swx,swy);
+
+  // 背景の星（ゆっくりまたたく）
+  for(const s of stars){
+    const al=.25+.35*Math.abs(Math.sin(t*1.3+s.tw));
+    ctx.fillStyle='rgba(200,215,255,'+al*s.s+')';
+    ctx.fillRect(s.x*W,s.y*H,s.s,s.s);
+  }
+
+  const rgb=hex2rgb(accent);
+  // トンネル粒子（奥から手前へ）
+  const sorted=parts.slice().sort((a,b)=>b.z-a.z);
+  for(const p of sorted){
+    const px=Math.cos(p.a)*p.r, py=Math.sin(p.a)*p.r*.72;
+    const q=proj(px,py,p.z);
+    if(q.x<-60||q.x>W+60||q.y<-60||q.y>H+60)continue;
+    const near=1-p.z/CONF.depth;
+    const size=Math.max(.6,q.s*rnd(2.4,2.4)+near*2);
+    const tw=.55+.45*Math.sin(t*2+p.tw);
+    ctx.fillStyle='rgba('+rgb+','+(near*.75*tw+.06)+')';
+    ctx.beginPath();ctx.arc(q.x,q.y,size,0,7);ctx.fill();
+    // スピード感のある尾（速いときだけ）
+    if(speed>1500){
+      const q2=proj(px,py,p.z+speed*.045);
+      ctx.strokeStyle='rgba('+rgb+','+near*.35+')';
+      ctx.lineWidth=size*.8;
+      ctx.beginPath();ctx.moveTo(q.x,q.y);ctx.lineTo(q2.x,q2.y);ctx.stroke();
+    }
+  }
+
+  // 倍率スプライト
+  for(const sp of sprites){
+    const q=proj(sp.x,sp.y,sp.z);
+    const fs=Math.min(200,q.s*46);
+    ctx.font='800 '+fs+'px "Hiragino Sans",sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='rgba(255,210,79,'+Math.min(.9,(1-sp.z/CONF.depth)*1.1)+')';
+    ctx.fillText(sp.txt,q.x,q.y);
+  }
+
+  // ゲート
+  if(state==='fly'&&gate)drawGate(gate,accent,t,null);
+  if(state==='quiz'||state==='quizPass'){
+    for(let i=0;i<qGates.length;i++){
+      const col=(state==='quizPass'&&i===qChosen)?'#ffffff':accent;
+      drawGate(qGates[i],col,t,qGates[i].label);
+    }
+  }
+
+  ctx.restore();
+
+  // 周辺減光
+  const v=ctx.createRadialGradient(CX,CY,Math.min(W,H)*.32,CX,CY,Math.max(W,H)*.78);
+  v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,10,.55)');
+  ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+
+  // フラッシュ
+  if(flashT>0){
+    ctx.fillStyle='rgba('+flashCol+','+Math.max(0,flashT)*.85+')';
+    ctx.fillRect(0,0,W,H);
+  }
+}
+
+function drawGate(g,color,t,label){
+  const q=proj(g.x,g.y||0,g.z);
+  const R=Math.max(6,260*q.s);
+  if(R>Math.max(W,H)*2)return;
+  const rgb=hex2rgb(color);
+  const glow=Math.min(1,1-g.z/CONF.depth+.15);
+  // 外リング
+  ctx.save();
+  ctx.shadowColor=color;ctx.shadowBlur=26*glow;
+  ctx.strokeStyle='rgba('+rgb+','+(0.9*glow)+')';
+  ctx.lineWidth=Math.max(1.5,R*.045);
+  ctx.beginPath();ctx.arc(q.x,q.y,R,0,7);ctx.stroke();
+  // 回転する点線リング
+  ctx.setLineDash([R*.14,R*.11]);
+  ctx.lineDashOffset=-t*R*.5*(g.rot?1:1);
+  ctx.strokeStyle='rgba(255,255,255,'+(0.5*glow)+')';
+  ctx.lineWidth=Math.max(1,R*.018);
+  ctx.beginPath();ctx.arc(q.x,q.y,R*1.13,0,7);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+  // 中の絵文字＋単位
+  ctx.textAlign='center';
+  if(g.d.emoji){
+    ctx.font=(R*.62)+'px sans-serif';ctx.textBaseline='middle';
+    ctx.globalAlpha=Math.min(1,glow+.15);
+    ctx.fillText(g.d.emoji,q.x,q.y-R*.12);
+    ctx.globalAlpha=1;
+  }
+  ctx.font='800 '+Math.max(9,R*.3)+'px "Hiragino Sans",sans-serif';
+  ctx.textBaseline='middle';
+  ctx.save();ctx.shadowColor=color;ctx.shadowBlur=14;
+  ctx.fillStyle='#fff';
+  ctx.fillText(g.d.unit||'',q.x,q.y+R*.42);
+  ctx.restore();
+  // クイズの選択肢ラベル（リングの中央）
+  if(label){
+    ctx.font='800 '+Math.max(10,R*.24)+'px "Hiragino Sans",sans-serif';
+    ctx.save();ctx.shadowColor=color;ctx.shadowBlur=12;
+    ctx.fillStyle='#fff';
+    ctx.fillText(label,q.x,q.y);
+    ctx.restore();
+  }
+}
+
+/* ══════════════ 旅モード ══════════════ */
+let boostT=0;
+function startRoute(key){
+  route=ROUTES[key];accent=route.color;gateIdx=0;
+  hideAll();
+  document.getElementById('exitBtn').classList.add('on');
+  document.getElementById('hud').classList.add('on');
+  updateHud('これから <b>'+route.name+'</b> へ');
+  gate=makeGate(route.gates[0],0,1900);
+  state='fly';speed=CONF.baseSpeed*.6;
+}
+function passGate(){
+  flashT=1;flashCol='255,255,255';
+  gate.passed=true;
+  const d=route.gates[gateIdx];
+  updateHud('いま <b>'+d.unit+'</b> の世界');
+  // カード表示
+  const inEl=document.getElementById('gateCardIn');
+  inEl.innerHTML=(d.mult?'<div class="mult">'+d.mult+'</div>':'')
+   +'<div class="unit" style="color:'+route.color+'">'+d.unit+'</div>'
+   +'<div class="eq">'+d.eq+'</div>'
+   +'<div class="anchor"><span class="em">'+d.emoji+'</span>'+d.anchor+'</div>'
+   +(d.warn?'<div class="warn">'+d.warn+'</div>':'')
+   +'<button class="gobtn" onclick="nextGate()">'
+   +(gateIdx<route.gates.length-1?'⏩ さらに奥へダイブ！':'🏁 旅のまとめへ')+'</button>';
+  document.getElementById('gateCard').classList.add('on');
+  state='card';
+}
+function nextGate(){
+  document.getElementById('gateCard').classList.remove('on');
+  gateIdx++;
+  if(gateIdx>=route.gates.length){showOutro();return;}
+  const d=route.gates[gateIdx];
+  gate=makeGate(d);
+  state='fly';boostT=.9;
+  // 倍率の文字が飛んでくる
+  if(d.mult)for(let i=0;i<7;i++){
+    const a=Math.random()*Math.PI*2,r=rnd(200,700);
+    sprites.push({txt:d.mult,x:Math.cos(a)*r,y:Math.sin(a)*r*.6,z:rnd(900,CONF.depth)});
+  }
+}
+function showOutro(){
+  const o=document.getElementById('outroIn');
+  o.innerHTML='<div style="font-size:15px;color:#9fb2e8;margin-bottom:6px;">🏁 '+route.name+'・完走！</div>'
+   +'<div class="ladder">'+route.ladder+'</div>'
+   +'<div class="msg">'+route.outro+'</div>'
+   +'<button class="gobtn" onclick="toTitle()">🌌 マップにもどる</button>';
+  document.getElementById('outroScr').classList.add('on');
+  state='outro';updateHud('');
+  document.getElementById('hud').classList.remove('on');
+}
+function updateHud(html){
+  document.getElementById('hudNow').innerHTML=html||'';
+  const dots=document.getElementById('hudDots');
+  if(route){
+    dots.innerHTML=route.gates.map((_,i)=>'<span class="'+(i<=gateIdx&&(state!=='fly'||i<gateIdx)?'done':'')+'"></span>').join('');
+  }
+}
+
+/* ══════════════ クイズモード ══════════════ */
+function startQuiz(){
+  accent='#c49bff';qIdx=0;qScore=0;
+  hideAll();
+  document.getElementById('exitBtn').classList.add('on');
+  document.getElementById('quizHud').classList.add('on');
+  document.getElementById('quizTip').classList.add('on');
+  nextQuestion(true);
+}
+function nextQuestion(first){
+  if(qIdx>=QUIZ.length){showResult();return;}
+  const item=QUIZ[qIdx];
+  // 選択肢の位置をシャッフル（縦画面では三角形に配置）
+  qOrder=[0,1,2].sort(()=>Math.random()-.5);
+  const pos=(W<H)?[[-310,250],[0,-280],[310,250]]:[[-520,0],[0,0],[520,0]];
+  qGates=qOrder.map((ci,i)=>{
+    const gg=makeGate({unit:'',emoji:''},pos[i][0],CONF.gateSpawnZ+(first?400:0));
+    gg.y=pos[i][1];gg.label=item.choices[ci];gg.ci=ci;
+    return gg;
+  });
+  qChosen=-1;camXTarget=0;camYTarget=0;
+  document.getElementById('quizQ').textContent='Q'+(qIdx+1)+'　'+item.q;
+  document.getElementById('quizMeta').textContent='せいかい '+qScore+' ／ '+QUIZ.length+'問中';
+  state='quiz';
+}
+function chooseGate(i){
+  if(state!=='quiz')return;
+  qChosen=i;camXTarget=qGates[i].x;camYTarget=qGates[i].y||0;
+  state='quizPass';
+  document.getElementById('quizTip').classList.remove('on');
+}
+function judgeQuiz(){
+  const item=QUIZ[qIdx];
+  const ok=(qGates[qChosen].ci===item.correct);
+  const jm=document.getElementById('judgeMark'),jt=document.getElementById('judgeTxt');
+  if(ok){
+    qScore++;flashT=1;flashCol='120,255,170';
+    jm.textContent='⭕';jm.style.color='#7cff9e';
+    jt.innerHTML='せいかい！　<b>'+item.q.replace(' ＝ ？','').replace('？','')+' ＝ '+item.choices[item.correct]+'</b>';
+    jt.style.border='1.5px solid rgba(124,255,158,.6)';
+  }else{
+    flashT=1;flashCol='255,90,90';shakeT=1;
+    jm.textContent='❌';jm.style.color='#ff8f8f';
+    jt.innerHTML='ざんねん…　正解は <b style="color:#7cff9e">'+item.choices[item.correct]+'</b><br><span style="font-size:.85em;color:#ffe9b0">💡 '+item.hint+'</span>';
+    jt.style.border='1.5px solid rgba(255,120,120,.6)';
+  }
+  document.getElementById('judge').classList.add('on');
+  qGates=[];state='judge';
+  setTimeout(()=>{
+    document.getElementById('judge').classList.remove('on');
+    qIdx++;camXTarget=0;camX=0;camYTarget=0;camY=0;
+    nextQuestion(false);
+  },ok?1400:2600);
+}
+function showResult(){
+  document.getElementById('quizHud').classList.remove('on');
+  let rank,msg;
+  if(qScore===QUIZ.length){rank='🏆';msg='単位マスター認定！かんぺき！';}
+  else if(qScore>=8){rank='🥇';msg='あと一歩でマスター！';}
+  else if(qScore>=6){rank='🥈';msg='いい感じ！まちがえたゲートだけ復習しよう';}
+  else{rank='🌱';msg='トンネルの旅（長さ・面積・かさ・重さ)をもう1周してから再挑戦！';}
+  document.getElementById('resultIn').innerHTML=
+   '<div class="rank">'+rank+'</div>'
+   +'<div class="rtitle">'+qScore+' ／ '+QUIZ.length+' 問せいかい</div>'
+   +'<div class="rscore">'+msg+'</div>'
+   +'<button class="gobtn" onclick="startQuiz()">🔁 もういちど</button> '
+   +'<button class="gobtn" style="background:linear-gradient(135deg,#cfd8ff,#9fb2e8)" onclick="toTitle()">🌌 マップへ</button>';
+  document.getElementById('resultScr').classList.add('on');
+  state='result';
+}
+
+/* ══════════════ 共通 ══════════════ */
+function hideAll(){
+  ['titleScr','gateCard','outroScr','resultScr'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  ['hud','quizHud','quizTip'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById('judge').classList.remove('on');
+  sprites.length=0;
+}
+function toTitle(){
+  hideAll();
+  document.getElementById('exitBtn').classList.remove('on');
+  document.getElementById('titleScr').classList.add('on');
+  state='title';route=null;gate=null;qGates=[];camX=0;camXTarget=0;camY=0;camYTarget=0;accent='#7cc4ff';
+  flashT=0;shakeT=0;speed=CONF.idleSpeed;
+}
+
+/* クリック／タップでゲート選択 */
+cv.addEventListener('pointerdown',e=>{
+  if(state!=='quiz')return;
+  const x=e.clientX,y=e.clientY;
+  let best=-1,bd=1e9;
+  qGates.forEach((g,i)=>{
+    const q=proj(g.x,g.y||0,g.z);const R=260*q.s;
+    const d=Math.hypot(x-q.x,y-q.y);
+    if(d<R*1.5&&d<bd){bd=d;best=i;}
+  });
+  if(best>=0)chooseGate(best);
+});
+addEventListener('keydown',e=>{
+  if(state!=='quiz')return;
+  if(e.key==='1'||e.key==='ArrowLeft')chooseGate(0);
+  if(e.key==='2'||e.key==='ArrowUp')chooseGate(1);
+  if(e.key==='3'||e.key==='ArrowRight')chooseGate(2);
+});
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

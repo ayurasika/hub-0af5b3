@@ -38,7 +38,9 @@ body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;backgr
 .dots .lbl{font-size:.62rem;color:#aaa;margin-left:4px;}
 
 /* accent per section */
-.am h2{color:#e8930c;} .pm h2{color:#2a7cc7;} .rika h2{color:#7b2ff7;} .kanji h2{color:#4472C4;} .yoji h2{color:#b8860b;} .hinshi h2{color:#2a9d8f;} .mama h2{color:#d84a7f;}
+.am h2{color:#e8930c;} .pm h2{color:#2a7cc7;} .rika h2{color:#7b2ff7;} .kanji h2{color:#4472C4;} .yoji h2{color:#b8860b;} .hinshi h2{color:#2a9d8f;} .mama h2{color:#d84a7f;} .tani h2{color:#3a5fd9;}
+.btn.indigo{background:#3a5fd9;color:#fff;}
+.btn.dark{background:#1a1a2e;color:#fff;}
 
 /* 今日の四字熟語 */
 .yoji-today{margin-top:10px;text-align:center;}
@@ -162,6 +164,16 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
     </div>
   </div>
 
+  <!-- 単位換算 -->
+  <div class="card tani">
+    <h2>📏 単位換算 <span class="badge">かさ・面積・重さ</span></h2>
+    <div class="sub">まず単位ダイブで興味づけ→単位_攻略で定着、の順がおすすめ</div>
+    <div class="btnrow" style="justify-content:flex-start;">
+      <a class="btn dark" href="tools/単位ダイブ.html">🚀 単位ダイブ</a>
+      <a class="btn indigo" href="tools/単位_攻略.html">📖 単位_攻略</a>
+    </div>
+  </div>
+
   <!-- ママ用 -->
   <div class="card mama">
     <h2>👩 ママ用</h2>
@@ -169,6 +181,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
     <div class="mlinks">
       <a class="btn" href="tools/理科カンペ_印刷用.html">🖨 今週のカンペ印刷</a>
       <a class="btn" href="tools/四字熟語カンペ_食事中用.html">🖨 四字熟語カンペ印刷</a>
+      <a class="btn" href="tools/単位_台本.html">🗣 単位換算の説明台本</a>
     </div>
     <div class="note" id="toilet-note"></div>
     <div class="opencount" id="opencount"></div>
