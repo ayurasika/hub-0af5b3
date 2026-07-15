@@ -38,7 +38,20 @@ body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;backgr
 .dots .lbl{font-size:.62rem;color:#aaa;margin-left:4px;}
 
 /* accent per section */
-.am h2{color:#e8930c;} .pm h2{color:#2a7cc7;} .rika h2{color:#7b2ff7;} .kanji h2{color:#4472C4;} .yoji h2{color:#b8860b;} .hinshi h2{color:#2a9d8f;} .mama h2{color:#d84a7f;} .tani h2{color:#3a5fd9;}
+.am h2{color:#e8930c;} .pm h2{color:#2a7cc7;} .rika h2{color:#7b2ff7;} .kanji h2{color:#4472C4;} .yoji h2{color:#b8860b;} .hinshi h2{color:#2a9d8f;} .mama h2{color:#d84a7f;} .tani h2{color:#3a5fd9;} .km h2{color:#e8611a;}
+
+/* 計算マスター（写真→丸つけ） */
+.btn.orange{background:#e8611a;color:#fff;}
+.km-status{margin-top:8px;font-size:.78rem;font-weight:700;color:#e8611a;min-height:1.2em;}
+.km-result{margin-top:10px;border:2px solid #ffe3d1;border-radius:12px;padding:10px 12px;background:#fffaf6;}
+.km-result .rdate{font-size:.72rem;font-weight:900;color:#e8611a;}
+.km-result .rsheet{font-size:.72rem;color:#999;margin-left:6px;}
+.km-marks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.km-mark{border-radius:10px;padding:5px 9px;font-size:.8rem;font-weight:900;background:#f0fbf4;color:#1f9d52;border:1.5px solid #9fdcb8;}
+.km-mark.ng{background:#fdf0f0;color:#d32f2f;border-color:#f0b9b9;}
+.km-mark small{font-weight:700;font-size:.68rem;margin-left:3px;}
+.km-msg{margin-top:8px;font-size:.85rem;line-height:1.7;background:#fff3e9;border-radius:10px;padding:8px 11px;color:#444;}
+.km-msg b{color:#e8611a;}
 .btn.indigo{background:#3a5fd9;color:#fff;}
 .btn.dark{background:#1a1a2e;color:#fff;}
 
@@ -108,6 +121,20 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
     <h2>☀️ あさイチ <span class="badge">おきたらこれ</span></h2>
     <div class="chk" id="chk-am"></div>
     <div class="dots" id="dots-am"></div>
+  </div>
+
+  <!-- 計算マスター 写真→丸つけ -->
+  <div class="card km">
+    <h2>🧮 計算マスター まるつけ <span class="badge">といたら写真をおくる</span></h2>
+    <div class="sub">📷で答案をパシャ → ママとClaudeがまるつけ → ここに結果がとどくよ</div>
+    <div class="btnrow" style="justify-content:flex-start;">
+      <button class="btn orange" onclick="document.getElementById('km-cam').click()">📷 写真をとっておくる</button>
+      <button class="btn" onclick="document.getElementById('km-alb').click()">アルバムから</button>
+    </div>
+    <input type="file" accept="image/*" capture="environment" id="km-cam" hidden>
+    <input type="file" accept="image/*" multiple id="km-alb" hidden>
+    <div class="km-status" id="km-status"></div>
+    <div id="km-result"></div>
   </div>
 
   <!-- 塾から帰ったら -->
@@ -411,6 +438,83 @@ function buildRika(){
   rikaProgress();
 }
 
+// ===== 計算マスター（写真アップロード＆丸つけ結果）=====
+const kmStatus = document.getElementById("km-status");
+function kmSay(msg){ kmStatus.textContent = msg; }
+
+// 写真を縮小してJPEGにする（回転もここで正しい向きに焼き直される）
+function kmShrink(file){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 2400;
+      const sc = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+      const cv = document.createElement("canvas");
+      cv.width = Math.round(img.naturalWidth * sc);
+      cv.height = Math.round(img.naturalHeight * sc);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      resolve(cv.toDataURL("image/jpeg", 0.85).split(",")[1]);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("読めない写真")); };
+    img.src = url;
+  });
+}
+
+async function kmUpload(files){
+  if(!SYNC_URL){ kmSay("ママへ：同期が未設定なので写真は送れません（Claudeに相談）"); return; }
+  const list = [...files];
+  for(let i = 0; i < list.length; i++){
+    kmSay(`おくってるよ… ${i+1}/${list.length} 📤`);
+    try{
+      const data = await kmShrink(list[i]);
+      const now = new Date();
+      const hm = String(now.getHours()).padStart(2,"0") + String(now.getMinutes()).padStart(2,"0");
+      const name = `計マス_${dstr(now)}_${hm}_${Math.random().toString(36).slice(2,5)}.jpg`;
+      const r = await fetch(SYNC_URL, {method:"POST", headers:{"Content-Type":"text/plain"}, body: JSON.stringify({mode:"km-photo", name, data})});
+      const j = await r.json();
+      if(!j.ok) throw new Error("保存失敗");
+    }catch(e){
+      kmSay("うまくおくれなかった…でんぱのいい所でもう一回ためしてね");
+      return;
+    }
+  }
+  kmSay("おくれたよ！まるつけを待っててね 🎵");
+  kmRefreshInbox();
+}
+document.getElementById("km-cam").addEventListener("change", e => { if(e.target.files.length) kmUpload(e.target.files); e.target.value = ""; });
+document.getElementById("km-alb").addEventListener("change", e => { if(e.target.files.length) kmUpload(e.target.files); e.target.value = ""; });
+
+// 丸つけ待ちの枚数を表示
+async function kmRefreshInbox(){
+  if(!SYNC_URL) return;
+  try{
+    const r = await fetch(SYNC_URL + "?mode=km-inbox");
+    const list = await r.json();
+    if(Array.isArray(list) && list.length){
+      const base = kmStatus.textContent.includes("おくれたよ") ? kmStatus.textContent + "　" : "";
+      kmSay(base + `🕐 まるつけ待ち：${list.length}まい`);
+    }
+  }catch(e){}
+}
+
+// 丸つけ結果（Claudeが同期の保存庫に km-result を書き込むと、ここに出る）
+function kmRenderResult(){
+  const mount = document.getElementById("km-result");
+  const res = store.get("km-result", null);
+  if(!res || !res.date){ mount.innerHTML = ""; return; }
+  const [y, m, d] = res.date.split("-").map(Number);
+  const marks = (res.marks || []).map(mk =>
+    `<span class="km-mark${mk.ok ? "" : " ng"}">${mk.n} ${mk.ok ? "⭕️" : "❌"}${mk.note ? `<small>${mk.note}</small>` : ""}</span>`
+  ).join("");
+  mount.innerHTML = `<div class="km-result">
+    <span class="rdate">✅ ${m}月${d}日のまるつけ</span>${res.sheet ? `<span class="rsheet">${res.sheet}</span>` : ""}
+    <div class="km-marks">${marks}</div>
+    ${res.message ? `<div class="km-msg"><b>💬 ひとこと：</b>${res.message}</div>` : ""}
+  </div>`;
+}
+
 // ===== 漢字・ママ用 =====
 const kw = CFG.kanjiWindow || [];
 document.getElementById("kanji-range").textContent =
@@ -438,9 +542,11 @@ function renderAll(){
   renderChecklist(CFG.checklist?.ayumi, "chk-mama", null);
   yjRender();
   buildRika();
+  kmRenderResult();
   renderOpenCount();
 }
 renderAll();
+kmRefreshInbox();
 
 // 起動時に1回同期 → 以降1分ごと＆画面に戻ってきた時
 syncPull().then(changed => { if(changed) renderAll(); });
