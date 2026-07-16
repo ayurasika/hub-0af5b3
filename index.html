@@ -548,11 +548,19 @@ function renderAll(){
 renderAll();
 kmRefreshInbox();
 
+// 開きっぱなし対策：日付が変わっていたらページごと読み直す（週の25問・今日のチェック欄を最新にするため）
+function staleReload(){
+  if(dstr(new Date()) !== TODAY){ location.reload(); return true; }
+  return false;
+}
+
 // 起動時に1回同期 → 以降1分ごと＆画面に戻ってきた時
 syncPull().then(changed => { if(changed) renderAll(); });
-setInterval(() => syncPull().then(c => { if(c) renderAll(); }), 60000);
+setInterval(() => { if(staleReload()) return; syncPull().then(c => { if(c) renderAll(); }); }, 60000);
 document.addEventListener("visibilitychange", () => {
-  if(document.visibilityState === "visible") syncPull().then(c => { if(c) renderAll(); });
+  if(document.visibilityState !== "visible" || staleReload()) return;
+  syncPull().then(c => { if(c) renderAll(); });
+  kmRefreshInbox();
 });
 
 function toggle(id){ document.getElementById(id).classList.toggle("open"); }
