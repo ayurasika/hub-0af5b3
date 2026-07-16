@@ -14,7 +14,8 @@ window.HUB_CONFIG = {
     ],
     kokoro_pm: [
       { id: "kanji", label: "漢字マスター（今週の2回ぶん）" },
-      { id: "rika", label: "理科カンペ ママと5問" }
+      { id: "rika", label: "理科カンペ ママと5問" },
+      { id: "hinshi", label: "品詞クイズ 3問だけ（下の🔤からひらく）" }
     ],
     ayumi: [
       { id: "koekake_am", label: "朝イチ「ハブ開こう」の声かけ" },
