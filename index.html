@@ -173,6 +173,13 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
     <div class="qlist" id="qlist"></div>
   </div>
 
+  <!-- 水溶液 暗記シート（3日おきに表示） -->
+  <div class="card rika" id="suiyo-card" style="display:none;border:2px solid #c9a8ff;">
+    <h2>🧪 水溶液デー <span class="badge">3日おきミッション</span></h2>
+    <div class="sub">紙の「水溶液の暗記シート」を1回やろう！（シートはママが持ってるよ）</div>
+    <div class="chk" id="chk-suiyo"></div>
+  </div>
+
   <!-- 漢字 -->
   <div class="card kanji">
     <h2>✏️ 漢字マスター <span class="badge" id="kanji-note"></span></h2>
@@ -535,8 +542,18 @@ function renderOpenCount(){
   document.getElementById("opencount").textContent = `📱 ハブを開いた回数（${scope}）：今日${todayAll}回 ／ 直近7日${wkAll}回（2週間後の見直しで使う数字）`;
 }
 
+// ===== 水溶液デー（2026-07-24を起点に3日おきに表示）=====
+function renderSuiyo(){
+  const start = new Date(2026, 6, 24);
+  const diff = Math.floor((today - start) / 86400000);
+  const show = diff >= 0 && diff % 3 === 0;
+  document.getElementById("suiyo-card").style.display = show ? "" : "none";
+  if(show) renderChecklist([{id:"suiyoeki", label:"水溶液の暗記シート（紙）をやった"}], "chk-suiyo", null);
+}
+
 // ===== まとめて描画（同期で状態が変わったら再実行）=====
 function renderAll(){
+  renderSuiyo();
   renderChecklist(CFG.checklist?.kokoro_am, "chk-am", "dots-am");
   renderChecklist(CFG.checklist?.kokoro_pm, "chk-pm", "dots-pm");
   renderChecklist(CFG.checklist?.ayumi, "chk-mama", null);
