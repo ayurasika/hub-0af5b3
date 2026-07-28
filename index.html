@@ -38,7 +38,28 @@ body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;backgr
 .dots .lbl{font-size:.62rem;color:#aaa;margin-left:4px;}
 
 /* accent per section */
-.am h2{color:#e8930c;} .pm h2{color:#2a7cc7;} .rika h2{color:#7b2ff7;} .kanji h2{color:#4472C4;} .yoji h2{color:#b8860b;} .hinshi h2{color:#2a9d8f;} .mama h2{color:#d84a7f;} .tani h2{color:#3a5fd9;} .km h2{color:#e8611a;}
+.am h2{color:#e8930c;} .pm h2{color:#2a7cc7;} .rika h2{color:#7b2ff7;} .kanji h2{color:#4472C4;} .yoji h2{color:#b8860b;} .hinshi h2{color:#2a9d8f;} .mama h2{color:#d84a7f;} .tani h2{color:#3a5fd9;} .km h2{color:#e8611a;} .naoshi h2{color:#e0533d;}
+
+/* まちがい直し（暗記系） */
+.card.naoshi{border:2px solid #ffd9d2;}
+.naoshi .progress{background:#ffece8;}
+.naoshi .progress .bar{background:linear-gradient(90deg,#ff9b86,#e0533d);}
+.naoshi .plabel{color:#e0533d;}
+.naoshi .q{border-color:#ffd9d2;}
+.naoshi .q .unit{color:#e0533d;background:#fff0ec;}
+.naoshi .q .src{font-size:.6rem;color:#bbb;font-weight:700;margin-left:auto;white-space:nowrap;}
+.naoshi .q .ans .why{background:#fff6f4;}
+.naoshi .q .ans .why b{color:#e0533d;}
+.naoshi .nbtns{display:flex;gap:8px;margin-top:8px;}
+.naoshi .nbtn{border:none;border-radius:14px;font-family:inherit;font-weight:900;font-size:.75rem;padding:7px 16px;cursor:pointer;}
+.naoshi .nbtn.ok{background:#eafaf0;color:#1f9d52;}
+.naoshi .nbtn.ng{background:#fdf0f0;color:#d32f2f;}
+.naoshi .streak{font-size:.68rem;color:#999;font-weight:700;align-self:center;margin-left:auto;}
+.naoshi .q.grad{border-color:#c8e6d2;background:#fbfffc;opacity:.65;}
+.naoshi .q.grad .qhead{color:#1f9d52;}
+.naoshi .q.grad .qhead::after{content:"🎓";margin-left:6px;}
+.naoshi .gradhead{font-size:.68rem;color:#1f9d52;font-weight:900;margin:14px 0 6px;border-top:1px dashed #cfe8d8;padding-top:10px;}
+.naoshi .empty{font-size:.8rem;color:#888;text-align:center;padding:14px 0;line-height:1.7;}
 
 /* 計算マスター（写真→丸つけ） */
 .btn.orange{background:#e8611a;color:#fff;}
@@ -161,6 +182,17 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
   </div>
 
   <!-- 理科カンペ -->
+  <div class="card naoshi">
+    <h2>🔁 まちがい直し <span class="badge">まちがえたやつだけ</span></h2>
+    <div class="sub" id="naoshi-sub"></div>
+    <div class="progress"><div class="bar" id="naoshi-bar"></div></div>
+    <div class="plabel" id="naoshi-plabel"></div>
+    <div class="btnrow">
+      <button class="btn main" style="background:#e0533d" onclick="toggle('naoshi-list')">ひらく</button>
+    </div>
+    <div class="qlist" id="naoshi-list"></div>
+  </div>
+
   <div class="card rika">
     <h2>🔬 理科カンペ <span class="badge" id="rika-week"></span></h2>
     <div class="sub">ママが読み上げる → こころが答える → 「言えた◯」を押す。⚠はひっかけ！</div>
@@ -228,7 +260,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 // config.js / rika-week.js は毎週上書きされるので、日付をキャッシュバスターにして必ず最新を取りに行く
 (function(){
   var v = new Date().toISOString().slice(0,10); // 同日内は同じURL＝キャッシュ活用、日が変われば必ず再取得
-  ["data/config.js","data/rika-week.js"].forEach(function(src){
+  ["data/config.js","data/rika-week.js","data/naoshi.js"].forEach(function(src){
     document.write('<script src="'+src+'?v='+v+'"><\/script>');
   });
 })();
@@ -445,6 +477,76 @@ function buildRika(){
   rikaProgress();
 }
 
+// ===== まちがい直し（暗記系）=====
+// 週次カンペと違い「間違えたものだけ」。◯が2回連続で卒業（下に沈むだけで消えない）。×でリセット。
+const NAOSHI = window.NAOSHI || {updated:"", items:[]};
+const GRAD = NAOSHI.grad || 2; // 卒業に必要な連続◯（data/naoshi.js の grad で変えられる）
+const nlist = document.getElementById("naoshi-list");
+const nkey = id => `naoshi-${id}`;
+
+function naoshiProgress(){
+  const total = NAOSHI.items.length;
+  const done = NAOSHI.items.filter(it => store.get(nkey(it.id),0) >= GRAD).length;
+  document.getElementById("naoshi-bar").style.width = (total ? done/total*100 : 0) + "%";
+  document.getElementById("naoshi-plabel").textContent = `卒業 ${done} / ${total}`;
+  document.getElementById("naoshi-sub").textContent =
+    total ? `のこり ${total-done}こ（◯が${GRAD}回つづいたら卒業）` : "";
+}
+
+function buildNaoshi(){
+  const openIds = new Set([...nlist.querySelectorAll(".q.open")].map(el => el.dataset.id));
+  nlist.innerHTML = "";
+  if(!NAOSHI.items.length){
+    nlist.innerHTML = `<div class="empty">いまは0こ。<br>まちがえた暗記の問題がたまったらここに出るよ</div>`;
+    naoshiProgress();
+    return;
+  }
+  // 未卒業を上、卒業を下に
+  const yet = NAOSHI.items.filter(it => store.get(nkey(it.id),0) < GRAD);
+  const grd = NAOSHI.items.filter(it => store.get(nkey(it.id),0) >= GRAD);
+
+  const row = (it) => {
+    const n = store.get(nkey(it.id),0);
+    const done = n >= GRAD;
+    const div = document.createElement("div");
+    div.className = "q" + (done?" grad":"") + (openIds.has(it.id)?" open":"");
+    div.dataset.id = it.id;
+    div.innerHTML = `
+      <div class="qhead"><span class="unit">${it.subject}・${it.unit}</span><span>${it.q}</span>${it.src?`<span class="src">${it.src}</span>`:""}</div>
+      <div class="ans">
+        <div class="a">${it.a}</div>
+        ${it.why ? `<div class="why"><b>ポイント</b> ${it.why}</div>` : ""}
+        <div class="nbtns">
+          <button class="nbtn ok">言えた ◯</button>
+          <button class="nbtn ng">まだ ✗</button>
+          <span class="streak">${done ? "🎓 卒業" : `れんぞく ${n}／${GRAD}`}</span>
+        </div>
+      </div>`;
+    div.querySelector(".qhead").onclick = () => div.classList.toggle("open");
+    div.querySelector(".ok").onclick = (e) => {
+      e.stopPropagation();
+      store.set(nkey(it.id), store.get(nkey(it.id),0) + 1);
+      buildNaoshi();
+    };
+    div.querySelector(".ng").onclick = (e) => {
+      e.stopPropagation();
+      store.set(nkey(it.id), 0);
+      buildNaoshi();
+    };
+    return div;
+  };
+
+  yet.forEach(it => nlist.appendChild(row(it)));
+  if(grd.length){
+    const h = document.createElement("div");
+    h.className = "gradhead";
+    h.textContent = `🎓 卒業したやつ（${grd.length}）`;
+    nlist.appendChild(h);
+    grd.forEach(it => nlist.appendChild(row(it)));
+  }
+  naoshiProgress();
+}
+
 // ===== 計算マスター（写真アップロード＆丸つけ結果）=====
 const kmStatus = document.getElementById("km-status");
 function kmSay(msg){ kmStatus.textContent = msg; }
@@ -559,6 +661,7 @@ function renderAll(){
   renderChecklist(CFG.checklist?.ayumi, "chk-mama", null);
   yjRender();
   buildRika();
+  buildNaoshi();
   kmRenderResult();
   renderOpenCount();
 }
