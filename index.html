@@ -77,11 +77,26 @@ body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;backgr
 .btn.dark{background:#1a1a2e;color:#fff;}
 
 /* 今日の四字熟語 */
-.yoji-today{margin-top:10px;text-align:center;}
-.yoji-today .word{font-size:2rem;font-weight:900;letter-spacing:.1em;color:#1a1a2e;}
-.yoji-today .yomi{font-size:.8rem;color:#b8860b;margin-top:2px;}
-.yoji-today .reveal{margin-top:8px;font-size:.85rem;line-height:1.7;color:#444;background:#fffae6;border-radius:12px;padding:10px 12px;text-align:left;display:none;}
-.yoji-today .reveal b{color:#b8860b;}
+/* 四字熟語クイズ */
+.yoji .progress{background:#fdf6e0;}
+.yoji .progress .bar{background:linear-gradient(90deg,#e8c66a,#b8860b);}
+.yoji .plabel{color:#b8860b;}
+.yq{border:2px solid #f2e7c4;border-radius:12px;margin-top:8px;padding:11px 12px;background:#fffdf6;}
+.yq .qno{font-size:.62rem;font-weight:900;color:#b8860b;background:#fdf6e0;border-radius:8px;padding:2px 7px;}
+.yq .imi{font-size:.98rem;font-weight:700;line-height:1.6;margin-top:7px;}
+.yq .hint{display:none;margin-top:7px;font-size:.8rem;color:#666;background:#fdf6e0;border-radius:8px;padding:7px 10px;line-height:1.6;}
+.yq.hintopen .hint{display:block;}
+.yq .ansbox{display:none;margin-top:9px;border-top:1px dashed #ecdfb8;padding-top:9px;text-align:center;}
+.yq.open .ansbox{display:block;}
+.yq .yw{font-size:1.8rem;font-weight:900;letter-spacing:.1em;color:#1a1a2e;}
+.yq .yy{font-size:.75rem;color:#b8860b;margin-top:2px;}
+.yq .cau2{font-size:.72rem;color:#d32f2f;font-weight:900;margin-top:5px;}
+.yq .ybtns{display:flex;gap:8px;margin-top:9px;align-items:center;justify-content:center;}
+.yq .ybtn{border:none;border-radius:14px;font-family:inherit;font-weight:900;font-size:.75rem;padding:7px 16px;cursor:pointer;}
+.yq .ybtn.ok{background:#eafaf0;color:#1f9d52;} .yq .ybtn.ng{background:#fdf0f0;color:#d32f2f;}
+.yq .streak{font-size:.68rem;color:#999;font-weight:700;}
+.yq.grad{border-color:#c8e6d2;background:#fbfffc;opacity:.7;}
+.yq .peek{border:none;background:none;font-family:inherit;font-size:.76rem;font-weight:900;color:#b8860b;cursor:pointer;padding:6px 0 0;}
 .btnrow{display:flex;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap;}
 .btn{border:none;border-radius:20px;padding:9px 18px;font-family:inherit;font-size:.82rem;font-weight:900;cursor:pointer;background:#eef4fb;color:#2a7cc7;}
 .btn.main{background:#7b2ff7;color:#fff;}
@@ -167,18 +182,16 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 
   <!-- 今日の四字熟語 -->
   <div class="card yoji">
-    <h2>🍚 きょうの四字熟語 <span class="badge">ごはん中にママが使う</span></h2>
-    <div class="yoji-today">
-      <div class="word" id="yj-word"></div>
-      <div class="yomi" id="yj-yomi"></div>
-      <div class="reveal" id="yj-reveal"></div>
-      <div class="btnrow">
-        <button class="btn gold" onclick="yjToggle()">意味と例を見る</button>
-        <button class="btn" onclick="yjNext()">別のにする</button>
-        <button class="btn" onclick="toggle('ylist')">ぜんぶ見る（37語）</button>
-      </div>
-      <div class="ylist" id="ylist"></div>
+    <h2>🍚 きょうの四字熟語 <span class="badge">クイズ2問</span></h2>
+    <div class="sub">意味を読んで、四字熟語を<b>漢字で書く</b>。書けたら「答えを見る」で答え合わせ</div>
+    <div class="progress"><div class="bar" id="yj-bar"></div></div>
+    <div class="plabel" id="yj-plabel"></div>
+    <div id="yj-list"></div>
+    <div class="btnrow" style="justify-content:flex-start;">
+      <button class="btn gold" onclick="yjShuffle()">🎲 べつの問題</button>
+      <button class="btn" onclick="toggle('ylist')">ぜんぶ見る（37語）</button>
     </div>
+    <div class="ylist" id="ylist"></div>
   </div>
 
   <!-- 理科カンペ -->
@@ -418,21 +431,63 @@ function renderDots(items, dotsId){
 }
 
 // ===== 今日の四字熟語 =====
-const dayN = Math.floor(today.getTime()/86400000);
+// 意味を読んで四字熟語を漢字で書くクイズ。1日2問、◯が3回つづいたら卒業。
+const YJ_PERDAY = 2, YJ_GRAD = 3;
+const yjkey = y => `yoji-${y}`;
+const yjlist = document.getElementById("yj-list");
+
 function yjRender(){
-  const off = store.get(`yj-offset-${TODAY}`, 0);
-  const w = YOJI[(dayN + off) % YOJI.length];
-  document.getElementById("yj-word").textContent = w.y;
-  document.getElementById("yj-yomi").textContent = w.yomi;
-  const r = document.getElementById("yj-reveal");
-  r.style.display = "none";
-  r.innerHTML = `<b>意味：</b>${w.imi}<br><b>例：</b>「${w.rei}」${w.cau?"<br><b style='color:#d32f2f'>✍ 書きまちがい注意の語</b>":""}`;
+  const openW = new Set([...yjlist.querySelectorAll(".yq.open")].map(el => el.dataset.w));
+  const hintW = new Set([...yjlist.querySelectorAll(".yq.hintopen")].map(el => el.dataset.w));
+  const done = YOJI.filter(w => store.get(yjkey(w.y),0) >= YJ_GRAD).length;
+  document.getElementById("yj-bar").style.width = done/YOJI.length*100 + "%";
+
+  const yet = YOJI.filter(w => store.get(yjkey(w.y),0) < YJ_GRAD);
+  const allGrad = yet.length === 0;
+  document.getElementById("yj-plabel").textContent = allGrad
+    ? `🎓 ぜんぶ卒業！ ${YOJI.length} / ${YOJI.length}（ここからは復習モード）`
+    : `卒業 ${done} / ${YOJI.length}`;
+
+  // その日ごとに固定の並び（開き直しても同じ。🎲を押したときだけ入れ替わる）
+  const pool = allGrad ? YOJI.slice() : yet;
+  const rnd = seedRand(TODAY + "#" + store.get("yoji-shuffle",0));
+  const a = pool.slice();
+  for(let i=a.length-1;i>0;i--){ const j = Math.floor(rnd()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  const pick = a.slice(0, YJ_PERDAY);
+
+  yjlist.innerHTML = "";
+  pick.forEach((w,i) => {
+    const n = store.get(yjkey(w.y),0);
+    const grad = n >= YJ_GRAD;
+    // 例文の中の四字熟語そのものは伏せる（ヒントで答えが見えないように）
+    const masked = w.rei.split(w.y).join("○○○○");
+    const div = document.createElement("div");
+    div.className = "yq" + (grad?" grad":"") + (openW.has(w.y)?" open":"") + (hintW.has(w.y)?" hintopen":"");
+    div.dataset.w = w.y;
+    div.innerHTML = `
+      <span class="qno">第${i+1}問</span>${grad?'<span class="qno" style="margin-left:6px;color:#1f9d52;background:#eafaf0">🎓卒業ずみ</span>':""}
+      <div class="imi">${w.imi}</div>
+      <div class="hint">💡 ヒント：「${masked}」</div>
+      <button class="peek hintbtn">💡 ヒントを見る</button>
+      <div class="ansbox">
+        <div class="yw">${w.y}</div>
+        <div class="yy">${w.yomi}</div>
+        ${w.cau?'<div class="cau2">✍ 書きまちがい注意の語！</div>':""}
+        <div class="ybtns">
+          <button class="ybtn ok">書けた ◯</button>
+          <button class="ybtn ng">まだ ✗</button>
+          <span class="streak">${grad ? "🎓 卒業" : `れんぞく ${n}／${YJ_GRAD}`}</span>
+        </div>
+      </div>
+      <button class="peek showbtn">▼ 答えを見る</button>`;
+    div.querySelector(".hintbtn").onclick = () => div.classList.toggle("hintopen");
+    div.querySelector(".showbtn").onclick = () => div.classList.toggle("open");
+    div.querySelector(".ok").onclick = () => { store.set(yjkey(w.y), store.get(yjkey(w.y),0)+1); yjRender(); };
+    div.querySelector(".ng").onclick = () => { store.set(yjkey(w.y), 0); yjRender(); };
+    yjlist.appendChild(div);
+  });
 }
-function yjToggle(){
-  const r = document.getElementById("yj-reveal");
-  r.style.display = r.style.display==="none" ? "block" : "none";
-}
-function yjNext(){ store.set(`yj-offset-${TODAY}`, store.get(`yj-offset-${TODAY}`,0)+1); yjRender(); }
+function yjShuffle(){ store.set("yoji-shuffle", store.get("yoji-shuffle",0)+1); yjRender(); }
 
 // 四字熟語ぜんぶ（静的・1回だけ構築）
 const ylist = document.getElementById("ylist");

@@ -20,7 +20,7 @@ window.HUB_CONFIG = {
     ayumi: [
       { id: "koekake_am", label: "朝イチ「ハブ開こう」の声かけ" },
       { id: "keisan_photo", label: "Claudeに「計マス丸つけ」と言う（写真はハブの📷から届く）" },
-      { id: "yoji", label: "ごはん中に四字熟語を1個使う" }
+      { id: "yoji", label: "ごはん中に四字熟語クイズ2問を出す（意味→漢字で書く）" }
     ]
   }
 };
