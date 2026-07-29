@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星座マスター 🌟 中学受験</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background: linear-gradient(180deg, #0a0e2a 0%, #141a45 60%, #1c2258 100%);
+    color: #f0f2ff;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+  header {
+    text-align: center;
+    padding: 20px 10px 12px;
+  }
+  header h1 {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+  header p {
+    color: #aab2e8;
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+  /* タブ */
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,14,42,0.92);
+    backdrop-filter: blur(4px);
+    z-index: 10;
+  }
+  .tab-btn {
+    border: 2px solid #3a4390;
+    background: #1a2050;
+    color: #dfe3ff;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .tab-btn.active {
+    background: #ffd95e;
+    border-color: #ffd95e;
+    color: #1a1a3a;
+    font-weight: bold;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 10px 12px; }
+  section.panel { display: none; }
+  section.panel.active { display: block; animation: fadeIn .3s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+
+  .sky-wrap {
+    background: radial-gradient(ellipse at 50% 120%, #232c6e 0%, #0b1035 55%, #060a24 100%);
+    border-radius: 16px;
+    border: 1px solid #2c3573;
+    overflow: hidden;
+    position: relative;
+  }
+  svg { display: block; width: 100%; height: auto; }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+  .hide-btn {
+    border: 2px solid #7a86e8;
+    background: #232b66;
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .hide-btn.hiding { background: #e8608a; border-color: #e8608a; }
+
+  .info-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid #333d7d;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+  .info-card h3 { color: #ffd95e; font-size: 1.05rem; margin-bottom: 6px; }
+  .info-card ul { padding-left: 20px; }
+  .info-card li { margin: 3px 0; }
+  .info-card .warn { color: #ff9db8; font-weight: bold; }
+  .info-card .plus {
+    margin-top: 10px; padding: 8px 10px;
+    background: rgba(255,217,94,0.08);
+    border-left: 3px solid #ffd95e;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #d5d9ff;
+  }
+  b.st { color: #ffd95e; }
+
+  /* SVGラベル */
+  .star-label { cursor: pointer; }
+  .star-label text {
+    fill: #eef0ff;
+    font-size: 15px;
+    font-family: inherit;
+    font-weight: bold;
+    paint-order: stroke;
+    stroke: #060a24;
+    stroke-width: 4px;
+  }
+  .star-label text.cname { fill: #9fe8ff; font-size: 14px; }
+  .star-label rect.qbox { display: none; }
+  .star-label text.qmark { display: none; fill: #fff; font-size: 15px; font-weight: bold; font-family: inherit; stroke: none; }
+  .sky-wrap.hiding .star-label text { display: none; }
+  .sky-wrap.hiding .star-label rect.qbox { display: block; }
+  .sky-wrap.hiding .star-label text.qmark { display: block; }
+  .sky-wrap.hiding .star-label.revealed text { display: block; }
+  .sky-wrap.hiding .star-label.revealed rect.qbox { display: none; }
+  .sky-wrap.hiding .star-label.revealed text.qmark { display: none; }
+
+  .const-line { stroke: #6b79d8; stroke-width: 1.6; opacity: 0.8; }
+  .tri-line { stroke: #ffd95e; stroke-width: 2.5; stroke-dasharray: 7 6; opacity: 0.95; }
+  .guide-line { stroke: #7ee8c8; stroke-width: 2; stroke-dasharray: 4 5; }
+  .curve-line { stroke: #ff9db8; stroke-width: 2.5; stroke-dasharray: 7 6; fill: none; }
+  .annot { fill: #7ee8c8; font-size: 13px; font-weight: bold; font-family: inherit; paint-order: stroke; stroke: #060a24; stroke-width: 3px;}
+  .annot.pink { fill: #ff9db8; }
+  .annot.yellow { fill: #ffd95e; }
+  .star-label text.annot { fill: #7ee8c8; font-size: 13px; }
+  .star-label text.annot.pink { fill: #ff9db8; }
+  .star-label text.annot.yellow { fill: #ffd95e; }
+  .ground { fill: #0d1230; }
+  .dir-label { fill: #aab2e8; font-size: 14px; font-weight: bold; font-family: inherit; }
+
+  /* 色と温度 */
+  .temp-bar {
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 14px 0 6px;
+    border: 1px solid #333d7d;
+  }
+  .temp-seg { flex: 1; text-align: center; padding: 10px 4px; font-size: 0.8rem; font-weight: bold; }
+  .color-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+  .color-table th, .color-table td { border: 1px solid #333d7d; padding: 8px 6px; text-align: center; }
+  .color-table th { background: #1a2050; color: #ffd95e; }
+  .star-chip {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-weight: bold;
+    margin: 2px;
+    color: #101030;
+  }
+
+  /* クイズ */
+  .quiz-box {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid #333d7d;
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 10px;
+  }
+  .quiz-q { font-size: 1.1rem; font-weight: bold; line-height: 1.6; margin-bottom: 14px; }
+  .quiz-progress { color: #aab2e8; font-size: 0.85rem; margin-bottom: 8px; }
+  .quiz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 520px) { .quiz-opts { grid-template-columns: 1fr; } }
+  .quiz-opt {
+    border: 2px solid #5563c8;
+    background: #1e2558;
+    color: #fff;
+    border-radius: 12px;
+    padding: 14px 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .quiz-opt:not(:disabled):hover { background: #2b3474; }
+  .quiz-opt.correct { background: #2e8b57; border-color: #7ee8a8; }
+  .quiz-opt.wrong { background: #a33; border-color: #ff9db8; }
+  .quiz-fb { margin-top: 12px; font-size: 0.95rem; line-height: 1.6; min-height: 1.5em; }
+  .quiz-fb .mark { font-size: 1.3rem; font-weight: bold; }
+  .quiz-next, .quiz-restart {
+    margin-top: 12px;
+    border: none;
+    background: #ffd95e;
+    color: #1a1a3a;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    display: none;
+  }
+  .quiz-score { font-size: 1.4rem; font-weight: bold; text-align: center; margin: 14px 0; }
+  .quiz-score small { display: block; font-size: 0.9rem; color: #aab2e8; font-weight: normal; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌟 星座マスター</h1>
+  <p>ながめる → 名前をかくしてテスト → クイズで仕上げ！</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="kita">🧭 北の空</button>
+  <button class="tab-btn" data-tab="haru">🌸 春</button>
+  <button class="tab-btn" data-tab="natsu">🎋 夏</button>
+  <button class="tab-btn" data-tab="aki">🍂 秋</button>
+  <button class="tab-btn" data-tab="fuyu">⛄ 冬</button>
+  <button class="tab-btn" data-tab="iro">🌈 色と温度</button>
+  <button class="tab-btn" data-tab="quiz">🎯 クイズ</button>
+</nav>
+
+<main>
+
+  <!-- ============ 北の空 ============ -->
+  <section class="panel active" id="panel-kita">
+    <div class="controls"><button class="hide-btn" data-sky="sky-kita">🙈 名前をかくしてテスト</button></div>
+    <div class="sky-wrap" id="sky-kita"></div>
+    <div class="info-card">
+      <h3>🧭 北の空（一年中見える）</h3>
+      <ul>
+        <li><b class="st">北極星</b>は<b class="st">こぐま座</b>の星。ほぼ真北にあって、<b>ほとんど動かない</b>。</li>
+        <li><b class="st">北斗七星</b>は<b class="st">おおぐま座</b>の一部。ひしゃく（水をくむ道具）の形。</li>
+        <li><b class="st">カシオペヤ座</b>は<b>W字</b>の形（向きによってM字に見える）。</li>
+        <li>北極星の見つけ方：北斗七星の<b>ひしゃくの先の2つの星</b>の間かくを<b class="st">5倍</b>のばす。カシオペヤ座からも5倍でたどれる。</li>
+        <li>北の空の星は、北極星を中心に<b>反時計回り</b>に回って見える（1時間に約15°）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 春 ============ -->
+  <section class="panel" id="panel-haru">
+    <div class="controls"><button class="hide-btn" data-sky="sky-haru">🙈 名前をかくしてテスト</button></div>
+    <div class="sky-wrap" id="sky-haru"></div>
+    <div class="info-card">
+      <h3>🌸 春の星座</h3>
+      <ul>
+        <li><b class="st">春の大三角</b>＝<b>アルクトゥルス</b>（うしかい座）・<b>スピカ</b>（おとめ座）・<b>デネボラ</b>（しし座）</li>
+        <li class="warn">⚠ デネボラだけは2等星！（アルクトゥルスとスピカは1等星）よく出るひっかけ！</li>
+        <li><b class="st">春の大曲線</b>＝北斗七星のえの部分のカーブ → アルクトゥルス → スピカ とつながる大きなカーブ。</li>
+        <li>しし座の1等星は<b class="st">レグルス</b>（デネボラとまちがえない！）。</li>
+        <li>色：アルクトゥルスは<b style="color:#ffaa55">オレンジ</b>、スピカは<b style="color:#aaccff">青白</b>。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 夏 ============ -->
+  <section class="panel" id="panel-natsu">
+    <div class="controls"><button class="hide-btn" data-sky="sky-natsu">🙈 名前をかくしてテスト</button></div>
+    <div class="sky-wrap" id="sky-natsu"></div>
+    <div class="info-card">
+      <h3>🎋 夏の星座</h3>
+      <ul>
+        <li><b class="st">夏の大三角</b>＝<b>ベガ</b>（こと座）・<b>デネブ</b>(はくちょう座)・<b>アルタイル</b>（わし座）→ ぜんぶ1等星で白い星。</li>
+        <li>七夕：<b class="st">ベガ＝織姫</b>、<b class="st">アルタイル＝彦星</b>。間に天の川が流れる。デネブは天の川の中。</li>
+        <li><b class="st">さそり座</b>は南の空の<b>低いところ</b>にS字の形。赤い1等星<b class="st">アンタレス</b>。</li>
+        <li>覚え方：「こ・は・わ」（こと・はくちょう・わし）＝「べ・デ・ア」（ベガ・デネブ・アルタイル）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 秋 ============ -->
+  <section class="panel" id="panel-aki">
+    <div class="controls"><button class="hide-btn" data-sky="sky-aki">🙈 名前をかくしてテスト</button></div>
+    <div class="sky-wrap" id="sky-aki"></div>
+    <div class="info-card">
+      <h3>🍂 秋の星座</h3>
+      <ul>
+        <li><b class="st">秋の四辺形（ペガススの四辺形）</b>＝<b class="st">ペガスス座</b>の大きな四角形。</li>
+        <li>四辺形の1つの角から<b class="st">アンドロメダ座</b>が続いている。</li>
+        <li class="warn">⚠ 秋の空には1等星がない！（四辺形は2等星）これがテストに出るポイント！</li>
+        <li>だから秋は「大三角」ではなく「<b>四辺形</b>」で覚える。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 冬 ============ -->
+  <section class="panel" id="panel-fuyu">
+    <div class="controls"><button class="hide-btn" data-sky="sky-fuyu">🙈 名前をかくしてテスト</button></div>
+    <div class="sky-wrap" id="sky-fuyu"></div>
+    <div class="info-card">
+      <h3>⛄ 冬の星座</h3>
+      <ul>
+        <li><b class="st">冬の大三角</b>＝<b>ベテルギウス</b>（オリオン座）・<b>シリウス</b>（おおいぬ座）・<b>プロキオン</b>（こいぬ座）</li>
+        <li><b class="st">オリオン座</b>は1等星が<b>2つ</b>：<b style="color:#ff6655">ベテルギウス（赤）</b>と<b style="color:#aaccff">リゲル（青白）</b>。まん中に<b class="st">三つ星</b>。</li>
+        <li>三つ星を左下にのばすと<b class="st">シリウス</b>（白くていちばん明るく見える星）にぶつかる。</li>
+        <li class="warn">⚠ 大三角に入るのはベテルギウス！リゲルじゃない！（ひっかけ注意）</li>
+        <li class="plus">＋α：カペラ（ぎょしゃ座・黄色）、アルデバラン（おうし座）、ポルックス（ふたご座）も冬の1等星。リゲル・シリウス・プロキオンと合わせて「冬のダイヤモンド」とよばれる。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 色と温度 ============ -->
+  <section class="panel" id="panel-iro">
+    <div class="info-card">
+      <h3>🌈 星の色と表面温度（教科書の表そのまま）</h3>
+      <p style="margin-bottom:4px;">温度が<b>高い→低い</b>の順にならべると…（炎の色と同じ原理！）</p>
+      <div class="temp-bar">
+        <div class="temp-seg" style="background:#aaccff;color:#101030;">青白い<br>10000℃以上</div>
+        <div class="temp-seg" style="background:#ffffff;color:#101030;">白い<br>7000〜10000℃</div>
+        <div class="temp-seg" style="background:#ffe28a;color:#101030;">黄色<br>5000〜6000℃</div>
+        <div class="temp-seg" style="background:#ffaa55;color:#101030;">オレンジ<br>3500〜5000℃</div>
+        <div class="temp-seg" style="background:#ff6655;color:#101030;">赤い<br>3000℃前後</div>
+      </div>
+      <table class="color-table">
+        <tr><th>色</th><th>代表的な星</th><th>覚え方のヒント</th></tr>
+        <tr><td><span class="star-chip" style="background:#aaccff;">青白い</span></td><td><b>リゲル</b>（オリオン座）・<b>スピカ</b>（おとめ座）</td><td>いちばん熱い！</td></tr>
+        <tr><td><span class="star-chip" style="background:#ffffff;">白い</span></td><td><b>シリウス</b>（おおいぬ座）・<b>ベガ</b>（こと座）</td><td>夏の大三角はみんな白</td></tr>
+        <tr><td><span class="star-chip" style="background:#ffe28a;">黄色</span></td><td><b>太陽</b>・<b>カペラ</b>（ぎょしゃ座）</td><td>太陽と同じなかま</td></tr>
+        <tr><td><span class="star-chip" style="background:#ffaa55;">オレンジ</span></td><td><b>アルクトゥルス</b>（うしかい座）</td><td>春の大三角の親分</td></tr>
+        <tr><td><span class="star-chip" style="background:#ff6655;">赤い</span></td><td><b>ベテルギウス</b>（オリオン座）・<b>アンタレス</b>（さそり座）</td><td>いちばん冷たい（それでも3000℃）</td></tr>
+      </table>
+      <div class="plus" style="margin-top:12px;">
+        📝 テストの定番：「赤い星を2つ選べ」→ <b>ベテルギウスとアンタレス</b>。「青白い星は？」→ <b>リゲルとスピカ</b>。温度が高いほど<b>青白</b>、低いほど<b>赤</b>！
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ クイズ ============ -->
+  <section class="panel" id="panel-quiz">
+    <div class="quiz-box" id="quiz-box">
+      <div class="quiz-progress" id="quiz-progress"></div>
+      <div class="quiz-q" id="quiz-q"></div>
+      <div class="quiz-opts" id="quiz-opts"></div>
+      <div class="quiz-fb" id="quiz-fb"></div>
+      <button class="quiz-next" id="quiz-next">つぎの問題 ▶</button>
+      <div class="quiz-score" id="quiz-score" style="display:none;"></div>
+      <button class="quiz-restart" id="quiz-restart">🔄 もう一回チャレンジ</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ============================================================
+// 星のデータ（星座ごと）
+// mag: 1=一等星(大きく), 2=二等星, 3=それ以下
+// color: aoshiro/shiro/ki/orange/aka/dim
+// ============================================================
+const COLORS = {
+  aoshiro: "#aaccff",
+  shiro:   "#ffffff",
+  ki:      "#ffe28a",
+  orange:  "#ffaa55",
+  aka:     "#ff7060",
+  dim:     "#c8cfff"
+};
+
+const SKIES = {
+
+  // ---------- 北の空 ----------
+  "sky-kita": {
+    constellations: [
+      {
+        cname: "北斗七星（おおぐま座の一部）",
+        clabel: [640, 445],
+        stars: [
+          {x:605,y:340,mag:2,color:"dim"},  // 0 α ひしゃくの先(上)
+          {x:655,y:375,mag:2,color:"dim"},  // 1 β ひしゃくの先(下)
+          {x:712,y:382,mag:2,color:"dim"},  // 2 γ
+          {x:700,y:322,mag:2,color:"dim"},  // 3 δ
+          {x:745,y:300,mag:2,color:"dim"},  // 4
+          {x:775,y:268,mag:2,color:"dim"},  // 5
+          {x:762,y:225,mag:2,color:"dim"}   // 6
+        ],
+        lines: [[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]],
+        labels: []
+      },
+      {
+        cname: "カシオペヤ座（W字）",
+        clabel: [185, 68],
+        stars: [
+          {x:100,y:160,mag:2,color:"dim"},
+          {x:140,y:112,mag:2,color:"dim"},
+          {x:185,y:148,mag:2,color:"dim"},
+          {x:230,y:108,mag:2,color:"dim"},
+          {x:272,y:150,mag:2,color:"dim"}
+        ],
+        lines: [[0,1],[1,2],[2,3],[3,4]],
+        labels: []
+      },
+      {
+        cname: "",
+        clabel: null,
+        stars: [ {x:405,y:200,mag:1,color:"ki"} ],
+        lines: [],
+        labels: [ {si:0, name:"北極星", sub:"（こぐま座）", dx:0, dy:-28} ]
+      }
+    ],
+    extras: [
+      // 北斗七星→北極星 5倍
+      {type:"dash", x1:605, y1:340, x2:415, y2:207, cls:"guide-line"},
+      {type:"text", x:490, y:300, text:"間かくの5倍！", cls:"annot"},
+      // カシオペヤ→北極星
+      {type:"dash", x1:255, y1:145, x2:395, y2:196, cls:"guide-line"},
+      {type:"text", x:225, y:240, text:"こっちからも5倍", cls:"annot"},
+      {type:"ground", h:40},
+      {type:"text", x:400, y:492, text:"北", cls:"dir-label", anchor:"middle"},
+      {type:"text", x:405, y:135, text:"⭐ ほとんど動かない！", cls:"annot yellow", anchor:"middle"}
+    ]
+  },
+
+  // ---------- 春 ----------
+  "sky-haru": {
+    constellations: [
+      {
+        cname: "北斗七星",
+        clabel: [150, 45],
+        stars: [
+          {x:128,y:78,mag:3,color:"dim"},
+          {x:152,y:108,mag:3,color:"dim"},
+          {x:196,y:112,mag:3,color:"dim"},
+          {x:196,y:74,mag:3,color:"dim"},
+          {x:238,y:66,mag:3,color:"dim"},
+          {x:278,y:70,mag:3,color:"dim"},
+          {x:312,y:92,mag:3,color:"dim"}
+        ],
+        lines: [[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]],
+        labels: []
+      },
+      {
+        cname: "うしかい座",
+        clabel: [500, 120],
+        stars: [
+          {x:430,y:245,mag:1,color:"orange"}, // 0 アルクトゥルス
+          {x:462,y:190,mag:3,color:"dim"},
+          {x:452,y:130,mag:3,color:"dim"},
+          {x:412,y:118,mag:3,color:"dim"},
+          {x:390,y:170,mag:3,color:"dim"}
+        ],
+        lines: [[0,1],[1,2],[2,3],[3,4],[4,0]],
+        labels: [ {si:0, name:"アルクトゥルス", sub:"オレンジ・1等星", dx:12, dy:26} ]
+      },
+      {
+        cname: "おとめ座",
+        clabel: [275, 460],
+        stars: [
+          {x:360,y:420,mag:1,color:"aoshiro"}, // 0 スピカ
+          {x:318,y:378,mag:3,color:"dim"},
+          {x:276,y:396,mag:3,color:"dim"},
+          {x:300,y:330,mag:3,color:"dim"}
+        ],
+        lines: [[0,1],[1,2],[1,3]],
+        labels: [ {si:0, name:"スピカ", sub:"青白・1等星", dx:14, dy:24} ]
+      },
+      {
+        cname: "しし座",
+        clabel: [672, 400],
+        stars: [
+          {x:695,y:330,mag:1,color:"aoshiro"}, // 0 レグルス
+          {x:683,y:285,mag:3,color:"dim"},
+          {x:693,y:248,mag:3,color:"dim"},
+          {x:665,y:220,mag:3,color:"dim"},
+          {x:632,y:228,mag:3,color:"dim"},
+          {x:625,y:262,mag:3,color:"dim"},
+          {x:632,y:352,mag:3,color:"dim"},
+          {x:575,y:300,mag:2,color:"shiro"}   // 7 デネボラ
+        ],
+        lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[0,6],[6,7],[5,7]],
+        labels: [
+          {si:0, name:"レグルス", sub:"1等星", dx:8, dy:28},
+          {si:7, name:"デネボラ", sub:"⚠2等星！", dx:-6, dy:-24}
+        ]
+      }
+    ],
+    extras: [
+      {type:"curve", d:"M 312 92 Q 420 130 430 245 Q 438 350 360 420", cls:"curve-line"},
+      {type:"text", x:520, y:165, text:"春の大曲線", cls:"annot pink", hide:true},
+      {type:"tri", pts:[[430,245],[360,420],[575,300]]},
+      {type:"text", x:455, y:352, text:"春の大三角", cls:"annot yellow", hide:true},
+      {type:"ground", h:30},
+      {type:"text", x:400, y:495, text:"南の空（夜8時ごろ）", cls:"dir-label", anchor:"middle"}
+    ]
+  },
+
+  // ---------- 夏 ----------
+  "sky-natsu": {
+    milkyway: "M 250 0 L 390 0 Q 470 200 560 500 L 400 500 Q 330 230 250 0 Z",
+    constellations: [
+      {
+        cname: "こと座",
+        clabel: [95, 190],
+        stars: [
+          {x:160,y:110,mag:1,color:"shiro"}, // 0 ベガ
+          {x:190,y:140,mag:3,color:"dim"},
+          {x:180,y:175,mag:3,color:"dim"},
+          {x:148,y:168,mag:3,color:"dim"},
+          {x:158,y:135,mag:3,color:"dim"}
+        ],
+        lines: [[0,4],[4,1],[1,2],[2,3],[3,4]],
+        labels: [ {si:0, name:"ベガ", sub:"織姫★白", dx:-10, dy:-24} ]
+      },
+      {
+        cname: "はくちょう座",
+        clabel: [462, 62],
+        stars: [
+          {x:360,y:85,mag:1,color:"shiro"},  // 0 デネブ
+          {x:390,y:150,mag:3,color:"dim"},   // 1 胸
+          {x:425,y:225,mag:3,color:"dim"},   // 2 くちばし
+          {x:325,y:180,mag:3,color:"dim"},   // 3 右つばさ
+          {x:455,y:130,mag:3,color:"dim"}    // 4 左つばさ
+        ],
+        lines: [[0,1],[1,2],[1,3],[1,4]],
+        labels: [ {si:0, name:"デネブ", sub:"白・天の川の中", dx:-16, dy:-22} ]
+      },
+      {
+        cname: "わし座",
+        clabel: [510, 385],
+        stars: [
+          {x:430,y:330,mag:1,color:"shiro"}, // 0 アルタイル
+          {x:455,y:305,mag:3,color:"dim"},
+          {x:405,y:352,mag:3,color:"dim"},
+          {x:445,y:398,mag:3,color:"dim"}
+        ],
+        lines: [[1,0],[0,2],[0,3]],
+        labels: [ {si:0, name:"アルタイル", sub:"彦星★白", dx:20, dy:16} ]
+      },
+      {
+        cname: "さそり座（S字）",
+        clabel: [700, 330],
+        stars: [
+          {x:610,y:330,mag:3,color:"dim"},
+          {x:595,y:355,mag:3,color:"dim"},
+          {x:600,y:382,mag:3,color:"dim"},
+          {x:632,y:400,mag:1,color:"aka"},   // 3 アンタレス
+          {x:655,y:425,mag:3,color:"dim"},
+          {x:665,y:455,mag:3,color:"dim"},
+          {x:650,y:478,mag:3,color:"dim"},
+          {x:622,y:480,mag:3,color:"dim"},
+          {x:606,y:462,mag:3,color:"dim"}
+        ],
+        lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8]],
+        labels: [ {si:3, name:"アンタレス", sub:"赤・1等星", dx:24, dy:0} ]
+      }
+    ],
+    extras: [
+      {type:"tri", pts:[[160,110],[360,85],[430,330]]},
+      {type:"text", x:295, y:205, text:"夏の大三角", cls:"annot yellow", hide:true},
+      {type:"text", x:415, y:470, text:"天の川", cls:"annot", anchor:"middle"},
+      {type:"ground", h:26},
+      {type:"text", x:400, y:496, text:"南の空 ／ さそり座は低いところ", cls:"dir-label", anchor:"middle"}
+    ]
+  },
+
+  // ---------- 秋 ----------
+  "sky-aki": {
+    constellations: [
+      {
+        cname: "ペガスス座",
+        clabel: [280, 420],
+        stars: [
+          {x:280,y:190,mag:2,color:"dim"},
+          {x:470,y:165,mag:2,color:"dim"},  // 1 アンドロメダ座と共有の角
+          {x:490,y:330,mag:2,color:"dim"},
+          {x:300,y:355,mag:2,color:"dim"},
+          {x:215,y:230,mag:3,color:"dim"},
+          {x:170,y:280,mag:3,color:"dim"}
+        ],
+        lines: [[0,1],[1,2],[2,3],[3,0],[0,4],[4,5]],
+        labels: []
+      },
+      {
+        cname: "アンドロメダ座",
+        clabel: [640, 55],
+        stars: [
+          {x:555,y:135,mag:3,color:"dim"},
+          {x:645,y:110,mag:3,color:"dim"},
+          {x:735,y:88,mag:3,color:"dim"}
+        ],
+        lines: [[0,1],[1,2]],
+        labels: []
+      }
+    ],
+    extras: [
+      {type:"dash", x1:470, y1:165, x2:555, y2:135, cls:"const-line"},
+      {type:"tri", pts:[[280,190],[470,165],[490,330],[300,355]]},
+      {type:"text", x:390, y:260, text:"秋の四辺形（ペガススの四辺形）", cls:"annot yellow", hide:true},
+      {type:"text", x:330, y:300, text:"⚠ 秋の空に1等星はない！", cls:"annot pink"},
+      {type:"ground", h:30},
+      {type:"text", x:400, y:495, text:"南の空（夜8時ごろ）", cls:"dir-label", anchor:"middle"}
+    ]
+  },
+
+  // ---------- 冬 ----------
+  "sky-fuyu": {
+    constellations: [
+      {
+        cname: "オリオン座",
+        clabel: [408, 145],
+        stars: [
+          {x:345,y:210,mag:1,color:"aka"},     // 0 ベテルギウス
+          {x:450,y:205,mag:2,color:"dim"},     // 1 ベラトリックス
+          {x:475,y:370,mag:1,color:"aoshiro"}, // 2 リゲル
+          {x:365,y:378,mag:2,color:"dim"},     // 3 サイフ
+          {x:378,y:305,mag:2,color:"dim"},     // 4 三つ星
+          {x:404,y:294,mag:2,color:"dim"},     // 5
+          {x:430,y:283,mag:2,color:"dim"}      // 6
+        ],
+        lines: [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6]],
+        labels: [
+          {si:0, name:"ベテルギウス", sub:"赤・1等星", dx:-16, dy:-24},
+          {si:2, name:"リゲル", sub:"青白・1等星", dx:26, dy:16},
+          {si:5, name:"三つ星", sub:"", dx:56, dy:26}
+        ]
+      },
+      {
+        cname: "おおいぬ座",
+        clabel: [130, 462],
+        stars: [
+          {x:185,y:390,mag:1,color:"shiro"}, // 0 シリウス
+          {x:160,y:425,mag:3,color:"dim"},
+          {x:185,y:458,mag:3,color:"dim"},
+          {x:222,y:440,mag:3,color:"dim"}
+        ],
+        lines: [[0,1],[1,2],[2,3],[3,0]],
+        labels: [ {si:0, name:"シリウス", sub:"白・いちばん明るい", dx:-20, dy:-24} ]
+      },
+      {
+        cname: "こいぬ座",
+        clabel: [118, 148],
+        stars: [
+          {x:150,y:215,mag:1,color:"shiro"}, // 0 プロキオン
+          {x:195,y:192,mag:3,color:"dim"}
+        ],
+        lines: [[0,1]],
+        labels: [ {si:0, name:"プロキオン", sub:"1等星", dx:-8, dy:30} ]
+      }
+    ],
+    extras: [
+      {type:"tri", pts:[[345,210],[185,390],[150,215]]},
+      {type:"text", x:255, y:285, text:"冬の大三角", cls:"annot yellow", hide:true},
+      {type:"dash", x1:378, y1:305, x2:200, y2:382, cls:"guide-line"},
+      {type:"text", x:315, y:355, text:"三つ星をのばすとシリウス", cls:"annot", hide:true},
+      {type:"ground", h:24},
+      {type:"text", x:400, y:496, text:"南の空（夜8時ごろ）", cls:"dir-label", anchor:"middle"}
+    ]
+  }
+};
+
+// ============================================================
+// 空の描画
+// ============================================================
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(name, attrs, parent) {
+  const e = document.createElementNS(SVGNS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+function starRadius(mag) { return mag === 1 ? 9 : mag === 2 ? 5.5 : 3.5; }
+
+function renderSky(id) {
+  const data = SKIES[id];
+  const wrap = document.getElementById(id);
+  const svg = el("svg", {viewBox: "0 0 800 510"}, wrap);
+
+  // 背景の小さな星をランダムにちりばめる
+  for (let i = 0; i < 70; i++) {
+    el("circle", {
+      cx: Math.random()*800, cy: Math.random()*460,
+      r: Math.random()*1.1 + 0.3,
+      fill: "#ffffff", opacity: (Math.random()*0.5+0.15).toFixed(2)
+    }, svg);
+  }
+
+  // 天の川
+  if (data.milkyway) {
+    el("path", {d: data.milkyway, fill: "#8fa3ff", opacity: 0.13}, svg);
+  }
+
+  // 大三角・補助線など（星より下のレイヤー）
+  (data.extras||[]).forEach(x => {
+    if (x.type === "tri") {
+      el("polygon", {points: x.pts.map(p=>p.join(",")).join(" "), fill:"rgba(255,217,94,0.06)", class:"tri-line"}, svg);
+    } else if (x.type === "dash") {
+      el("line", {x1:x.x1,y1:x.y1,x2:x.x2,y2:x.y2, class:x.cls}, svg);
+    } else if (x.type === "curve") {
+      el("path", {d:x.d, class:x.cls}, svg);
+    } else if (x.type === "ground") {
+      el("path", {d:`M 0 510 L 0 ${510-x.h} Q 400 ${510-x.h-18} 800 ${510-x.h} L 800 510 Z`, class:"ground"}, svg);
+    }
+  });
+
+  // 星座
+  data.constellations.forEach(c => {
+    // 線
+    c.lines.forEach(([a,b]) => {
+      el("line", {
+        x1:c.stars[a].x, y1:c.stars[a].y,
+        x2:c.stars[b].x, y2:c.stars[b].y, class:"const-line"
+      }, svg);
+    });
+    // 星
+    c.stars.forEach(s => {
+      const r = starRadius(s.mag);
+      if (s.mag === 1) {
+        // 一等星は光のにじみ＋十字のきらめき
+        el("circle", {cx:s.x, cy:s.y, r:r*2.4, fill:COLORS[s.color], opacity:0.18}, svg);
+        el("line", {x1:s.x-r*2.6, y1:s.y, x2:s.x+r*2.6, y2:s.y, stroke:COLORS[s.color], "stroke-width":1, opacity:0.6}, svg);
+        el("line", {x1:s.x, y1:s.y-r*2.6, x2:s.x, y2:s.y+r*2.6, stroke:COLORS[s.color], "stroke-width":1, opacity:0.6}, svg);
+      }
+      el("circle", {cx:s.x, cy:s.y, r:r, fill:COLORS[s.color]}, svg);
+    });
+    // 星の名前ラベル（かくせる）
+    c.labels.forEach(lb => {
+      const s = c.stars[lb.si];
+      addLabel(svg, s.x+lb.dx, s.y+lb.dy, lb.name, lb.sub, false);
+    });
+    // 星座名ラベル（かくせる）
+    if (c.cname && c.clabel) {
+      addLabel(svg, c.clabel[0], c.clabel[1], c.cname, "", true);
+    }
+  });
+
+  // テキスト注釈（最前面）
+  (data.extras||[]).forEach(x => {
+    if (x.type === "text") {
+      if (x.hide) {
+        // 答えになる注釈は「かくすモード」で一緒にかくす
+        addLabel(svg, x.x, x.y, x.text, "", false, x.cls);
+      } else {
+        const t = el("text", {x:x.x, y:x.y, class:x.cls}, svg);
+        if (x.anchor) t.setAttribute("text-anchor", x.anchor);
+        t.textContent = x.text;
+      }
+    }
+  });
+}
+
+// かくして自分でテストできるラベル
+function addLabel(svg, x, y, name, sub, isCname, textCls) {
+  const g = el("g", {class:"star-label"}, svg);
+  const t = el("text", {x:x, y:y, "text-anchor":"middle", class:textCls || (isCname?"cname":"")}, g);
+  t.textContent = name;
+  if (sub) {
+    const t2 = el("text", {x:x, y:y+17, "text-anchor":"middle", class:isCname?"cname":"", "font-size":"11"}, g);
+    t2.setAttribute("style","font-size:11px; fill:#ffbcd0;");
+    t2.textContent = sub;
+  }
+  // かくすとき用の「？」ボックス
+  const w = Math.max(name.length*15+16, 40);
+  el("rect", {x:x-w/2, y:y-16, width:w, height:22, rx:11, fill:"#e8608a", opacity:0.9, class:"qbox"}, g);
+  const q = el("text", {x:x, y:y, "text-anchor":"middle", class:"qmark"}, g);
+  q.textContent = "？";
+  g.addEventListener("click", () => {
+    if (g.closest(".sky-wrap").classList.contains("hiding")) {
+      g.classList.toggle("revealed");
+    }
+  });
+}
+
+Object.keys(SKIES).forEach(renderSky);
+
+// かくすボタン
+document.querySelectorAll(".hide-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const wrap = document.getElementById(btn.dataset.sky);
+    const hiding = wrap.classList.toggle("hiding");
+    btn.classList.toggle("hiding", hiding);
+    btn.textContent = hiding ? "👀 名前を見る（タップで1つずつ答え合わせ）" : "🙈 名前をかくしてテスト";
+    if (!hiding) wrap.querySelectorAll(".star-label.revealed").forEach(g=>g.classList.remove("revealed"));
+  });
+});
+
+// タブ切り替え
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ============================================================
+// クイズ
+// ============================================================
+const QUIZ = [
+  {q:"夏の大三角をつくる、こと座の1等星は？", opts:["ベガ","デネブ","アルタイル","アンタレス"], a:0, ex:"こと座＝ベガ（織姫の星）。「こ・は・わ」＝「べ・デ・ア」で覚えよう。"},
+  {q:"デネブがある星座は？", opts:["はくちょう座","わし座","こと座","さそり座"], a:0, ex:"デネブ＝はくちょう座。天の川の中を飛んでいる白鳥。"},
+  {q:"アルタイルがある星座は？", opts:["わし座","こと座","はくちょう座","おとめ座"], a:0, ex:"アルタイル＝わし座。七夕の彦星。"},
+  {q:"七夕の「織姫」の星は？", opts:["ベガ","アルタイル","デネブ","スピカ"], a:0, ex:"織姫＝ベガ（こと座）、彦星＝アルタイル（わし座）。間に天の川！"},
+  {q:"夏、南の空の低いところに見えるS字の形の星座は？", opts:["さそり座","しし座","オリオン座","ペガスス座"], a:0, ex:"さそり座はS字で南の低い空。赤い1等星アンタレスが目印。"},
+  {q:"さそり座にある赤い1等星は？", opts:["アンタレス","ベテルギウス","アルタイル","リゲル"], a:0, ex:"さそり座＝アンタレス（赤）。赤い星はアンタレスとベテルギウスの2つ！"},
+  {q:"冬の大三角の組み合わせで正しいのは？", opts:["ベテルギウス・シリウス・プロキオン","リゲル・シリウス・プロキオン","ベテルギウス・リゲル・シリウス","ベガ・デネブ・アルタイル"], a:0, ex:"冬の大三角に入るのはベテルギウス！リゲルじゃないよ（超頻出ひっかけ）。"},
+  {q:"シリウスがある星座は？", opts:["おおいぬ座","こいぬ座","オリオン座","おおぐま座"], a:0, ex:"シリウス＝おおいぬ座。白くて、星の中でいちばん明るく見える。"},
+  {q:"プロキオンがある星座は？", opts:["こいぬ座","おおいぬ座","うしかい座","こぐま座"], a:0, ex:"プロキオン＝こいぬ座。「こいぬのプロ」で覚えよう。"},
+  {q:"オリオン座にある1等星2つの正しい組み合わせは？", opts:["ベテルギウス（赤）とリゲル（青白）","ベテルギウス（青白）とリゲル（赤）","シリウスとプロキオン","アンタレスとスピカ"], a:0, ex:"ベテルギウスが赤、リゲルが青白。色の入れかえひっかけに注意！"},
+  {q:"オリオン座の三つ星を左下にのばすとぶつかる星は？", opts:["シリウス","プロキオン","カペラ","北極星"], a:0, ex:"三つ星の延長→シリウス（おおいぬ座）。星をさがす手がかりとして出る！"},
+  {q:"春の大三角の組み合わせで正しいのは？", opts:["アルクトゥルス・スピカ・デネボラ","アルクトゥルス・スピカ・レグルス","ベガ・デネブ・アルタイル","スピカ・レグルス・シリウス"], a:0, ex:"春はアルクトゥルス（うしかい座）・スピカ（おとめ座）・デネボラ（しし座）。レグルスじゃない！"},
+  {q:"春の大三角のデネボラは何等星？", opts:["2等星","1等星","3等星","6等星"], a:0, ex:"デネボラだけ2等星！「春の大三角で1等星でないものは？」は超頻出。"},
+  {q:"アルクトゥルスがある星座は？", opts:["うしかい座","おとめ座","しし座","こと座"], a:0, ex:"アルクトゥルス＝うしかい座。色はオレンジ。"},
+  {q:"スピカがある星座は？", opts:["おとめ座","うしかい座","しし座","おおいぬ座"], a:0, ex:"スピカ＝おとめ座。色は青白。"},
+  {q:"しし座の1等星は？", opts:["レグルス","デネボラ","スピカ","ポルックス"], a:0, ex:"しし座の1等星＝レグルス。デネボラ（2等星）はしっぽの星。"},
+  {q:"春の大曲線の正しいつながりは？", opts:["北斗七星→アルクトゥルス→スピカ","北斗七星→スピカ→アルクトゥルス","カシオペヤ座→北極星→スピカ","北斗七星→レグルス→デネボラ"], a:0, ex:"北斗七星のえのカーブをのばして、アルクトゥルス→スピカの順！"},
+  {q:"秋の四辺形をつくる星座は？", opts:["ペガスス座","アンドロメダ座","オリオン座","カシオペヤ座"], a:0, ex:"秋の四辺形＝ペガススの四辺形。角の1つからアンドロメダ座が続く。"},
+  {q:"秋の星空の特ちょうとして正しいのは？", opts:["1等星がない","1等星がいちばん多い","大三角がある","星が全く見えない"], a:0, ex:"秋の空には1等星がない！だから「四辺形」で覚える。"},
+  {q:"北極星がある星座は？", opts:["こぐま座","おおぐま座","カシオペヤ座","こいぬ座"], a:0, ex:"北極星＝こぐま座。おおぐま座（北斗七星）とまちがえない！"},
+  {q:"北斗七星は何座の一部？", opts:["おおぐま座","こぐま座","カシオペヤ座","うしかい座"], a:0, ex:"北斗七星＝おおぐま座の一部（しっぽとおしり）。"},
+  {q:"北斗七星から北極星を見つけるには？", opts:["ひしゃくの先の2つの星の間かくを5倍のばす","えの先を3倍のばす","真上を見る","W字の真ん中をたどる"], a:0, ex:"ひしゃくの先の2つの星を5倍！カシオペヤ座からもたどれる。"},
+  {q:"W字の形をした北の空の星座は？", opts:["カシオペヤ座","おおぐま座","こぐま座","ペガスス座"], a:0, ex:"カシオペヤ座＝W字（向きによってM字）。一年中北の空に見える。"},
+  {q:"赤い星の組み合わせはどれ？", opts:["ベテルギウスとアンタレス","リゲルとスピカ","シリウスとベガ","太陽とカペラ"], a:0, ex:"赤＝ベテルギウス・アンタレス。青白＝リゲル・スピカ。白＝シリウス・ベガ。黄＝太陽・カペラ。"},
+  {q:"青白い星の組み合わせはどれ？", opts:["リゲルとスピカ","ベテルギウスとアンタレス","シリウスとベガ","アルクトゥルスと太陽"], a:0, ex:"青白＝リゲル・スピカ。表面温度がいちばん高い（10000℃以上）。"},
+  {q:"星の色と表面温度の関係で正しいのは？", opts:["青白い星ほど温度が高い","赤い星ほど温度が高い","色と温度は関係ない","白い星がいちばん低い"], a:0, ex:"温度が高い順：青白→白→黄→オレンジ→赤。炎の色と同じ原理！"},
+  {q:"太陽と同じ黄色の仲間の1等星は？", opts:["カペラ","シリウス","アンタレス","リゲル"], a:0, ex:"黄色＝太陽とカペラ（ぎょしゃ座）。"},
+  {q:"アルクトゥルスの色は？", opts:["オレンジ","青白","赤","白"], a:0, ex:"アルクトゥルス＝オレンジ（3500〜5000℃）。"},
+  {q:"夏の大三角の星の色は？", opts:["ぜんぶ白","ぜんぶ赤","ぜんぶ青白","バラバラ"], a:0, ex:"ベガ・デネブ・アルタイルはぜんぶ白い1等星。"},
+  {q:"一年中、北の空でほとんど動かない星は？", opts:["北極星","シリウス","ベガ","カシオペヤ"], a:0, ex:"北極星は地じくの延長上にあるからほとんど動かない。方角を知る目印！"}
+];
+
+let quizOrder = [], quizIdx = 0, quizScore = 0;
+const $ = id => document.getElementById(id);
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  quizOrder = shuffle(QUIZ).slice(0,10);
+  quizIdx = 0; quizScore = 0;
+  $("quiz-score").style.display = "none";
+  $("quiz-restart").style.display = "none";
+  showQuestion();
+}
+
+function showQuestion() {
+  const item = quizOrder[quizIdx];
+  $("quiz-progress").textContent = `第${quizIdx+1}問 / 10問　（正解 ${quizScore}）`;
+  $("quiz-q").textContent = item.q;
+  $("quiz-fb").innerHTML = "";
+  $("quiz-next").style.display = "none";
+  const box = $("quiz-opts");
+  box.innerHTML = "";
+  // 選択肢をシャッフルして表示
+  const order = shuffle([0,1,2,3]);
+  order.forEach(oi => {
+    const b = document.createElement("button");
+    b.className = "quiz-opt";
+    b.textContent = item.opts[oi];
+    b.addEventListener("click", () => answer(b, oi, item));
+    box.appendChild(b);
+  });
+}
+
+function answer(btn, oi, item) {
+  document.querySelectorAll(".quiz-opt").forEach(b => b.disabled = true);
+  const correct = oi === item.a;
+  if (correct) { quizScore++; btn.classList.add("correct"); }
+  else {
+    btn.classList.add("wrong");
+    document.querySelectorAll(".quiz-opt").forEach(b => {
+      if (b.textContent === item.opts[item.a]) b.classList.add("correct");
+    });
+  }
+  $("quiz-fb").innerHTML =
+    `<span class="mark">${correct ? "⭕ 正解！" : "❌ ざんねん…"}</span><br>${item.ex}`;
+  if (quizIdx < 9) {
+    $("quiz-next").style.display = "inline-block";
+  } else {
+    finishQuiz();
+  }
+}
+
+function finishQuiz() {
+  const s = $("quiz-score");
+  let msg;
+  if (quizScore === 10) msg = "🏆 パーフェクト！星座マスター認定！";
+  else if (quizScore >= 8) msg = "🌟 すごい！あと少しでマスター！";
+  else if (quizScore >= 5) msg = "💪 いい調子！まちがえた星をもう一回ながめよう";
+  else msg = "🌱 まずは「ながめる」→「かくす」で覚えてからもう一回！";
+  s.innerHTML = `けっか：${quizScore} / 10 <small>${msg}</small>`;
+  s.style.display = "block";
+  $("quiz-restart").style.display = "inline-block";
+}
+
+$("quiz-next").addEventListener("click", () => { quizIdx++; showQuestion(); });
+$("quiz-restart").addEventListener("click", startQuiz);
+startQuiz();
+</script>
+</body>
+</html>
