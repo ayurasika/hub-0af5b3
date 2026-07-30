@@ -166,6 +166,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
     <div class="btnrow" style="justify-content:flex-start;">
       <button class="btn orange" onclick="document.getElementById('km-cam').click()">📷 写真をとっておくる</button>
       <button class="btn" onclick="document.getElementById('km-alb').click()">アルバムから</button>
+      <a class="btn orange" href="tools/計マス_解説.html">📖 大きい字で解説を見る</a>
     </div>
     <input type="file" accept="image/*" capture="environment" id="km-cam" hidden>
     <input type="file" accept="image/*" multiple id="km-alb" hidden>
@@ -798,6 +799,15 @@ document.addEventListener("visibilitychange", () => {
 });
 
 function toggle(id){ document.getElementById(id).classList.toggle("open"); }
+
+// ツールのリンクに日付をつけて、iPadのキャッシュに古い版が残らないようにする
+// （config.jsの読み込みと同じ方式。日が変われば必ず最新を取りに行く）
+(function(){
+  var v = new Date().toISOString().slice(0,10);
+  document.querySelectorAll('a[href^="tools/"]').forEach(function(a){
+    a.href = a.getAttribute("href") + "?v=" + v;
+  });
+})();
 </script>
 </body>
 </html>

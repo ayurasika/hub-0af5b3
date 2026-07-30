@@ -92,9 +92,17 @@
   .canvas-wrap {
     position: relative;
     width: 100%;
-    aspect-ratio: 1;
+  }
+  /* aspect-ratio は古いiPadで効かないので、paddingで正方形を作る（全ブラウザ対応） */
+  .canvas-wrap::before {
+    content: "";
+    display: block;
+    padding-top: 100%;
   }
   canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     display: block;
@@ -507,6 +515,21 @@
 </div>
 
 <script>
+// 古いiPad(iOS15以下)のSafariには ctx.roundRect が無く、描画が最初のコマで
+// 止まって真っ暗になるため、無い場合だけ同じ動きの代替を足す
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    this.moveTo(x + r, y);
+    this.arcTo(x + w, y, x + w, y + h, r);
+    this.arcTo(x + w, y + h, x, y + h, r);
+    this.arcTo(x, y + h, x, y, r);
+    this.arcTo(x, y, x + w, y, r);
+    this.closePath();
+    return this;
+  };
+}
+
 // ================= タブ切り替え =================
 const tabs = document.querySelectorAll('.tab-btn');
 tabs.forEach(btn => {

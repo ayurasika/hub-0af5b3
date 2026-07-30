@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>計マス まるつけと解説</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e8611a'/><text x='50' y='72' font-size='58' text-anchor='middle' fill='white'>🧮</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;background:#fff8f3;color:#1a1a2e;line-height:1.75;padding-bottom:60px;}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px;}
+
+.header{background:linear-gradient(135deg,#f08a4b,#e8611a);color:#fff;padding:18px 16px 16px;border-radius:0 0 22px 22px;box-shadow:0 3px 12px rgba(232,97,26,.3);}
+.header h1{font-size:1.45rem;font-weight:900;}
+.header .meta{font-size:1rem;opacity:.95;margin-top:4px;}
+.back{display:inline-block;margin-top:10px;font-size:.9rem;font-weight:900;color:#fff;background:rgba(255,255,255,.25);border-radius:16px;padding:5px 14px;text-decoration:none;}
+
+.card{background:#fff;border-radius:18px;margin-top:16px;padding:18px 18px 20px;box-shadow:0 2px 10px rgba(200,120,60,.13);}
+.card h2{font-size:1.2rem;font-weight:900;color:#e8611a;margin-bottom:6px;}
+
+/* 判定（大きく） */
+.marks{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+.mk{flex:1 1 30%;min-width:130px;border:2.5px solid #9fdcb8;background:#f2fdf6;border-radius:14px;padding:12px 10px;text-align:center;}
+.mk.ng{border-color:#f0b9b9;background:#fdf3f3;}
+.mk .no{font-size:1.25rem;font-weight:900;}
+.mk .jd{font-size:2.1rem;line-height:1.15;margin-top:2px;}
+.mk .nt{font-size:.85rem;color:#666;margin-top:4px;line-height:1.5;}
+.score{font-size:1.15rem;font-weight:900;margin-top:14px;text-align:center;color:#e8611a;}
+
+.msg{margin-top:14px;font-size:1.08rem;line-height:1.9;background:#fff3e9;border-radius:14px;padding:14px 16px;}
+
+/* 解説 */
+.kai{background:#fff;border-radius:18px;margin-top:16px;padding:18px;box-shadow:0 2px 10px rgba(200,120,60,.13);border:3px solid #ffd9bf;}
+.kai .kno{display:inline-block;font-size:.9rem;font-weight:900;color:#fff;background:#e8611a;border-radius:12px;padding:3px 12px;}
+.kai .kq{font-size:1.32rem;font-weight:900;margin-top:10px;line-height:1.6;word-break:break-all;}
+.kai .ktag{margin-top:10px;font-size:1.02rem;font-weight:900;color:#1f7a4d;background:#eafaf0;border-radius:12px;padding:9px 13px;}
+.kai h3{font-size:1.1rem;font-weight:900;margin-top:20px;color:#e8611a;border-bottom:2px dashed #ffd9bf;padding-bottom:5px;}
+.step{margin-top:12px;display:flex;gap:11px;align-items:flex-start;}
+.step .sn{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:#e8611a;color:#fff;font-weight:900;font-size:.95rem;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.step .sb{flex:1;font-size:1.06rem;line-height:1.85;}
+.shiki{font-size:1.3rem;font-weight:900;letter-spacing:.02em;background:#fffaf5;border-left:5px solid #e8611a;border-radius:8px;padding:10px 14px;margin:9px 0;overflow-x:auto;white-space:nowrap;}
+.ans{font-size:1.5rem;font-weight:900;color:#e60012;text-align:center;background:#fff4f4;border-radius:14px;padding:13px;margin-top:16px;}
+.point{margin-top:16px;font-size:1.04rem;line-height:1.9;background:#f3f8ff;border-radius:14px;padding:14px 16px;}
+.point b{color:#2a6fd9;}
+.betsu{margin-top:14px;border-top:1px dashed #ffd9bf;padding-top:12px;}
+.betsu .bn{font-size:1rem;font-weight:900;color:#b8860b;}
+.betsu .bb{font-size:1.02rem;line-height:1.85;margin-top:5px;}
+.empty{text-align:center;padding:34px 12px;font-size:1.06rem;color:#888;line-height:2;}
+.footer{text-align:center;font-size:.8rem;color:#bba;margin-top:26px;}
+.noprint .btn{border:none;border-radius:20px;padding:11px 22px;font-family:inherit;font-size:.95rem;font-weight:900;cursor:pointer;background:#e8611a;color:#fff;margin-top:16px;}
+@media print{.noprint,.header .back{display:none;} body{background:#fff;} .card,.kai{box-shadow:none;border:1px solid #ddd;page-break-inside:avoid;}}
+</style>
+</head>
+<body>
+
+<div class="header"><div class="wrap">
+  <h1>🧮 計マス まるつけと解説</h1>
+  <div class="meta" id="meta">よみこみ中…</div>
+  <a class="back" href="../index.html">← ハブにもどる</a>
+</div></div>
+
+<div class="wrap" id="main"></div>
+
+<div class="wrap noprint" style="text-align:center">
+  <button class="btn" onclick="window.print()">🖨 印刷する</button>
+</div>
+
+<div class="footer">計マス まるつけと解説 ｜ ママとClaudeがつくってるよ</div>
+
+<script src="../data/config.js"></script>
+<script>
+const CFG = window.HUB_CONFIG || {};
+const SYNC_URL = CFG.syncUrl || "";
+const main = document.getElementById("main");
+const esc = s => String(s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+
+function render(r){
+  if(!r || !r.date){
+    document.getElementById("meta").textContent = "まだ結果がないよ";
+    main.innerHTML = `<div class="card"><div class="empty">
+      まだ まるつけの結果がとどいてないよ。<br>
+      計マスをといたら、ハブの 📷 で写真をおくってね。
+    </div></div>`;
+    return;
+  }
+  const [y,m,d] = r.date.split("-").map(Number);
+  document.getElementById("meta").textContent = `${m}月${d}日分 ／ ${r.sheet || ""}`;
+
+  const ok = (r.marks||[]).filter(x=>x.ok).length, all = (r.marks||[]).length;
+  let html = `<div class="card">
+    <h2>けっか</h2>
+    <div class="marks">${(r.marks||[]).map(x=>`
+      <div class="mk${x.ok?"":" ng"}">
+        <div class="no">${esc(x.n)}</div>
+        <div class="jd">${x.ok?"⭕️":"❌"}</div>
+        ${x.note?`<div class="nt">${esc(x.note)}</div>`:""}
+      </div>`).join("")}</div>
+    <div class="score">${all}問中 ${ok}問せいかい</div>
+    ${r.message?`<div class="msg">💬 ${esc(r.message)}</div>`:""}
+  </div>`;
+
+  (r.kaisetsu||[]).forEach(k=>{
+    html += `<div class="kai">
+      <span class="kno">${esc(k.n)} のくわしい解説</span>
+      <div class="kq">${esc(k.q)}</div>
+      ${k.tag?`<div class="ktag">💡 ${esc(k.tag)}</div>`:""}
+      ${(k.sections||[]).map(sec=>`
+        <h3>${esc(sec.title)}</h3>
+        ${(sec.steps||[]).map((s,i)=>`
+          <div class="step"><div class="sn">${i+1}</div><div class="sb">${s.text||""}</div></div>
+          ${s.shiki?`<div class="shiki">${esc(s.shiki)}</div>`:""}
+        `).join("")}
+        ${sec.note?`<div class="sb" style="margin-top:10px;font-size:1.02rem">${sec.note}</div>`:""}
+      `).join("")}
+      ${k.a?`<div class="ans">答え　${esc(k.a)}</div>`:""}
+      ${(k.betsu||[]).length?`<div class="betsu">${k.betsu.map(b=>`
+        <div class="bn">▽ ${esc(b.name)}</div><div class="bb">${b.body||""}</div>`).join("")}</div>`:""}
+      ${k.point?`<div class="point"><b>ここが大事</b><br>${k.point}</div>`:""}
+    </div>`;
+  });
+
+  main.innerHTML = html;
+}
+
+(async ()=>{
+  let cached = null;
+  try { cached = (JSON.parse(localStorage.getItem("shared-cache")||"{}")["km-result"]||{}).v; } catch(e){}
+  if(cached) render(cached);
+  if(!SYNC_URL) { if(!cached) render(null); return; }
+  try{
+    const res = await fetch(SYNC_URL);
+    const st = await res.json();
+    render((st["km-result"]||{}).v);
+  }catch(e){ if(!cached) render(null); }
+})();
+</script>
+</body>
+</html>
