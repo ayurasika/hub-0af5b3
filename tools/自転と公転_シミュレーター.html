@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自転と公転シミュレーター</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: linear-gradient(180deg, #0a0e1a 0%, #101530 100%);
+    color: #e0e6f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 10px 60px;
+  }
+  h1 {
+    font-size: 1.25em;
+    color: #ffd700;
+    text-align: center;
+    font-weight: 900;
+  }
+  .subtitle {
+    font-size: 0.75em;
+    color: #8892b0;
+    text-align: center;
+    margin: 4px 0 14px;
+  }
+
+  /* タブ */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 14px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 9px 0;
+    border: 1px solid rgba(160,176,255,0.3);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    color: #a0b0ff;
+    font-family: inherit;
+    font-size: 0.72em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pos-btns {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .phase-btns {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .phase-btns .pos-btn { font-size: 0.78em; }
+  .pos-btn {
+    padding: 7px 0;
+    border: 1px solid rgba(160,176,255,0.3);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    color: #c8d2f8;
+    font-family: inherit;
+    font-size: 0.9em;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  .pos-btn.active {
+    background: linear-gradient(135deg, #e0b030, #b8860b);
+    color: #fff;
+    border-color: transparent;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, #4a5adb, #7a5adb);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 2px 12px rgba(122,90,219,0.5);
+  }
+  .panel { display: none; width: 100%; max-width: 440px; }
+  .panel.active { display: block; }
+
+  .canvas-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 16px;
+    border: 1px solid rgba(160,176,255,0.2);
+    background: #070a16;
+  }
+
+  /* コントロール */
+  .controls {
+    margin-top: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(160,176,255,0.15);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .play-btn {
+    flex-shrink: 0;
+    width: 84px;
+    padding: 8px 0;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2fae6e, #1e8a54);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85em;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .play-btn.playing { background: linear-gradient(135deg, #d66a2f, #b5511e); }
+  input[type=range] {
+    flex: 1;
+    accent-color: #7a8aff;
+    height: 26px;
+  }
+  .readout {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    flex: 1;
+    min-width: 100px;
+    background: rgba(122,138,255,0.12);
+    border: 1px solid rgba(122,138,255,0.3);
+    border-radius: 10px;
+    padding: 7px 6px;
+    text-align: center;
+  }
+  .chip .label { font-size: 0.65em; color: #8892b0; }
+  .chip .value { font-size: 1.05em; font-weight: 900; color: #ffe066; }
+
+  /* 説明カード */
+  .card {
+    margin-top: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(160,176,255,0.15);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 0.85em;
+    line-height: 1.75;
+  }
+  .card h2 {
+    font-size: 1.0em;
+    color: #a0b0ff;
+    margin-bottom: 6px;
+  }
+  .card strong { color: #ffe066; }
+  .formula {
+    background: rgba(255,224,102,0.1);
+    border: 1.5px solid rgba(255,224,102,0.45);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 8px 0;
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: 900;
+    color: #ffe066;
+  }
+  .warn {
+    background: rgba(255,107,107,0.1);
+    border: 1.5px solid rgba(255,107,107,0.45);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 8px 0;
+  }
+  .warn::before { content: "⚠️ ひっかけ注意　"; font-weight: 900; color: #ff8a8a; }
+  .tip {
+    background: rgba(74,191,74,0.1);
+    border: 1.5px solid rgba(74,191,74,0.45);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 8px 0;
+  }
+  .tip::before { content: "💡 "; }
+
+  /* まとめ表 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 0.95em;
+  }
+  th, td {
+    border: 1px solid rgba(160,176,255,0.25);
+    padding: 8px 6px;
+    text-align: center;
+  }
+  th { background: rgba(122,138,255,0.15); color: #a0b0ff; }
+  td.big { font-weight: 900; color: #ffe066; font-size: 1.05em; }
+
+  /* 手順ステップ */
+  .step {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+    align-items: flex-start;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a5adb, #7a5adb);
+    color: #fff;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-body { flex: 1; }
+
+  /* ブラー隠しクイズ */
+  .hide {
+    filter: blur(7px);
+    opacity: 0.6;
+    background: rgba(122,138,255,0.2);
+    border-radius: 6px;
+    padding: 0 6px;
+    cursor: pointer;
+    transition: all 0.6s;
+  }
+  .hide.show {
+    filter: blur(0);
+    opacity: 1;
+    background: rgba(255,224,102,0.25);
+    color: #ffe066;
+    font-weight: 900;
+  }
+</style>
+</head>
+<body>
+
+<h1>🌍 自転と公転シミュレーター ☀️</h1>
+<div class="subtitle">なんで1時間で15°？ なんで1ヶ月で30°？ を目で見て納得する</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="jiten">🌍 自転</button>
+  <button class="tab-btn" data-tab="kita">⭐ 北の空</button>
+  <button class="tab-btn" data-tab="koten">☀️ 公転</button>
+  <button class="tab-btn" data-tab="tsuki">🌙 月</button>
+  <button class="tab-btn" data-tab="deiri">⏰ 月の出</button>
+  <button class="tab-btn" data-tab="matome">📝 まとめ</button>
+</div>
+
+<!-- ============ タブ1: 自転 ============ -->
+<div class="panel active" id="panel-jiten">
+  <div class="canvas-wrap"><canvas id="cv-jiten" width="800" height="800"></canvas></div>
+  <div class="controls">
+    <div class="ctrl-row">
+      <button class="play-btn" id="play-jiten">▶ 再生</button>
+      <input type="range" id="slider-jiten" min="0" max="24" step="0.5" value="0">
+    </div>
+    <div class="readout">
+      <div class="chip"><div class="label">経過時間</div><div class="value" id="ro-jiten-t">0時間</div></div>
+      <div class="chip"><div class="label">回った角度</div><div class="value" id="ro-jiten-deg">0°</div></div>
+      <div class="chip"><div class="label">日本の時刻</div><div class="value" id="ro-jiten-clock">正午</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🌍 自転（じてん）＝地球がコマのように回ること</h2>
+    地球は北極と南極を貫く<strong>地軸（ちじく）</strong>を中心に、<strong>1日（24時間）で1回転（360°）</strong>している。
+    上の図は<strong>北極の真上から見た地球</strong>。▶再生を押すと、日本にいる🙂が昼→夕方→夜→朝とめぐるのが見えるよ。
+    <div class="formula">360° ÷ 24時間 ＝ 1時間に15°</div>
+    <div class="tip"><strong>「1日＝24時間」はそもそも、太陽が真南に来てから次にまた真南に来るまでの時間</strong>のこと。つまり「地球が1回転する時間」を24等分したのが「1時間」。だから割り算で必ず15°になる。</div>
+  </div>
+
+  <div class="card">
+    <h2>🚃 なんで星が動いて見えるの？</h2>
+    星が動いているんじゃなくて、<strong>自分が乗っている地球が回っている</strong>から。
+    電車に乗ると、止まっている景色が後ろに流れて見えるのと同じ。
+    地球が<strong>西→東</strong>に回るから、太陽も星も反対の<strong>東→西</strong>に動いて見える。これを<strong>日周運動（にっしゅううんどう）</strong>と呼ぶよ。
+  </div>
+</div>
+
+<!-- ============ タブ2: 北の空 ============ -->
+<div class="panel" id="panel-kita">
+  <div class="canvas-wrap"><canvas id="cv-kita" width="800" height="800"></canvas></div>
+  <div class="controls">
+    <div class="ctrl-row">
+      <button class="play-btn" id="play-kita">▶ 再生</button>
+      <input type="range" id="slider-kita" min="0" max="24" step="0.5" value="0">
+    </div>
+    <div class="readout">
+      <div class="chip"><div class="label">経過時間</div><div class="value" id="ro-kita-t">0時間</div></div>
+      <div class="chip"><div class="label">動いた角度</div><div class="value" id="ro-kita-deg">0°</div></div>
+      <div class="chip"><div class="label">進んだ目盛り</div><div class="value" id="ro-kita-memori">0目盛り</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⭐ 北の空は「北極星」を中心に反時計回り</h2>
+    <strong>北極星は地軸をまっすぐ北へのばした先</strong>にあるから、地球がどれだけ回っても<strong>ほぼ動かない</strong>。
+    まわりの星は北極星を中心に<strong>反時計回り</strong>に、<strong>1時間で15°</strong>動いて見える。
+    <div class="formula">この図の目盛りは12個 → 1目盛り＝30°＝<u>2時間</u></div>
+    <div class="tip">テキストp.79の図と同じ配置！ 問題の①〜⑫は「30°きざみ」だから、<strong>2時間で1目盛り</strong>進むと覚えると計算がラク。</div>
+    <div class="warn">反時計回り＝「①→②→③…」と番号が増える向き。時刻を<strong>さかのぼる</strong>ときは逆に時計回りに戻すこと！</div>
+  </div>
+</div>
+
+<!-- ============ タブ3: 公転 ============ -->
+<div class="panel" id="panel-koten">
+  <div class="canvas-wrap"><canvas id="cv-koten" width="800" height="800"></canvas></div>
+  <div class="controls">
+    <div class="ctrl-row">
+      <button class="play-btn" id="play-koten">▶ 再生</button>
+      <input type="range" id="slider-koten" min="0" max="12" step="0.25" value="0">
+    </div>
+    <div class="readout">
+      <div class="chip"><div class="label">経過</div><div class="value" id="ro-koten-t">0ヶ月</div></div>
+      <div class="chip"><div class="label">進んだ角度</div><div class="value" id="ro-koten-deg">0°</div></div>
+      <div class="chip"><div class="label">今の月</div><div class="value" id="ro-koten-month">8月</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>☀️ 公転（こうてん）＝地球が太陽のまわりを回ること</h2>
+    地球は自転しながら、同時に<strong>太陽のまわりを1年（12ヶ月）かけて1周（360°）</strong>している。これが公転。
+    <div class="formula">360° ÷ 12ヶ月 ＝ 1ヶ月に30°<br><span style="font-size:0.75em; font-weight:400;">（360° ÷ 365日 ＝ 1日に約1°）</span></div>
+    <div class="tip">アニメの地球はゆっくり回してるけど、ほんとは<strong>1ヶ月に約30回転</strong>（毎日1回転）しながら進んでる。</div>
+  </div>
+
+  <div class="card">
+    <h2>🌌 なんで「同じ時刻」でも星がずれるの？</h2>
+    地球が公転で場所を変えると、<strong>同じ「午後9時」でも地球の向きが少しずつ変わる</strong>。
+    だから同じ時刻・同じ場所で星を見ると、<strong>1ヶ月ごとに30°ずつ（反時計回りに）進んだ位置</strong>に見える。
+    これを<strong>年周運動（ねんしゅううんどう）</strong>と呼ぶよ。
+    <div class="warn">日周運動（1時間15°）と年周運動（1ヶ月30°）は<strong>どちらも北の空では反時計回り</strong>。向きが同じだから、テストでは2つを足し算できる！</div>
+  </div>
+</div>
+
+<!-- ============ タブ4: 月 ============ -->
+<div class="panel" id="panel-tsuki">
+  <div class="canvas-wrap"><canvas id="cv-tsuki" width="800" height="800"></canvas></div>
+  <div class="controls">
+    <div class="pos-btns">
+      <button class="pos-btn" data-pos="A">A</button>
+      <button class="pos-btn" data-pos="B">B</button>
+      <button class="pos-btn" data-pos="C">C</button>
+      <button class="pos-btn" data-pos="D">D</button>
+      <button class="pos-btn" data-pos="E">E</button>
+      <button class="pos-btn" data-pos="F">F</button>
+      <button class="pos-btn" data-pos="G">G</button>
+      <button class="pos-btn" data-pos="H">H</button>
+    </div>
+    <div class="ctrl-row">
+      <button class="play-btn" id="play-tsuki">▶ 再生</button>
+      <input type="range" id="slider-tsuki" min="0" max="360" step="1" value="225">
+    </div>
+    <div class="readout">
+      <div class="chip"><div class="label">新月から</div><div class="value" id="ro-tsuki-day">–</div></div>
+      <div class="chip"><div class="label">月の名前</div><div class="value" id="ro-tsuki-name">–</div></div>
+      <div class="chip"><div class="label">光って見える側</div><div class="value" id="ro-tsuki-side">–</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>👀 「地球から見る」って、地球のどこから？</h2>
+    こたえ：<strong>どこからでもいい</strong>。月はめちゃくちゃ遠い（地球30個ぶんも先）から、
+    <strong>地球のどこに立っていても、月の形はまったく同じに見える</strong>。
+    だから「地球から見たら」は<strong>図の🙂みたいに、月の方を向いて立った人から見たら</strong>と考えればOK。
+    <div class="tip">テストの図では「地球の中心から月を見る」と考えてしまって大丈夫。表面か中心かで形は変わらない（遠すぎるから）。</div>
+  </div>
+
+  <div class="card">
+    <h2>🌗 形が変わるしくみ</h2>
+    月は自分では光らない。<strong>いつも太陽側の半分だけ</strong>照らされている（図1の月が全部半分ずつ光ってるのはそのせい）。
+    その光った半分を、<strong>地球からどの角度で見るか</strong>で形が変わって見える。
+    <div class="formula">月の形 ＝ 光った半分を「見る角度」で決まる</div>
+    ボタンでA〜Hを切りかえて、右上の「地球から見ると」がどう変わるか見てみて。
+  </div>
+
+  <div class="card">
+    <h2>🧭 どっち側が光って見える？</h2>
+    覚え方はこれだけ：<strong>光って見えるのは、いつも太陽がある側</strong>。
+    <div class="formula">ふくらむ期間（新月G→上弦A→満月C）＝ <strong>西（右）側</strong>が光る<br>欠ける期間（満月C→下弦E→新月G）＝ <strong>東（左）側</strong>が光る</div>
+    <div class="warn">東・西は「<strong>南を向いて月を見たとき、左が東・右が西</strong>」。テストの解答用紙（東・西つきの円）もこの向きで書かれてる。</div>
+  </div>
+
+  <div class="card">
+    <h2>⚔️ この問題を解く（図1のDの位置）</h2>
+    <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Dはどこ？</strong>：満月（C）と下弦（E）の間 → <strong>満月から少し欠けはじめた月</strong>。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><strong>どっちが欠ける？</strong>：満月→新月の「欠ける期間」だから光るのは<strong>東（左）側</strong>。つまり欠ける（影になる）のは<strong>西（右）側</strong>。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><strong>答え</strong>：円の<strong>右（西）側のはしを少しだけ</strong>ぬりつぶす。上のDボタンを押して確認してみて！</div></div>
+  </div>
+</div>
+
+<!-- ============ タブ5: 月の出入り ============ -->
+<div class="panel" id="panel-deiri">
+  <div class="canvas-wrap"><canvas id="cv-deiri" width="800" height="800"></canvas></div>
+  <div class="controls">
+    <div class="phase-btns">
+      <button class="pos-btn" data-phase="0">新月</button>
+      <button class="pos-btn" data-phase="45">三日月</button>
+      <button class="pos-btn" data-phase="90">上弦</button>
+      <button class="pos-btn" data-phase="180">満月</button>
+      <button class="pos-btn" data-phase="270">下弦</button>
+    </div>
+    <div class="ctrl-row">
+      <button class="play-btn" id="play-deiri">▶ 再生</button>
+      <input type="range" id="slider-deiri" min="0" max="24" step="0.25" value="18">
+    </div>
+    <div class="readout">
+      <div class="chip"><div class="label">時刻</div><div class="value" id="ro-deiri-t">–</div></div>
+      <div class="chip"><div class="label">月はいま</div><div class="value" id="ro-deiri-up">–</div></div>
+      <div class="chip"><div class="label">月の出</div><div class="value" id="ro-deiri-rise">–</div></div>
+      <div class="chip"><div class="label">月の入り</div><div class="value" id="ro-deiri-set">–</div></div>
+    </div>
+    <div style="margin-top:8px; font-size:0.72em; color:#8892b0; text-align:center;">※この図では 日の出6:00・日の入り18:00 に固定（春分・秋分のころ）</div>
+  </div>
+
+  <div class="card">
+    <h2>⏰ 「月の出」って何が起きてる？</h2>
+    月がのぼってくるんじゃなくて、<strong>自分の乗った地球が自転して、地平線の下から月が「見えはじめる」瞬間</strong>が月の出。
+    ▶再生で🙂と地平線がぐるぐる回るのを見てみて。月はほとんど動いてない（1日で約12°だけ）。<strong>動いてるのは自分！</strong>
+  </div>
+
+  <div class="card">
+    <h2>🌕 満月は「日の入りと同時」にのぼる</h2>
+    満月は<strong>太陽の正反対</strong>にある。だから太陽が西にしずむとき、ちょうど反対の<strong>東から満月がのぼる</strong>。
+    新月は太陽と<strong>同じ方向</strong>にあるから、太陽と一緒に出て一緒にしずむ（＝昼の空にあるから見えない）。
+    <div class="formula">位置の関係が、そのまま「出る時刻」を決める</div>
+    <table>
+      <tr><th>月の形</th><th>月の出</th><th>南中</th><th>月の入り</th></tr>
+      <tr><td><strong>新月</strong></td><td><span class="hide">6時ごろ</span></td><td><span class="hide">12時ごろ</span></td><td><span class="hide">18時ごろ</span></td></tr>
+      <tr><td><strong>上弦</strong></td><td><span class="hide">正午ごろ</span></td><td><span class="hide">18時ごろ</span></td><td><span class="hide">真夜中ごろ</span></td></tr>
+      <tr><td><strong>満月</strong></td><td><span class="hide">18時ごろ（日の入り）</span></td><td><span class="hide">真夜中ごろ</span></td><td><span class="hide">6時ごろ（日の出）</span></td></tr>
+      <tr><td><strong>下弦</strong></td><td><span class="hide">真夜中ごろ</span></td><td><span class="hide">6時ごろ</span></td><td><span class="hide">正午ごろ</span></td></tr>
+    </table>
+    <div class="tip">丸暗記しなくていい。上のボタンで月の位置を切りかえて、🙂が回って月に出会う時刻を確かめれば、その場で作れる。</div>
+  </div>
+
+  <div class="card">
+    <h2>📅 月の出は毎日約50分ずつおそくなる</h2>
+    月は公転で<strong>1日に約12°</strong>進む。地球がその12°ぶんよけいに回って月に追いつくのに<strong>約50分</strong>かかる。
+    だから月の出は<strong>毎日約50分ずつおそくなる</strong>（おくれ方は日によって30分〜70分くらいで変わる）。
+    <div class="warn">問題の表でも 16:32 → 16:59 → 17:23 と、月の出が毎日30分近くおそくなってるのが読み取れる。<strong>「月の出が毎日おそくなる」＝表が月の表だと見ぬくヒント</strong>にもなる。</div>
+  </div>
+
+  <div class="card">
+    <h2>⚔️ この問題を解く（テキストp.18）</h2>
+    <div class="step"><div class="step-num">1</div><div class="step-body"><strong>(1) 南中時刻</strong>＝日の出と日の入りのまん中。<br>(5時31分＋17時33分)÷2＝<strong>11時32分</strong></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><strong>(2) 昼の長さ</strong>＝日の入り−日の出。<br>17時31分−5時32分＝<strong>11時間59分</strong></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><strong>(3) 3日目の月の形</strong>：月の出17時23分 ≒ 日の入り17時30分。<br><strong>「日の入りとほぼ同時にのぼる月」＝満月</strong>！ 答えは<strong>ア</strong>（まん丸）。</div></div>
+    <div class="tip">形をきかれてるのに、使うのは<strong>時刻の表</strong>。「月の出と日の入りが同じ→満月」「月の出が正午→上弦」…と、<strong>時刻から形を逆算</strong>させるのがこのタイプの問題のねらい。</div>
+  </div>
+</div>
+
+<!-- ============ タブ6: まとめ ============ -->
+<div class="panel" id="panel-matome">
+  <div class="card">
+    <h2>📝 2つの運動まとめ</h2>
+    <table>
+      <tr><th></th><th>原因</th><th>星の動き</th><th>速さ</th></tr>
+      <tr><td><strong>日周運動</strong></td><td>自転<br>(1日で1回転)</td><td>反時計回り<br>(北の空)</td><td class="big">1時間で15°</td></tr>
+      <tr><td><strong>年周運動</strong></td><td>公転<br>(1年で1周)</td><td>反時計回り<br>(北の空)</td><td class="big">1ヶ月で30°<br><span style="font-size:0.8em">(1日で約1°)</span></td></tr>
+    </table>
+    <div class="tip">どっちも「360°を時間で割るだけ」。<strong>360÷24＝15、360÷12＝30</strong>。丸暗記じゃなくて、その場で作れる数字！</div>
+  </div>
+
+  <div class="card">
+    <h2>⚔️ 実際の問題で使ってみる（テキストp.79 (4)）</h2>
+    「8月1日の午後9時に星Aが①の位置。<strong>4月1日の午前3時</strong>にはどの位置？」
+    <div class="step"><div class="step-num">1</div><div class="step-body"><strong>月のずれ</strong>：8月1日→4月1日は<strong>8ヶ月後</strong>。<br>8 × 30°＝<strong>240°</strong> 反時計回り（＝8目盛り）</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><strong>時刻のずれ</strong>：午後9時→午前3時は<strong>6時間後</strong>。<br>6 × 15°＝<strong>90°</strong> 反時計回り（＝3目盛り）</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><strong>合計</strong>：240°＋90°＝<strong>330°</strong>（＝11目盛り）反時計回り。<br>①から11個進んで…答えは<strong>⑫</strong>！</div></div>
+    <div class="tip">330°進む＝<strong>「30°（1目盛り）だけ戻る」のと同じ</strong>。①の1つ手前は⑫。大きい角度が出たら「1周360°から引いて逆回り」するとはやい。</div>
+    <div class="warn">「4月1日の<strong>午前3時</strong>」は8ヶ月後の3月31日の夜中すぎ…と混乱しがち。<strong>月の計算は「日付どうし」（8/1→4/1で8ヶ月）、時刻の計算は「時刻どうし」（21時→翌3時で＋6時間）</strong>と分けて考えれば大丈夫。</div>
+  </div>
+
+  <div class="card">
+    <h2>✅ 3秒チェック（タップで答えが出るよ）</h2>
+    <div style="line-height:2.2;">
+      ・星は1時間に何度動く？ → <span class="hide">15°（360÷24）</span><br>
+      ・星は1ヶ月（同じ時刻）で何度動く？ → <span class="hide">30°（360÷12）</span><br>
+      ・星は1日（同じ時刻）で約何度動く？ → <span class="hide">約1°（360÷365）</span><br>
+      ・北の空の星の回り方は？ → <span class="hide">反時計回り</span><br>
+      ・北極星が動かない理由は？ → <span class="hide">地軸ののばした先にあるから</span><br>
+      ・月の光って見える側は？ → <span class="hide">いつも太陽がある側</span><br>
+      ・満ち欠けがひとまわりする期間は？ → <span class="hide">約1ヶ月（29.5日）</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================= タブ切り替え =================
+const tabs = document.querySelectorAll('.tab-btn');
+tabs.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabs.forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    drawAll();
+  });
+});
+
+// ブラー隠し
+document.querySelectorAll('.hide').forEach(el => {
+  el.addEventListener('click', () => el.classList.toggle('show'));
+});
+
+// ================= 共通ヘルパー =================
+// 角度aは「画面上で、真上から反時計回りに測った角度（度）」
+function posFromTop(cx, cy, r, aDeg) {
+  const a = aDeg * Math.PI / 180;
+  return { x: cx - r * Math.sin(a), y: cy - r * Math.cos(a) };
+}
+function drawStarShape(ctx, x, y, r, color) {
+  ctx.save();
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const ang = -Math.PI / 2 + i * Math.PI / 5;
+    const rr = (i % 2 === 0) ? r : r * 0.45;
+    const px = x + rr * Math.cos(ang), py = y + rr * Math.sin(ang);
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 18;
+  ctx.fill();
+  ctx.restore();
+}
+// 固定シードの背景星
+const bgStars = [];
+(function () {
+  let seed = 42;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  for (let i = 0; i < 90; i++) bgStars.push({ x: rnd() * 800, y: rnd() * 800, r: rnd() * 1.6 + 0.4, a: rnd() * 0.6 + 0.2 });
+})();
+function drawBgStars(ctx) {
+  ctx.save();
+  bgStars.forEach(s => {
+    ctx.globalAlpha = s.a;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+}
+// 円弧矢印（反時計回りの向き表示）
+function drawCcwArrow(ctx, cx, cy, r, fromDeg, toDeg, color) {
+  // fromDeg→toDeg は「真上から反時計回り」の度数
+  const toRad = d => (-90 - d) * Math.PI / 180; // canvas角に変換（反時計=角度減少）
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, toRad(fromDeg), toRad(toDeg), true);
+  ctx.stroke();
+  // 矢じり
+  const tip = posFromTop(cx, cy, r, toDeg);
+  const tangent = (toDeg + 90) * Math.PI / 180;
+  const dx = -Math.cos(-tangent + Math.PI / 2), dy = -Math.sin(-tangent + Math.PI / 2);
+  // 進行方向（反時計）の接線ベクトルを posFromTop の微分から求める
+  const a = toDeg * Math.PI / 180;
+  const tx = -Math.cos(a), ty = Math.sin(a);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(tip.x + tx * 16, tip.y + ty * 16);
+  ctx.lineTo(tip.x - ty * 9, tip.y + tx * 9);
+  ctx.lineTo(tip.x + ty * 9, tip.y - tx * 9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// ================= タブ1: 自転 =================
+const cvJiten = document.getElementById('cv-jiten');
+const ctxJ = cvJiten.getContext('2d');
+let tJiten = 0; // 経過時間（時間）
+
+function drawJiten() {
+  const ctx = ctxJ;
+  ctx.clearRect(0, 0, 800, 800);
+  drawBgStars(ctx);
+
+  const cx = 470, cy = 400, r = 175;
+
+  // 太陽（左端）
+  const sg = ctx.createRadialGradient(30, 400, 10, 30, 400, 220);
+  sg.addColorStop(0, 'rgba(255,220,100,0.95)');
+  sg.addColorStop(0.3, 'rgba(255,180,60,0.35)');
+  sg.addColorStop(1, 'rgba(255,180,60,0)');
+  ctx.fillStyle = sg;
+  ctx.fillRect(0, 0, 400, 800);
+  ctx.fillStyle = '#ffd700';
+  ctx.font = '900 30px "Noto Sans JP"';
+  ctx.textAlign = 'left';
+  ctx.fillText('☀️太陽の光', 20, 120);
+  // 光の矢印
+  ctx.strokeStyle = 'rgba(255,220,100,0.7)';
+  ctx.lineWidth = 4;
+  [250, 400, 550].forEach(y => {
+    ctx.beginPath();
+    ctx.moveTo(90, y);
+    ctx.lineTo(230, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(230, y);
+    ctx.lineTo(212, y - 9);
+    ctx.moveTo(230, y);
+    ctx.lineTo(212, y + 9);
+    ctx.stroke();
+  });
+
+  // 地球本体
+  const eg = ctx.createRadialGradient(cx - 60, cy - 60, 20, cx, cy, r);
+  eg.addColorStop(0, '#5aa0e8');
+  eg.addColorStop(1, '#1a4a8a');
+  ctx.fillStyle = eg;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 陸地っぽい模様（自転と一緒に回る）
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.clip();
+  const rot = -tJiten * 15 * Math.PI / 180; // 反時計（画面上）
+  ctx.translate(cx, cy);
+  ctx.rotate(rot);
+  ctx.fillStyle = 'rgba(90,180,110,0.75)';
+  [[0.5, 0.2, 52], [-0.4, 0.55, 40], [0.15, -0.6, 46], [-0.62, -0.25, 34]].forEach(([fx, fy, rr]) => {
+    ctx.beginPath();
+    ctx.ellipse(fx * r, fy * r, rr, rr * 0.65, fx, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+
+  // 夜側（右半分）
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, -Math.PI / 2, Math.PI / 2);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(2,4,18,0.72)';
+  ctx.fill();
+  ctx.restore();
+
+  // 縁
+  ctx.strokeStyle = 'rgba(160,200,255,0.5)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 北極（中心）
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.font = '700 22px "Noto Sans JP"';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('北極', cx, cy - 16);
+
+  // 回転方向の矢印
+  drawCcwArrow(ctx, cx, cy, r + 42, 200, 280, '#ffe066');
+  ctx.fillStyle = '#ffe066';
+  ctx.font = '700 24px "Noto Sans JP"';
+  const lbl = posFromTop(cx, cy, r + 82, 240);
+  ctx.fillText('自転の向き', lbl.x, lbl.y);
+
+  // 日本の人マーカー（正午スタート＝太陽側）
+  const a = 90 + tJiten * 15;
+  const p = posFromTop(cx, cy, r, a);
+  ctx.font = '46px serif';
+  ctx.fillText('🙂', p.x, p.y + 14);
+  ctx.font = '700 20px "Noto Sans JP"';
+  ctx.fillStyle = '#ff9d9d';
+  const pl = posFromTop(cx, cy, r + 80, a);
+  ctx.fillText('日本', pl.x, pl.y + 6);
+
+  // 時間帯ラベル
+  ctx.font = '700 24px "Noto Sans JP"';
+  ctx.fillStyle = '#ffd977';
+  ctx.fillText('昼（正午）', cx - r - 8, cy + 60);
+  ctx.fillStyle = '#9aa8ff';
+  ctx.fillText('夜（真夜中）', cx + r - 30, cy + 60);
+  ctx.fillStyle = '#ccc';
+  ctx.fillText('朝', cx, cy - r - 26);
+  ctx.fillText('夕方', cx, cy + r + 40);
+
+  // タイトル
+  ctx.fillStyle = '#8892b0';
+  ctx.font = '700 22px "Noto Sans JP"';
+  ctx.textAlign = 'left';
+  ctx.fillText('（北極の真上から見た図）', 20, 780);
+
+  // 読み出し
+  document.getElementById('ro-jiten-t').textContent = fmtNum(tJiten) + '時間';
+  document.getElementById('ro-jiten-deg').textContent = fmtNum(tJiten * 15) + '°';
+  document.getElementById('ro-jiten-clock').textContent = clockLabel((12 + tJiten) % 24);
+}
+function fmtNum(v) {
+  return (Math.round(v * 10) / 10).toString().replace(/\.0$/, '');
+}
+function clockLabel(h) {
+  const hh = Math.round(h * 2) / 2;
+  const h24 = ((hh % 24) + 24) % 24;
+  if (h24 === 12) return '正午';
+  if (h24 === 0) return '真夜中0時';
+  const ampm = h24 < 12 ? '午前' : '午後';
+  let disp = h24 % 12;
+  if (disp === 0) disp = 12;
+  return ampm + fmtNum(disp) + '時';
+}
+
+// ================= タブ2: 北の空 =================
+const cvKita = document.getElementById('cv-kita');
+const ctxK = cvKita.getContext('2d');
+let tKita = 0;
+const marks = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫'];
+
+function drawKita() {
+  const ctx = ctxK;
+  ctx.clearRect(0, 0, 800, 800);
+  drawBgStars(ctx);
+
+  const cx = 400, cy = 400, r = 265;
+
+  // 地面（下部・斜線ハッチ）
+  const groundY = 715;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(200,210,240,0.8)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(0, groundY);
+  ctx.lineTo(800, groundY);
+  ctx.stroke();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(200,210,240,0.45)';
+  for (let x = -40; x < 820; x += 26) {
+    ctx.beginPath();
+    ctx.moveTo(x, 800);
+    ctx.lineTo(x + 40, groundY);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#aab4d8';
+  ctx.font = '700 22px "Noto Sans JP"';
+  ctx.textAlign = 'center';
+  ctx.fillText('地面（北を向いて見ている）', 400, 760);
+  ctx.restore();
+
+  // 12本の点線スポーク＋番号
+  ctx.save();
+  ctx.setLineDash([6, 7]);
+  ctx.strokeStyle = 'rgba(160,176,255,0.5)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 12; i++) {
+    const p = posFromTop(cx, cy, r, i * 30);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.font = '900 30px "Noto Sans JP"';
+  ctx.fillStyle = '#c8d2f8';
+  ctx.textAlign = 'center';
+  for (let i = 0; i < 12; i++) {
+    const p = posFromTop(cx, cy, r + 34, i * 30);
+    ctx.fillText(marks[i], p.x, p.y + 10);
+  }
+
+  // 動いた軌跡
+  const aStar = tKita * 15;
+  if (aStar > 0.5) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,224,102,0.5)';
+    ctx.lineWidth = 4;
+    const toRad = d => (-90 - d) * Math.PI / 180;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, toRad(0), toRad(Math.min(aStar, 359.9)), true);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 反時計回り矢印（案内）
+  drawCcwArrow(ctx, cx, cy, r + 74, 100, 150, 'rgba(255,150,150,0.9)');
+  ctx.fillStyle = 'rgba(255,150,150,0.95)';
+  ctx.font = '700 22px "Noto Sans JP"';
+  const al = posFromTop(cx, cy, r + 116, 125);
+  ctx.fillText('反時計回り', al.x, al.y);
+
+  // 北極星（中心・動かない）
+  drawStarShape(ctx, cx, cy, 20, '#ffd700');
+  ctx.fillStyle = '#ffd700';
+  ctx.font = '700 24px "Noto Sans JP"';
+  ctx.fillText('北極星（動かない）', cx, cy + 52);
+
+  // 星A
+  const p = posFromTop(cx, cy, r, aStar);
+  drawStarShape(ctx, p.x, p.y, 16, '#7ad0ff');
+  ctx.fillStyle = '#7ad0ff';
+  ctx.font = '900 26px "Noto Sans JP"';
+  ctx.fillText('A', p.x + 30, p.y + 8);
+
+  // 読み出し
+  document.getElementById('ro-kita-t').textContent = fmtNum(tKita) + '時間';
+  document.getElementById('ro-kita-deg').textContent = fmtNum(tKita * 15) + '°';
+  document.getElementById('ro-kita-memori').textContent = fmtNum(tKita * 15 / 30) + '目盛り';
+}
+
+// ================= タブ3: 公転 =================
+const cvKoten = document.getElementById('cv-koten');
+const ctxO = cvKoten.getContext('2d');
+let tKoten = 0; // 経過月
+let spinVis = 0; // 見た目用の自転角
+
+function drawKoten() {
+  const ctx = ctxO;
+  ctx.clearRect(0, 0, 800, 800);
+  drawBgStars(ctx);
+
+  const cx = 400, cy = 400, orbitR = 258;
+
+  // 公転軌道
+  ctx.save();
+  ctx.setLineDash([7, 8]);
+  ctx.strokeStyle = 'rgba(160,176,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, orbitR, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // 月ラベル（スタート8月を下に、反時計回りに9月,10月…）
+  ctx.font = '700 23px "Noto Sans JP"';
+  ctx.textAlign = 'center';
+  for (let i = 0; i < 12; i++) {
+    const month = ((8 - 1 + i) % 12) + 1;
+    const a = 180 + i * 30;
+    const p = posFromTop(cx, cy, orbitR + 60, a);
+    ctx.fillStyle = (i === Math.floor(((tKoten % 12) + 12) % 12 + 0.0001)) ? '#ffe066' : 'rgba(200,210,240,0.55)';
+    ctx.fillText(month + '月', p.x, p.y + 8);
+    const dot = posFromTop(cx, cy, orbitR, a);
+    ctx.fillStyle = 'rgba(200,210,240,0.5)';
+    ctx.beginPath();
+    ctx.arc(dot.x, dot.y, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 公転方向矢印
+  drawCcwArrow(ctx, cx, cy, orbitR - 44, 210, 270, '#ffe066');
+  ctx.fillStyle = '#ffe066';
+  ctx.font = '700 22px "Noto Sans JP"';
+  const ol = posFromTop(cx, cy, orbitR - 92, 240);
+  ctx.fillText('公転の向き', ol.x, ol.y);
+
+  // 太陽
+  const sg = ctx.createRadialGradient(cx, cy, 5, cx, cy, 120);
+  sg.addColorStop(0, 'rgba(255,230,120,1)');
+  sg.addColorStop(0.35, 'rgba(255,180,60,0.5)');
+  sg.addColorStop(1, 'rgba(255,180,60,0)');
+  ctx.fillStyle = sg;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 120, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ffcf40';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 46, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#7a4a00';
+  ctx.font = '900 26px "Noto Sans JP"';
+  ctx.fillText('太陽', cx, cy + 9);
+
+  // 地球（8月＝下スタート、反時計回り）
+  const aEarth = 180 + tKoten * 30;
+  const ep = posFromTop(cx, cy, orbitR, aEarth);
+  const er = 27;
+  const eg = ctx.createRadialGradient(ep.x - 8, ep.y - 8, 4, ep.x, ep.y, er);
+  eg.addColorStop(0, '#6ab0f0');
+  eg.addColorStop(1, '#1a4a8a');
+  ctx.fillStyle = eg;
+  ctx.beginPath();
+  ctx.arc(ep.x, ep.y, er, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 自転してる感（回る赤マーカー）
+  const mp = {
+    x: ep.x + (er - 6) * Math.cos(spinVis),
+    y: ep.y + (er - 6) * Math.sin(spinVis)
+  };
+  ctx.fillStyle = '#ff6b6b';
+  ctx.beginPath();
+  ctx.arc(mp.x, mp.y, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 夜側（太陽と反対側の半分）
+  const phi = Math.atan2(ep.y - cy, ep.x - cx); // 太陽→地球の向き
+  ctx.save();
+  ctx.translate(ep.x, ep.y);
+  ctx.rotate(phi);
+  ctx.beginPath();
+  ctx.arc(0, 0, er, -Math.PI / 2, Math.PI / 2);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(2,4,18,0.7)';
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = 'rgba(160,200,255,0.6)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(ep.x, ep.y, er, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = '#9ecbff';
+  ctx.font = '700 22px "Noto Sans JP"';
+  ctx.fillText('地球', ep.x, ep.y - er - 12);
+
+  ctx.fillStyle = '#8892b0';
+  ctx.font = '700 22px "Noto Sans JP"';
+  ctx.textAlign = 'left';
+  ctx.fillText('（宇宙の上から見た図）', 20, 780);
+
+  // 読み出し
+  const mNow = ((8 - 1 + Math.floor(tKoten + 0.0001)) % 12) + 1;
+  document.getElementById('ro-koten-t').textContent = fmtNum(tKoten) + 'ヶ月';
+  document.getElementById('ro-koten-deg').textContent = fmtNum(tKoten * 30) + '°';
+  document.getElementById('ro-koten-month').textContent = mNow + '月';
+}
+
+// ================= タブ4: 月 =================
+const cvTsuki = document.getElementById('cv-tsuki');
+const ctxT = cvTsuki.getContext('2d');
+let pTsuki = 225; // 新月(G)からの公転角（度）。スタートは問題のD
+const POS_ANGLE = { G: 0, H: 45, A: 90, B: 135, C: 180, D: 225, E: 270, F: 315 };
+
+function moonName(p) {
+  const q = ((p % 360) + 360) % 360;
+  if (q < 10 || q > 350) return '新月';
+  if (q < 70) return '三日月';
+  if (q < 110) return '上弦の月';
+  if (q < 170) return 'ふくらんだ月';
+  if (q < 190) return '満月';
+  if (q < 250) return '欠けはじめた月';
+  if (q < 290) return '下弦の月';
+  return '明け方の細い月';
+}
+
+// 月の見た目（空で見た形）を描く。litRight=trueなら右(西)側が光る
+function drawMoonPhase(ctx, cx, cy, R, p) {
+  const q = ((p % 360) + 360) % 360;
+  const litFrac = (1 - Math.cos(q * Math.PI / 180)) / 2;
+  const litRight = q < 180; // ふくらむ期間＝西(右)が光る
+  // 全部影
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.fillStyle = '#141a36';
+  ctx.fill();
+  // 光ってる部分
+  if (litFrac > 0.01) {
+    ctx.translate(cx, cy);
+    ctx.scale(litRight ? 1 : -1, 1);
+    ctx.beginPath();
+    if (litFrac > 0.99) {
+      ctx.arc(0, 0, R, 0, Math.PI * 2);
+    } else {
+      const rx = R * Math.abs(Math.cos(q * Math.PI / 180));
+      const crescent = litFrac < 0.5;
+      // 光る側の縁（上→右→下）
+      ctx.arc(0, 0, R, -Math.PI / 2, Math.PI / 2);
+      // 境界線（ターミネーター）で戻る
+      ctx.ellipse(0, 0, Math.max(rx, 0.001), R, 0, Math.PI / 2, -Math.PI / 2, crescent);
+    }
+    ctx.fillStyle = '#ffe9a8';
+    ctx.shadowColor = 'rgba(255,233,168,0.6)';
+    ctx.shadowBlur = 14;
+    ctx.fill();
+  }
+  ctx.restore();
+  // 輪郭
+  ctx.strokeStyle = 'rgba(200,210,240,0.5)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function drawTsuki() {
+  const ctx = ctxT;
+  ctx.clearRect(0, 0, 800, 800);
+  drawBgStars(ctx);
+
+  const cx = 290, cy = 450, orbitR = 205, moonR = 19;
+  const q = ((pTsuki % 360) + 360) % 360;
+
+  // 太陽の光（右から）
+  ctx.fillStyle = '#ffd700';
+  ctx.font = '900 26px "Noto Sans JP"';
+  ctx.textAlign = 'center';
+  ctx.fillText('太陽の光', 690, 470);
+  ctx.strokeStyle = 'rgba(255,220,100,0.7)';
+  ctx.lineWidth = 4;
+  [520, 600, 680].forEach(y => {
+    ctx.beginPath();
+    ctx.moveTo(760, y);
+    ctx.lineTo(630, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(630, y);
+    ctx.lineTo(648, y - 9);
+    ctx.moveTo(630, y);
+    ctx.lineTo(648, y + 9);
+    ctx.stroke();
+  });
+
+  // 公転軌道
+  ctx.save();
+  ctx.setLineDash([6, 7]);
+  ctx.strokeStyle = 'rgba(160,176,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, orbitR, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // 公転方向矢印（反時計回り）
+  drawCcwArrow(ctx, cx, cy, orbitR + 48, 155, 205, 'rgba(255,224,102,0.8)');
+
+  // 8つの月（テキストの図1と同じ・左半分が影）
+  ctx.font = '900 26px "Noto Sans JP"';
+  for (const [letter, pa] of Object.entries(POS_ANGLE)) {
+    const a = pa - 90; // 画面角（Aが上）
+    const mp = posFromTop(cx, cy, orbitR, a);
+    // 本体（明）
+    ctx.beginPath();
+    ctx.arc(mp.x, mp.y, moonR, 0, Math.PI * 2);
+    ctx.fillStyle = '#e8e0c8';
+    ctx.fill();
+    // 影（太陽と反対＝左半分）
+    ctx.save();
+    ctx.translate(mp.x, mp.y);
+    ctx.rotate(Math.PI);
+    ctx.beginPath();
+    ctx.arc(0, 0, moonR, -Math.PI / 2, Math.PI / 2);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(20,26,54,0.9)';
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(200,210,240,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(mp.x, mp.y, moonR, 0, Math.PI * 2);
+    ctx.stroke();
+    // 文字
+    const lp = posFromTop(cx, cy, orbitR + 38, a);
+    ctx.fillStyle = '#c8d2f8';
+    ctx.fillText(letter, lp.x, lp.y + 9);
+  }
+
+  // 今の月（金のリング）
+  const cur = posFromTop(cx, cy, orbitR, q - 90);
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 4;
+  ctx.shadowColor = '#ffd700';
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.arc(cur.x, cur.y, moonR + 7, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // 地球
+  const er = 48;
+  const eg = ctx.createRadialGradient(cx - 12, cy - 12, 6, cx, cy, er);
+  eg.addColorStop(0, '#6ab0f0');
+  eg.addColorStop(1, '#1a4a8a');
+  ctx.fillStyle = eg;
+  ctx.beginPath();
+  ctx.arc(cx, cy, er, 0, Math.PI * 2);
+  ctx.fill();
+  // 夜側（左半分）
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(Math.PI);
+  ctx.beginPath();
+  ctx.arc(0, 0, er, -Math.PI / 2, Math.PI / 2);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(2,4,18,0.6)';
+  ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(160,200,255,0.6)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, er, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 月を見る人（月の方を向いて立つ）＋視線
+  const mAngScreen = q - 90;
+  const op = posFromTop(cx, cy, er + 2, mAngScreen);
+  ctx.save();
+  ctx.setLineDash([5, 6]);
+  ctx.strokeStyle = 'rgba(255,157,157,0.8)';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(op.x, op.y);
+  ctx.lineTo(cur.x, cur.y);
+  ctx.stroke();
+  ctx.restore();
+  ctx.font = '30px serif';
+  ctx.fillText('🙂', op.x, op.y + 10);
+  ctx.fillStyle = '#ff9d9d';
+  ctx.font = '700 19px "Noto Sans JP"';
+  ctx.fillText('月を見る人', cx, cy + er + 26);
+
+  // ===== 右上：地球から見るとパネル =====
+  const px = 540, py = 60, pw = 250, ph = 330;
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.strokeStyle = 'rgba(160,176,255,0.35)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(px, py, pw, ph, 14);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#a0b0ff';
+  ctx.font = '900 24px "Noto Sans JP"';
+  ctx.fillText('👀 地球から見ると', px + pw / 2, py + 38);
+
+  const dx = px + pw / 2, dy = py + 165, dR = 80;
+  drawMoonPhase(ctx, dx, dy, dR, q);
+  // 解答用紙風の点線ガイド
+  ctx.save();
+  ctx.setLineDash([4, 5]);
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.lineWidth = 1.5;
+  [0.38, 0.71, 0.92].forEach(f => {
+    ctx.beginPath();
+    ctx.ellipse(dx, dy, dR * f, dR, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+  ctx.beginPath();
+  ctx.moveTo(dx, dy - dR);
+  ctx.lineTo(dx, dy + dR);
+  ctx.stroke();
+  ctx.restore();
+  // 東西ラベル（南を向いて見る→左が東）
+  ctx.fillStyle = '#c8d2f8';
+  ctx.font = '700 24px "Noto Sans JP"';
+  ctx.fillText('東', dx - dR - 28, dy + 9);
+  ctx.fillText('西', dx + dR + 28, dy + 9);
+  // 月の名前
+  ctx.fillStyle = '#ffe066';
+  ctx.font = '900 26px "Noto Sans JP"';
+  ctx.fillText(moonName(q), dx, py + ph - 28);
+
+  ctx.fillStyle = '#8892b0';
+  ctx.font = '700 22px "Noto Sans JP"';
+  ctx.textAlign = 'left';
+  ctx.fillText('（宇宙の上から見た図・太陽は右のずっと遠く）', 20, 780);
+
+  // 読み出し
+  const litFrac = (1 - Math.cos(q * Math.PI / 180)) / 2;
+  document.getElementById('ro-tsuki-day').textContent = '約' + Math.round(q / 360 * 29.5) + '日';
+  document.getElementById('ro-tsuki-name').textContent = moonName(q);
+  document.getElementById('ro-tsuki-side').textContent =
+    litFrac < 0.02 ? '見えない' : litFrac > 0.98 ? '全部光る' : (q < 180 ? '西（右）側' : '東（左）側');
+
+  // ボタンのハイライト
+  document.querySelectorAll('.pos-btn').forEach(b => {
+    b.classList.toggle('active', Math.abs(POS_ANGLE[b.dataset.pos] - q) < 1);
+  });
+}
+
+// 位置ボタン
+document.querySelectorAll('.pos-btn[data-pos]').forEach(b => {
+  b.addEventListener('click', () => {
+    pTsuki = POS_ANGLE[b.dataset.pos];
+    document.getElementById('slider-tsuki').value = pTsuki;
+    anim.tsuki = false;
+    const pb = document.getElementById('play-tsuki');
+    pb.textContent = '▶ 再生';
+    pb.classList.remove('playing');
+    drawAll();
+  });
+});
+
+// ================= タブ5: 月の出入り =================
+const cvDeiri = document.getElementById('cv-deiri');
+const ctxD = cvDeiri.getContext('2d');
+let tDeiri = 18;    // 時刻（0〜24時）
+let pDeiri = 180;   // 月の位相（新月から反時計回りの角度）。スタートは満月
+
+function fmtClock(t) {
+  const total = Math.round(((t % 24) + 24) % 24 * 60);
+  const h = Math.floor(total / 60) % 24;
+  const m = total % 60;
+  return h + ':' + String(m).padStart(2, '0');
+}
+// 方向ベクトル（真上から反時計回りの度数）
+function dirOfAngle(aDeg) {
+  const a = aDeg * Math.PI / 180;
+  return { x: -Math.sin(a), y: -Math.cos(a) };
+}
+
+function drawDeiri() {
+  const ctx = ctxD;
+  ctx.clearRect(0, 0, 800, 800);
+  drawBgStars(ctx);
+
+  const cx = 360, cy = 410, er = 105, orbitR = 250;
+  const q = ((pDeiri % 360) + 360) % 360;
+  const moonDir = (q + 270) % 360;          // 月の方向（真上から反時計回り）
+  const zDir = (270 + 15 * (tDeiri - 12) % 360 + 360) % 360; // 🙂の頭上方向
+  const tRise = (6 + q / 15) % 24;
+  const tSet = (tRise + 12) % 24;
+  const upNow = ((tDeiri - tRise + 24) % 24) < 12;
+
+  // 太陽の光（右から）
+  ctx.fillStyle = '#ffd700';
+  ctx.font = '900 26px "Noto Sans JP"';
+  ctx.textAlign = 'center';
+  ctx.fillText('太陽の光', 700, 180);
+  ctx.strokeStyle = 'rgba(255,220,100,0.7)';
+  ctx.lineWidth = 4;
+  [230, 310, 390].forEach(y => {
+    ctx.beginPath();
+    ctx.moveTo(770, y);
+    ctx.lineTo(650, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(650, y);
+    ctx.lineTo(668, y - 9);
+    ctx.moveTo(650, y);
+    ctx.lineTo(668, y + 9);
+    ctx.stroke();
+  });
+
+  // 月の軌道
+  ctx.save();
+  ctx.setLineDash([6, 7]);
+  ctx.strokeStyle = 'rgba(160,176,255,0.3)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, orbitR, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // 地球
+  const eg = ctx.createRadialGradient(cx - 25, cy - 25, 10, cx, cy, er);
+  eg.addColorStop(0, '#6ab0f0');
+  eg.addColorStop(1, '#1a4a8a');
+  ctx.fillStyle = eg;
+  ctx.beginPath();
+  ctx.arc(cx, cy, er, 0, Math.PI * 2);
+  ctx.fill();
+  // 夜側（太陽の反対＝左半分）
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(Math.PI);
+  ctx.beginPath();
+  ctx.arc(0, 0, er, -Math.PI / 2, Math.PI / 2);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(2,4,18,0.6)';
+  ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(160,200,255,0.6)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, er, 0, Math.PI * 2);
+  ctx.stroke();
+  // 自転方向
+  drawCcwArrow(ctx, cx, cy, er + 26, 155, 205, 'rgba(255,224,102,0.7)');
+
+  // 🙂観測者
+  const zv = dirOfAngle(zDir);
+  const op = { x: cx + zv.x * er, y: cy + zv.y * er };
+
+  // 地平線の下（🙂から見えない側）をうすく暗く
+  const theta = Math.atan2(op.y - cy, op.x - cx); // canvas角：地球中心→🙂
+  ctx.save();
+  ctx.translate(op.x, op.y);
+  ctx.rotate(theta);
+  ctx.fillStyle = 'rgba(5,8,20,0.42)';
+  ctx.fillRect(-1400, -700, 1400, 1400);
+  ctx.restore();
+
+  // 地平線（🙂の接線）
+  const ev = dirOfAngle((zDir + 90) % 360); // 東向き
+  ctx.save();
+  ctx.setLineDash([8, 7]);
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(op.x + ev.x * 310, op.y + ev.y * 310);
+  ctx.lineTo(op.x - ev.x * 310, op.y - ev.y * 310);
+  ctx.stroke();
+  ctx.restore();
+  // 東西ラベル（東＝自転で進む向き）
+  ctx.font = '900 24px "Noto Sans JP"';
+  ctx.fillStyle = '#7ad0ff';
+  ctx.fillText('東', op.x + ev.x * 335, op.y + ev.y * 335 + 8);
+  ctx.fillStyle = '#ff9d9d';
+  ctx.fillText('西', op.x - ev.x * 335, op.y - ev.y * 335 + 8);
+  // 地平線ラベル
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '700 19px "Noto Sans JP"';
+  ctx.fillText('地平線', op.x + ev.x * 250, op.y + ev.y * 250 - 16);
+
+  // 🙂本体
+  ctx.font = '34px serif';
+  ctx.fillText('🙂', op.x, op.y + 12);
+
+  // 月
+  const mp = posFromTop(cx, cy, orbitR, moonDir);
+  ctx.globalAlpha = upNow ? 1 : 0.35;
+  ctx.beginPath();
+  ctx.arc(mp.x, mp.y, 26, 0, Math.PI * 2);
+  ctx.fillStyle = '#e8e0c8';
+  ctx.fill();
+  ctx.save();
+  ctx.translate(mp.x, mp.y);
+  ctx.rotate(Math.PI);
+  ctx.beginPath();
+  ctx.arc(0, 0, 26, -Math.PI / 2, Math.PI / 2);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(20,26,54,0.9)';
+  ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(200,210,240,0.5)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(mp.x, mp.y, 26, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#ffe066';
+  ctx.font = '700 22px "Noto Sans JP"';
+  ctx.fillText('月', mp.x, mp.y - 36);
+
+  // 🙂→月の視線（見えてるときだけ）
+  if (upNow) {
+    ctx.save();
+    ctx.setLineDash([5, 6]);
+    ctx.strokeStyle = 'rgba(255,224,102,0.55)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(op.x, op.y);
+    ctx.lineTo(mp.x, mp.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 月の出・月の入りの瞬間ハイライト
+  const nearRise = Math.min((tDeiri - tRise + 24) % 24, (tRise - tDeiri + 24) % 24) < 0.26;
+  const nearSet = Math.min((tDeiri - tSet + 24) % 24, (tSet - tDeiri + 24) % 24) < 0.26;
+  if (nearRise || nearSet) {
+    ctx.fillStyle = '#ffd700';
+    ctx.font = '900 34px "Noto Sans JP"';
+    ctx.fillText(nearRise ? '🌙 いま月の出！' : '🌙 いま月の入り！', 400, 60);
+  }
+
+  ctx.fillStyle = '#8892b0';
+  ctx.font = '700 22px "Noto Sans JP"';
+  ctx.textAlign = 'left';
+  ctx.fillText('（宇宙の上から見た図・太陽は右のずっと遠く）', 20, 780);
+
+  // 読み出し
+  const isDay = tDeiri >= 6 && tDeiri < 18;
+  document.getElementById('ro-deiri-t').textContent = fmtClock(tDeiri) + (isDay ? ' ☀' : ' 🌙');
+  document.getElementById('ro-deiri-up').textContent = upNow ? '空にある' : '地平線の下';
+  document.getElementById('ro-deiri-rise').textContent = fmtClock(tRise);
+  document.getElementById('ro-deiri-set').textContent = fmtClock(tSet);
+
+  // 位相ボタンのハイライト
+  document.querySelectorAll('.pos-btn[data-phase]').forEach(b => {
+    b.classList.toggle('active', Math.abs(parseFloat(b.dataset.phase) - q) < 1);
+  });
+}
+
+// 位相ボタン
+document.querySelectorAll('.pos-btn[data-phase]').forEach(b => {
+  b.addEventListener('click', () => {
+    pDeiri = parseFloat(b.dataset.phase);
+    drawAll();
+  });
+});
+
+// ================= アニメーションループ =================
+const anim = { jiten: false, kita: false, koten: false, tsuki: false, deiri: false };
+
+function setupPlay(key, btn, slider, max, step, getT, setT) {
+  btn.addEventListener('click', () => {
+    anim[key] = !anim[key];
+    btn.textContent = anim[key] ? '⏸ 停止' : '▶ 再生';
+    btn.classList.toggle('playing', anim[key]);
+  });
+  slider.addEventListener('input', () => {
+    setT(parseFloat(slider.value));
+    drawAll();
+  });
+}
+setupPlay('jiten', document.getElementById('play-jiten'), document.getElementById('slider-jiten'), 24, 0.5, () => tJiten, v => tJiten = v);
+setupPlay('kita', document.getElementById('play-kita'), document.getElementById('slider-kita'), 24, 0.5, () => tKita, v => tKita = v);
+setupPlay('koten', document.getElementById('play-koten'), document.getElementById('slider-koten'), 12, 0.25, () => tKoten, v => tKoten = v);
+setupPlay('tsuki', document.getElementById('play-tsuki'), document.getElementById('slider-tsuki'), 360, 1, () => pTsuki, v => pTsuki = v);
+setupPlay('deiri', document.getElementById('play-deiri'), document.getElementById('slider-deiri'), 24, 0.25, () => tDeiri, v => tDeiri = v);
+
+function drawAll() {
+  drawJiten();
+  drawKita();
+  drawKoten();
+  drawTsuki();
+  drawDeiri();
+}
+
+function loop() {
+  let changed = false;
+  if (anim.jiten) {
+    tJiten = (tJiten + 24 / (10 * 60)) % 24; // 約10秒で1日
+    document.getElementById('slider-jiten').value = tJiten;
+    changed = true;
+  }
+  if (anim.kita) {
+    tKita = (tKita + 24 / (12 * 60)) % 24; // 約12秒で1日
+    document.getElementById('slider-kita').value = tKita;
+    changed = true;
+  }
+  if (anim.koten) {
+    tKoten = (tKoten + 12 / (14 * 60)) % 12; // 約14秒で1年
+    spinVis += 0.25;
+    document.getElementById('slider-koten').value = tKoten;
+    changed = true;
+  }
+  if (anim.tsuki) {
+    pTsuki = (pTsuki + 360 / (20 * 60)) % 360; // 約20秒でひと月
+    document.getElementById('slider-tsuki').value = pTsuki;
+    changed = true;
+  }
+  if (anim.deiri) {
+    tDeiri = (tDeiri + 24 / (16 * 60)) % 24; // 約16秒で1日
+    document.getElementById('slider-deiri').value = tDeiri;
+    changed = true;
+  }
+  if (changed) drawAll();
+  requestAnimationFrame(loop);
+}
+
+drawAll();
+loop();
+</script>
+</body>
+</html>
