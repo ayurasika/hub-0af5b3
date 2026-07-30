@@ -216,7 +216,7 @@
 
 <header>
   <h1>🌟 星座マスター</h1>
-  <p>ながめる → 名前をかくしてテスト → クイズで仕上げ！</p>
+  <p>名前は最初からかくしてあるよ。？をタップで答え合わせ → クイズで仕上げ！</p>
 </header>
 
 <nav class="tabs" id="tabs">
@@ -771,15 +771,17 @@ function addLabel(svg, x, y, name, sub, isCname, textCls) {
 
 Object.keys(SKIES).forEach(renderSky);
 
-// かくすボタン
+// かくすボタン（最初は「かくした状態」でスタート）
 document.querySelectorAll(".hide-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const wrap = document.getElementById(btn.dataset.sky);
-    const hiding = wrap.classList.toggle("hiding");
+  const wrap = document.getElementById(btn.dataset.sky);
+  const sync = (hiding) => {
     btn.classList.toggle("hiding", hiding);
-    btn.textContent = hiding ? "👀 名前を見る（タップで1つずつ答え合わせ）" : "🙈 名前をかくしてテスト";
+    btn.textContent = hiding ? "👀 名前をぜんぶ見る（？はタップで1つずつ）" : "🙈 名前をかくしてテスト";
     if (!hiding) wrap.querySelectorAll(".star-label.revealed").forEach(g=>g.classList.remove("revealed"));
-  });
+  };
+  wrap.classList.add("hiding");
+  sync(true);
+  btn.addEventListener("click", () => sync(wrap.classList.toggle("hiding")));
 });
 
 // タブ切り替え
