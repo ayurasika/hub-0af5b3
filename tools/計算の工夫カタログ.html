@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>計算の工夫カタログ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23b8860b'/><text x='50' y='72' font-size='58' text-anchor='middle' fill='white'>💡</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;background:#fffdf4;color:#1a1a2e;line-height:1.75;padding-bottom:60px;}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px;}
+
+.header{background:linear-gradient(135deg,#e0b24a,#b8860b);color:#fff;padding:18px 16px 16px;border-radius:0 0 22px 22px;box-shadow:0 3px 12px rgba(184,134,11,.3);}
+.header h1{font-size:1.45rem;font-weight:900;}
+.header .meta{font-size:.95rem;opacity:.95;margin-top:3px;}
+.back{display:inline-block;margin-top:10px;font-size:.9rem;font-weight:900;color:#fff;background:rgba(255,255,255,.25);border-radius:16px;padding:5px 14px;text-decoration:none;}
+
+.lead{background:#fff;border-radius:18px;margin-top:16px;padding:16px 18px;box-shadow:0 2px 10px rgba(180,140,40,.13);font-size:1.05rem;line-height:1.9;}
+.lead b{color:#b8860b;}
+
+.sechead{margin-top:26px;font-size:1.18rem;font-weight:900;display:flex;align-items:center;gap:9px;}
+.sechead.t{color:#1f7a4d;} .sechead.s{color:#d0651a;}
+.sechead .cnt{margin-left:auto;font-size:.8rem;font-weight:700;color:#999;}
+.sechead .note{display:block;font-size:.82rem;font-weight:700;color:#999;margin-top:2px;}
+
+.k{background:#fff;border-radius:16px;margin-top:12px;box-shadow:0 2px 10px rgba(180,140,40,.13);overflow:hidden;border:2.5px solid #ecdfb8;}
+.k.t{border-color:#c8e6d2;} .k.s{border-color:#ffd9bf;}
+.khead{display:flex;align-items:center;gap:11px;padding:14px 16px;cursor:pointer;font-size:1.12rem;font-weight:900;}
+.k.t .khead{color:#1f7a4d;} .k.s .khead{color:#d0651a;}
+.khead .ic{font-size:1.5rem;line-height:1;}
+.khead::after{content:"▼";margin-left:auto;font-size:.7rem;color:#bbb;transition:.2s;}
+.k.open .khead::after{transform:rotate(180deg);}
+.kbody{display:none;padding:0 16px 18px;}
+.k.open .kbody{display:block;}
+
+.lbl{font-size:.88rem;font-weight:900;color:#b8860b;margin-top:14px;}
+.mido{margin-top:5px;font-size:1.06rem;line-height:1.85;background:#fffbee;border-radius:12px;padding:11px 14px;}
+.step{margin-top:10px;display:flex;gap:10px;align-items:flex-start;}
+.step .sn{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:#b8860b;color:#fff;font-weight:900;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin-top:3px;}
+.step .sb{flex:1;font-size:1.04rem;line-height:1.85;}
+.shiki{font-size:1.2rem;font-weight:900;background:#fffaf0;border-left:5px solid #b8860b;border-radius:8px;padding:9px 13px;margin:8px 0 8px 36px;overflow-x:auto;white-space:nowrap;}
+.rei{margin-top:10px;border:2px dashed #ecdfb8;border-radius:12px;padding:12px 14px;background:#fffef8;}
+.rei .rq{font-size:1.1rem;font-weight:900;word-break:break-all;}
+.rei .rs{font-size:.98rem;margin-top:6px;line-height:1.8;color:#555;}
+.rei .ra{font-size:1.1rem;font-weight:900;color:#e60012;margin-top:6px;}
+.rei .rf{font-size:.78rem;color:#aaa;font-weight:700;margin-top:5px;}
+.hito{margin-top:13px;font-size:1.02rem;line-height:1.85;background:#f3f8ff;border-radius:12px;padding:11px 14px;}
+.hito b{color:#2a6fd9;}
+.btnrow{text-align:center;margin-top:20px;}
+.btn{border:none;border-radius:20px;padding:11px 22px;font-family:inherit;font-size:.95rem;font-weight:900;cursor:pointer;background:#b8860b;color:#fff;}
+.btn.g{background:#eef4fb;color:#2a7cc7;margin-left:8px;}
+.footer{text-align:center;font-size:.8rem;color:#cb9;margin-top:26px;}
+@media print{.noprint,.back{display:none;} body{background:#fff;} .k{box-shadow:none;page-break-inside:avoid;} .kbody{display:block!important;}}
+</style>
+</head>
+<body>
+
+<div class="header"><div class="wrap">
+  <h1>💡 計算の工夫カタログ</h1>
+  <div class="meta" id="meta"></div>
+  <a class="back" href="../index.html">← ハブにもどる</a>
+</div></div>
+
+<div class="wrap">
+  <div class="lead" id="lead"></div>
+  <div id="main"></div>
+  <div class="btnrow noprint">
+    <button class="btn" onclick="openAll()">ぜんぶひらく</button>
+    <button class="btn g" onclick="window.print()">🖨 印刷</button>
+  </div>
+</div>
+
+<div class="footer">計算の工夫カタログ ｜ こころが実際にといた計マスから集めてるよ</div>
+
+<script src="../data/kufu.js"></script>
+<script>
+const K = window.KUFU || {items:[]};
+const esc = s => String(s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+document.getElementById("meta").textContent = `${K.items.length}この型 ／ ${K.updated} 時点`;
+document.getElementById("lead").innerHTML = K.lead || "";
+
+function card(it){
+  return `<div class="k ${it.status==='tokui'?'t':'s'}" data-id="${it.id}">
+    <div class="khead"><span class="ic">${it.icon||"💡"}</span><span>${esc(it.name)}</span></div>
+    <div class="kbody">
+      <div class="lbl">こういう形を見たら</div>
+      <div class="mido">${it.midokoro||""}</div>
+      <div class="lbl">やり方</div>
+      ${(it.yarikata||[]).map((y,i)=>`
+        <div class="step"><div class="sn">${i+1}</div><div class="sb">${y.text||""}</div></div>
+        ${y.shiki?`<div class="shiki">${esc(y.shiki)}</div>`:""}
+      `).join("")}
+      <div class="lbl">じっさいに出た問題</div>
+      ${(it.rei||[]).map(r=>`<div class="rei">
+        <div class="rq">${esc(r.q)}</div>
+        ${r.sol?`<div class="rs">${r.sol}</div>`:""}
+        ${r.a?`<div class="ra">答え　${esc(r.a)}</div>`:""}
+        ${r.from?`<div class="rf">計マス ${esc(r.from)}</div>`:""}
+      </div>`).join("")}
+      ${it.hito||it.hitokoto?`<div class="hito">${it.hitokoto||it.hito}</div>`:""}
+    </div>
+  </div>`;
+}
+
+const t = K.items.filter(x=>x.status==="tokui");
+const s = K.items.filter(x=>x.status!=="tokui");
+document.getElementById("main").innerHTML =
+  `<div class="sechead t">✅ もう使える型<span class="cnt">${t.length}こ</span></div>
+   <div class="sechead t" style="margin-top:0"><span class="note">計マスで実際にできてた工夫。テスト前はここをサッと見直すだけでいい</span></div>
+   ${t.map(card).join("")}
+   <div class="sechead s">🔥 これから手に入れる型<span class="cnt">${s.length}こ</span></div>
+   <div class="sechead s" style="margin-top:0"><span class="note">取りこぼしが出てる工夫。ここが伸びしろ</span></div>
+   ${s.map(card).join("")}`;
+
+document.querySelectorAll(".khead").forEach(h =>
+  h.onclick = () => h.parentElement.classList.toggle("open"));
+function openAll(){ document.querySelectorAll(".k").forEach(k=>k.classList.add("open")); }
+</script>
+</body>
+</html>
