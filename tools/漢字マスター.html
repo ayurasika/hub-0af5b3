@@ -313,6 +313,17 @@ body::before{
   <!-- MAP -->
   <div class="tab" id="tab-map">
     <button class="back-btn" onclick="goTab('home')">← もどる</button>
+
+    <!-- 全体の到達ぐあい（ぜんぶ合わせて今どこまで進んでるか） -->
+    <div id="overall-panel" style="background:linear-gradient(135deg,#fff8f0,#fff);border:2px solid #ffd9a8;border-radius:16px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-weight:800;color:#e08a2e;font-size:0.95em;margin-bottom:8px;">📊 ぜんぶ合わせて、いまどこまで</div>
+      <div id="ov-bar" style="height:22px;border-radius:11px;overflow:hidden;display:flex;background:#f0f0f0;margin-bottom:6px;"></div>
+      <div id="ov-legend" style="font-size:0.72em;color:#8fa8bc;margin-bottom:10px;"></div>
+      <div id="ov-nums" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      <div id="ov-note" style="font-size:0.75em;color:#666;margin-top:10px;line-height:1.6;"></div>
+      <div id="ov-weak" style="margin-top:10px;"></div>
+    </div>
+
     <div class="section-title"><h2 id="map-title">第19回 — 自然</h2><div class="line"></div></div>
     <div class="stats-bar">
       <div class="stat"><div class="stat-num master" id="m-master">0</div><div class="stat-label">マスター</div></div>
@@ -1064,6 +1075,29 @@ const ROUNDS = {
     {k:"悪習",r:"アクシュウ",ex:"物を粗末にする〜がある"},
     {k:"破損",r:"ハソン",ex:"屋根が〜する"}
   ]},
+  58:{theme:"☀️夏期講習 その8",words:[
+    {k:"専念",r:"センネン",ex:"研究に〜する"},
+    {k:"採用",r:"サイヨウ",ex:"会社の〜試験を受ける"},
+    {k:"家路",r:"イエジ",ex:"〜を急ぐ人々"},
+    {k:"派生",r:"ハセイ",ex:"かな文字は漢字から〜してできた"},
+    {k:"候補",r:"コウホ",ex:"選手の〜に挙げられる"},
+    {k:"就く",r:"ツく",ex:"職に〜く"},
+    {k:"支障",r:"シショウ",ex:"少々の遅れなら〜はないよ"},
+    {k:"帯びる",r:"オびる",ex:"葉が赤みを〜びる"},
+    {k:"展覧",r:"テンラン",ex:"絵の〜会に行く"}
+  ]},
+  59:{theme:"☀️夏期講習 その9",words:[
+    {k:"秘めた",r:"ヒめた",ex:"心に〜めた決意"},
+    {k:"脳裏",r:"ノウリ",ex:"〜に焼きついて離れない光景"},
+    {k:"貸借",r:"タイシャク",ex:"金銭の〜は良くない"},
+    {k:"解毒",r:"ゲドク",ex:"〜作用のある植物"},
+    {k:"態勢",r:"タイセイ",ex:"万全の受け入れ〜で、来客を待つ"},
+    {k:"潔く",r:"イサギヨく",ex:"〜く自分の非を認めて謝った"},
+    {k:"損なう",r:"ソコなう",ex:"機嫌を〜なうと口をきかない"},
+    {k:"財布",r:"サイフ",ex:"〜を落として必死に探す"},
+    {k:"均一",r:"キンイツ",ex:"百円〜の店を利用する"},
+    {k:"出納",r:"スイトウ",ex:"役所の〜係としてお金を管理する"}
+  ]},
   99:{theme:"🔥テストで落とした漢字",words:[
     {k:"比類",r:"ヒルイ",ex:"〜ないほどの強さ"},
     {k:"演芸",r:"エンゲイ",ex:"〜会を見にいく"},
@@ -1081,7 +1115,14 @@ const ROUNDS = {
     {k:"考証",r:"コウショウ",ex:"時代〜がしっかりした映画"},
     {k:"授かる",r:"サズかる",ex:"知恵を〜かる"},
     {k:"観覧車",r:"カンランシャ",ex:"遊園地の〜"},
-    {k:"報われる",r:"ムクわれる",ex:"努力が〜われる"}
+    {k:"報われる",r:"ムクわれる",ex:"努力が〜われる"},
+    // 2026-08-01 夏期講習特別テスト1（★＝白紙だったもの）
+    {k:"所属",r:"ショゾク",ex:"サッカー部に〜する"},
+    {k:"評論家",r:"ヒョウロンカ",ex:"映画〜の話を聞く"},
+    {k:"軽やか",r:"カロやか",ex:"〜な足どりで歩く"},
+    {k:"燃焼",r:"ネンショウ",ex:"ろうそくが完全〜する"},
+    {k:"夫婦",r:"フウフ",ex:"〜で店をやっている"},
+    {k:"勧告",r:"カンコク",ex:"ひなんを〜する"}
   ]}
 };
 
@@ -1103,7 +1144,13 @@ const DROPPED = new Set([
   // 夏期講習 その6
   "当初","独創","奮い",
   // 夏期講習 その7
-  "派手","門戸","悪習","破損"
+  "派手","門戸","悪習","破損",
+  // 2026-08-01 夏期講習特別テスト1（所属・評論家・軽やかは白紙だった＝7割以上の子が書けている）
+  "所属","評論家","軽やか","燃焼","夫婦","勧告",
+  // 夏期講習 その8（赤○＝①⑧⑨⑩）
+  "専念","支障","帯びる","展覧",
+  // 夏期講習 その9（赤○＝⑧⑩）
+  "財布","出納"
 ]);
 
 // ===== TROPHIES =====
@@ -1483,13 +1530,71 @@ function startDailyReview(){
 }
 
 // ===== MAP =====
+// ぜんぶ合わせた到達ぐあい（あゆみが「どこまで書けるようになったか」を見るためのパネル）
+function renderOverall(){
+  const now=Date.now(), DAY=86400000;
+  let all=0, mastered=0, learning=0, unseen=0, todayCount=0, weak=[];
+  let lastSeenMax=0;
+  for(const[kai,data]of Object.entries(ROUNDS)){
+    for(const w of data.words){
+      const r=state.records[kai+'_'+w.k]||{correct:0,wrong:0,total:0,mastered:false};
+      all++;
+      if(r.mastered)mastered++;
+      else if(r.total>0)learning++;
+      else unseen++;
+      if(r.lastSeen){
+        if(r.lastSeen>lastSeenMax)lastSeenMax=r.lastSeen;
+        if(now-r.lastSeen < 20*3600*1000)todayCount++;
+      }
+      if(!r.mastered && r.wrong>=2) weak.push({k:w.k,r:w.r,wrong:r.wrong,correct:r.correct,kai});
+    }
+  }
+  const pct=n=>all?(n/all*100):0;
+  document.getElementById('ov-bar').innerHTML=
+    `<div style="width:${pct(mastered)}%;background:#f5a623"></div>`+
+    `<div style="width:${pct(learning)}%;background:#8fd3a8"></div>`+
+    `<div style="width:${pct(unseen)}%;background:#e6e6e6"></div>`;
+  document.getElementById('ov-legend').innerHTML=
+    `<span style="color:#f5a623">■</span>マスター　<span style="color:#8fd3a8">■</span>練習中　<span style="color:#ccc">■</span>まだ一度も`;
+
+  const box=(num,label,color)=>`<div style="flex:1;min-width:70px;background:#fff;border:1.5px solid ${color}33;border-radius:10px;padding:6px 4px;text-align:center;">
+    <div style="font-size:1.35em;font-weight:800;color:${color}">${num}</div>
+    <div style="font-size:0.62em;color:#8fa8bc;line-height:1.3">${label}</div></div>`;
+  document.getElementById('ov-nums').innerHTML=
+    box(mastered,'マスター<br>(5回正解)','#f5a623')+
+    box(learning,'れんしゅう中','#3fa96a')+
+    box(unseen,'まだ一度も<br>出てない','#8fa8bc')+
+    box(all,'ぜんぶで','#4a9bd9');
+
+  const days = lastSeenMax ? Math.floor((now-lastSeenMax)/DAY) : null;
+  let note = `今日やった漢字：<b>${todayCount}語</b>`;
+  if(days===null) note += `　／　この端末にはまだ記録がありません`;
+  else if(days===0) note += `　／　最後にやったのは今日`;
+  else note += `　／　最後にやったのは<b>${days}日前</b>`;
+  // 今のペースだと全部に1回触るまで何日か（ざっくり）
+  if(todayCount>0 && unseen>0){
+    note += `<br>いまのペース（1日${todayCount}語）だと、まだ出てない${unseen}語に1回ずつ触るまで<b>約${Math.ceil(unseen/todayCount)}日</b>`;
+  }
+  document.getElementById('ov-note').innerHTML=note;
+
+  weak.sort((a,b)=>b.wrong-a.wrong);
+  document.getElementById('ov-weak').innerHTML = weak.length
+    ? `<div style="font-size:0.75em;color:#c0392b;font-weight:700;margin-bottom:4px;">何度もまちがえてる漢字（${weak.length}語）</div>`+
+      `<div style="font-size:0.8em;line-height:1.9;">`+
+      weak.slice(0,15).map(x=>`<span style="display:inline-block;background:#fff0f0;border:1px solid #f5c6c6;border-radius:8px;padding:1px 8px;margin:1px 3px 1px 0;">${x.k}<span style="color:#c0392b;font-size:0.85em">×${x.wrong}</span></span>`).join('')+
+      (weak.length>15?`<span style="color:#999;font-size:0.9em">ほか${weak.length-15}語</span>`:'')+`</div>`
+    : `<div style="font-size:0.75em;color:#8fa8bc;">何度もまちがえてる漢字：まだなし</div>`;
+}
+
 function renderMap(){
+  renderOverall();
   // Round selector
   const sel=document.getElementById('map-roundsel');
   sel.innerHTML='';
   for(const kai of Object.keys(ROUNDS)){
     const b=document.createElement('button');
-    b.textContent='回'+kai;
+    const rs=getRoundStats(parseInt(kai));
+    b.innerHTML='回'+kai+`<span style="font-size:0.85em;opacity:.75;margin-left:3px">${rs.mastered}/${rs.mastered+rs.learning+rs.yet}</span>`;
     b.style.cssText='padding:6px 12px;margin:2px;border-radius:10px;border:2px solid '+(parseInt(kai)===currentRound?'#4a9bd9':'#e8f0f8')+';background:'+(parseInt(kai)===currentRound?'#4a9bd9':'#fff')+';color:'+(parseInt(kai)===currentRound?'#fff':'#8fa8bc')+';font-family:inherit;font-weight:700;font-size:0.75em;cursor:pointer;';
     b.onclick=()=>{currentRound=parseInt(kai);renderMap();};
     sel.appendChild(b);
