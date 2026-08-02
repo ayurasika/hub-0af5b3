@@ -243,6 +243,8 @@ body::before{
 
 @media(max-width:400px){.kanji-grid{grid-template-columns:repeat(4,1fr);}}
 </style>
+<!-- ハブの共通設定（syncUrl）。tools/ から見た相対パス。読めなくても動く（同期しないだけ） -->
+<script src="../data/config.js"></script>
 </head>
 <body>
 
@@ -1484,6 +1486,7 @@ function judge(correct){
     pState.dotStatus[pState.idx]='ng';
   }
   saveState();
+  if(typeof syncQueueWord==='function') syncQueueWord(key);   // この1語だけクラウドに送る
   checkAchievements();
 
   pState.idx++;
@@ -1871,6 +1874,80 @@ function cloudSettings(){
   }
 }
 
+// ===== 同期（ハブと同じGoogle Apps Script。トークン設定は不要） =====
+// GASの保存庫は「1キーあたり9KBまで」なので、記録を丸ごと1キーに入れると壊れる。
+// そこで 1語＝1キー（kM_<回>_<漢字>）に分け、値は [正解数, まちがい数, 出題数] の3つだけにする。
+// 記録は増える一方なので「出題数が多い方が進んでいる」とみなしてマージする。
+// これで iPad と Mac の記録は消し合わずに合流する。
+const SYNC_URL = (window.HUB_CONFIG && window.HUB_CONFIG.syncUrl) || "";
+const KP = "kM_";
+let syncQueue = {}, syncTimer = null, syncedAt = null;
+
+function syncQueueWord(key){
+  if(!SYNC_URL) return;
+  const r = state.records[key]; if(!r) return;
+  syncQueue[KP+key] = {v:[r.correct||0, r.wrong||0, r.total||0], t:Date.now()};
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncFlush, 1500);
+}
+
+function syncFlush(){
+  if(!SYNC_URL || !Object.keys(syncQueue).length) return;
+  const body = JSON.stringify(syncQueue); syncQueue = {};
+  fetch(SYNC_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:body})
+    .then(()=>{syncedAt=new Date(); syncBadge();}).catch(()=>{});
+}
+
+// 相手の方が進んでいる語は取り込み、こちらの方が進んでいる語は送り返す
+async function syncPull(){
+  if(!SYNC_URL) return;
+  try{
+    const r = await fetch(SYNC_URL);
+    const remote = await r.json();
+    let changed = false; const back = {};
+    for(const rk in remote){
+      if(rk.indexOf(KP)!==0) continue;
+      const key = rk.slice(KP.length);
+      const v = remote[rk] && remote[rk].v;
+      if(!Array.isArray(v)) continue;
+      const cur = state.records[key];
+      if(!cur) continue;                       // いまの収録語にない語は無視
+      const rt=v[2]||0, ct=cur.total||0;
+      if(rt>ct || (rt===ct && (v[0]||0)>(cur.correct||0))){
+        cur.correct=v[0]||0; cur.wrong=v[1]||0; cur.total=rt;
+        cur.mastered = cur.correct>=5;
+        if(!cur.lastSeen) cur.lastSeen = remote[rk].t||Date.now();
+        changed = true;
+      }else if(ct>rt){
+        back[rk] = {v:[cur.correct||0,cur.wrong||0,ct], t:Date.now()};
+      }
+    }
+    // 相手が持っていないこちらの記録を送る（初回の引っこしもこれで済む）
+    for(const key in state.records){
+      const c = state.records[key];
+      if((c.total||0)>0 && !(KP+key in remote)) back[KP+key]={v:[c.correct||0,c.wrong||0,c.total||0], t:Date.now()};
+    }
+    if(Object.keys(back).length){ Object.assign(syncQueue, back); syncFlush(); }
+    syncedAt = new Date(); syncBadge();
+    if(changed){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      updateHeader(); renderHome();
+      const m=document.getElementById('tab-map');
+      if(m && m.classList.contains('active')) renderMap();
+    }
+  }catch(e){}
+}
+
+function syncBadge(){
+  let el=document.getElementById('sync-badge');
+  if(!el){
+    el=document.createElement('div'); el.id='sync-badge';
+    el.style.cssText='position:fixed;bottom:6px;left:8px;font-size:0.62em;color:#9bb;z-index:50;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  el.textContent = SYNC_URL ? ('☁️ '+(syncedAt?('同期 '+String(syncedAt.getHours()).padStart(2,'0')+':'+String(syncedAt.getMinutes()).padStart(2,'0')):'…')) : '';
+}
+
 // ===== INIT =====
 loadState();
 // ensure all records exist
@@ -1883,6 +1960,10 @@ for(const[kai,data]of Object.entries(ROUNDS)){
 saveState();
 updateHeader();
 renderHome();
+syncBadge();
+syncPull();                                   // 起動時に他の端末の記録を取り込む
+setInterval(syncPull, 5*60*1000);             // 開いている間は5分ごと
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) syncPull(); });
 setTimeout(()=>daifukuSay('きょうもいっしょにがんばろ！'),1200);
 </script>
 </body>
