@@ -1558,7 +1558,9 @@ function startDailyReview(){
   const wrongs=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.wrong>0&&!x.rec.mastered&&!doneRecently(x.rec)));
   // ③マスター済みだが3日以上見てない（忘却チェック）
   const stale=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.mastered&&days(x.rec)>=3));
-  // ④まだ一度もやってない
+  // ④正解の途中の語（1〜4回正解・まだマスターしてない）。ここを再訪しないと永遠に卒業できない
+  const inProgress=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&!x.rec.mastered&&x.rec.wrong===0&&x.rec.correct>0&&!doneRecently(x.rec)));
+  // ⑤まだ一度もやってない
   const unseen=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.total===0));
 
   const picked=[];
@@ -1573,7 +1575,7 @@ function startDailyReview(){
       seen.add(key);picked.push(x);added++;
     }
   };
-  take(fire,3);take(wrongs,3);take(stale,2);take(unseen);
+  take(fire,3);take(wrongs,3);take(inProgress,2);take(stale,1);take(unseen);
 
   if(picked.length===0){alert('今日の分はぜんぶ終わってるよ！すごい！');return;}
 
