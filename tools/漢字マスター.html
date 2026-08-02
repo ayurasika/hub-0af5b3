@@ -1888,7 +1888,7 @@ let syncQueue = {}, syncTimer = null, syncedAt = null;
 function syncQueueWord(key){
   if(!SYNC_URL) return;
   const r = state.records[key]; if(!r) return;
-  syncQueue[KP+key] = {v:[r.correct||0, r.wrong||0, r.total||0], t:Date.now()};
+  syncQueue[KP+key] = {v:[r.correct||0, r.wrong||0, r.total||0, r.lastSeen||0], t:Date.now()};
   clearTimeout(syncTimer);
   syncTimer = setTimeout(syncFlush, 1500);
 }
@@ -1918,16 +1918,18 @@ async function syncPull(){
       if(rt>ct || (rt===ct && (v[0]||0)>(cur.correct||0))){
         cur.correct=v[0]||0; cur.wrong=v[1]||0; cur.total=rt;
         cur.mastered = cur.correct>=5;
-        if(!cur.lastSeen) cur.lastSeen = remote[rk].t||Date.now();
+        // lastSeen＝実際に学習した時刻（v[3]）。同期した時刻(t)を入れると
+        // 「今日やったばかり」扱いになり、翌日まで出題されなくなるので使わない
+        if(v[3]) cur.lastSeen = v[3];
         changed = true;
       }else if(ct>rt){
-        back[rk] = {v:[cur.correct||0,cur.wrong||0,ct], t:Date.now()};
+        back[rk] = {v:[cur.correct||0,cur.wrong||0,ct,cur.lastSeen||0], t:Date.now()};
       }
     }
     // 相手が持っていないこちらの記録を送る（初回の引っこしもこれで済む）
     for(const key in state.records){
       const c = state.records[key];
-      if((c.total||0)>0 && !(KP+key in remote)) back[KP+key]={v:[c.correct||0,c.wrong||0,c.total||0], t:Date.now()};
+      if((c.total||0)>0 && !(KP+key in remote)) back[KP+key]={v:[c.correct||0,c.wrong||0,c.total||0,c.lastSeen||0], t:Date.now()};
     }
     if(Object.keys(back).length){ Object.assign(syncQueue, back); syncFlush(); }
     syncedAt = new Date(); syncBadge();
