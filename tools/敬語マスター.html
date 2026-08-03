@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>敬語マスター</title>
+<!-- ハブの共通設定（syncUrl）。読めなくても動く（端末ごと保存になるだけ） -->
+<script src="../data/config.js"></script>
+<style>
+*{box-sizing:border-box;}
+body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif; margin:0; background:linear-gradient(160deg,#f3f7ff,#fdf4ff); color:#334; line-height:1.6; padding-bottom:60px;}
+.wrap{max-width:560px; margin:0 auto; padding:14px;}
+h1{font-size:1.25em; margin:10px 0 2px; color:#5b4b8a;}
+.sub{font-size:.78em; color:#889;}
+.tabs{display:flex; gap:8px; margin:12px 0;}
+.tabbtn{flex:1; padding:10px; border-radius:14px; border:2px solid #d8d2ee; background:#fff; font-family:inherit; font-weight:700; font-size:.95em; color:#7a6fae; cursor:pointer;}
+.tabbtn.on{background:#7a6fae; border-color:#7a6fae; color:#fff;}
+.note{background:#fff; border:1.5px solid #e3ddf5; border-radius:14px; padding:10px 14px; font-size:.8em; color:#556; margin-bottom:12px;}
+.note b{color:#5b4b8a;}
+/* ---- 表モード ---- */
+table{width:100%; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 2px 8px rgba(90,75,138,.08);}
+th{background:#ece7fa; color:#5b4b8a; font-size:.8em; padding:7px 4px;}
+td{border:1px solid #eee9fb; padding:0; text-align:center; font-size:.9em;}
+td.base{background:#faf8ff; font-weight:700; color:#445; padding:8px 4px; width:64px;}
+.cell{display:block; width:100%; min-height:44px; padding:8px 4px; border:none; background:none; font-family:inherit; font-size:1em; color:#334; cursor:pointer;}
+.cell.hidden-a{color:transparent; position:relative;}
+.cell.hidden-a::after{content:"タップ"; position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); color:#c9c0e8; font-size:.75em;}
+.teinei{color:#8a9; font-size:.85em; padding:8px 4px;}
+/* ---- クイズモード ---- */
+.qcard{background:#fff; border-radius:18px; padding:20px 16px; text-align:center; box-shadow:0 2px 10px rgba(90,75,138,.1); margin-bottom:12px;}
+.qtype{display:inline-block; font-size:.75em; font-weight:700; padding:2px 12px; border-radius:999px; margin-bottom:8px;}
+.qtype.sonkei{background:#ffe9d6; color:#c07020;}
+.qtype.kenjo{background:#dcefe2; color:#2e8555;}
+.qword{font-size:2em; font-weight:800; color:#334; margin:6px 0;}
+.qask{font-size:.85em; color:#889;}
+.ans{font-size:1.5em; font-weight:800; color:#c0392b; min-height:1.5em; margin:10px 0 4px;}
+.hint{font-size:.75em; color:#99a; min-height:1.2em;}
+.btnrow{display:flex; gap:10px; justify-content:center; margin-top:12px;}
+.btn{padding:12px 22px; border-radius:14px; border:none; font-family:inherit; font-weight:800; font-size:1em; cursor:pointer;}
+.btn.reveal{background:#7a6fae; color:#fff;}
+.btn.ok{background:#3fa96a; color:#fff;}
+.btn.ng{background:#e06060; color:#fff;}
+.prog{font-size:.8em; color:#778; text-align:center; margin-top:6px;}
+.gradbar{height:10px; background:#eee; border-radius:5px; overflow:hidden; margin:6px 0;}
+.gradbar>div{height:100%; background:linear-gradient(90deg,#a58fd8,#7a6fae);}
+.dots{font-size:.8em; letter-spacing:2px; text-align:center; color:#b9aede; min-height:1.2em;}
+#sync-badge{position:fixed; bottom:6px; left:8px; font-size:.62em; color:#9bb;}
+.back{display:inline-block; margin:6px 0; font-size:.8em; color:#7a6fae; text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="../index.html">← ハブにもどる</a>
+<h1>🗣 敬語マスター</h1>
+<div class="sub">尊敬語＝相手を上げる（相手がする）／謙譲語＝自分を下げる（自分がする）／丁寧語＝です・ます</div>
+
+<div class="tabs">
+  <button class="tabbtn on" id="tb-quiz" onclick="mode('quiz')">クイズ</button>
+  <button class="tabbtn" id="tb-table" onclick="mode('table')">表で覚える</button>
+</div>
+
+<div id="pane-quiz">
+  <div class="note"><b>「れる・られる」も間違いではない</b>けど、テストで出るのは<b>特別な言い方</b>のほう。3回連続◯で卒業！</div>
+  <div class="qcard" id="qcard">
+    <span class="qtype" id="qtype"></span>
+    <div class="qword" id="qword"></div>
+    <div class="qask" id="qask"></div>
+    <div class="ans" id="qans"></div>
+    <div class="hint" id="qhint"></div>
+    <div class="btnrow" id="qbtns"></div>
+    <div class="dots" id="qdots"></div>
+  </div>
+  <div class="gradbar"><div id="gbar" style="width:0%"></div></div>
+  <div class="prog" id="gprog"></div>
+</div>
+
+<div id="pane-table" style="display:none">
+  <div class="note">尊敬語・謙譲語は<b>かくれてる</b>よ。言ってからタップして答え合わせ。<b>いらっしゃる</b>は「行く・来る・いる」ぜんぶの尊敬語（三刀流）、<b>まいる</b>は「行く・来る」の謙譲語。</div>
+  <table id="ktable"></table>
+</div>
+
+</div>
+<div id="sync-badge"></div>
+<script>
+// ====== データ（夏期講習の敬語表プリントより） ======
+const WORDS = [
+  {b:"見る",   s:"ごらんになる",           k:"拝見する",       t:"見ます"},
+  {b:"いう",   s:"おっしゃる",             k:"申す",           t:"いいます", kh:"「申し上げる」もOK"},
+  {b:"食べる", s:"めしあがる",             k:"いただく",       t:"食べます"},
+  {b:"行く",   s:"いらっしゃる",           k:"まいる",         t:"行きます", sh:"「おいでになる」もOK", kh:"「うかがう」もOK"},
+  {b:"する",   s:"なさる",                 k:"いたす",         t:"します"},
+  {b:"来る",   s:"いらっしゃる",           k:"まいる",         t:"来ます",   sh:"「おいでになる」もOK"},
+  {b:"聞く",   s:"お聞きになる",           k:"承る",           t:"聞きます", kh:"「うかがう」もOK。承る＝うけたまわる"},
+  {b:"いる",   s:"いらっしゃる",           k:"おる",           t:"います"}
+];
+const GRAD = 3;   // 連続◯で卒業
+
+// ====== 記録（ローカル＋ハブのGASに同期） ======
+const SKEY="keigo_master_v1";
+let rec={};   // id -> {streak, total}
+try{ rec=JSON.parse(localStorage.getItem(SKEY)||"{}"); }catch(e){}
+function save(){ localStorage.setItem(SKEY, JSON.stringify(rec)); }
+function R(id){ return rec[id]||(rec[id]={streak:0,total:0}); }
+
+const SYNC_URL=(window.HUB_CONFIG&&window.HUB_CONFIG.syncUrl)||"";
+let sq={}, st=null, syncedAt=null;
+function syncQueue(id){
+  if(!SYNC_URL)return;
+  sq["kg_"+id]={v:[R(id).streak,R(id).total],t:Date.now()};
+  clearTimeout(st); st=setTimeout(syncFlush,1200);
+}
+function syncFlush(){
+  if(!SYNC_URL||!Object.keys(sq).length)return;
+  const b=JSON.stringify(sq); sq={};
+  fetch(SYNC_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:b}).then(()=>{syncedAt=new Date();badge();}).catch(()=>{});
+}
+async function syncPull(){
+  if(!SYNC_URL)return;
+  try{
+    const j=await (await fetch(SYNC_URL)).json();
+    let changed=false; const back={};
+    for(const k in j){
+      if(k.indexOf("kg_")!==0)continue;
+      const id=k.slice(3), v=j[k]&&j[k].v;
+      if(!Array.isArray(v))continue;
+      const c=R(id);
+      if((v[1]||0)>c.total){ c.streak=v[0]||0; c.total=v[1]||0; changed=true; }
+      else if(c.total>(v[1]||0)) back["kg_"+id]={v:[c.streak,c.total],t:Date.now()};
+    }
+    for(const id in rec){ if(rec[id].total>0 && !("kg_"+id in j)) back["kg_"+id]={v:[rec[id].streak,rec[id].total],t:Date.now()}; }
+    if(Object.keys(back).length){ Object.assign(sq,back); syncFlush(); }
+    syncedAt=new Date(); badge();
+    if(changed){ save(); drawProg(); }
+  }catch(e){}
+}
+function badge(){
+  document.getElementById("sync-badge").textContent = SYNC_URL?("☁️ "+(syncedAt?("同期 "+String(syncedAt.getHours()).padStart(2,"0")+":"+String(syncedAt.getMinutes()).padStart(2,"0")):"…")):"";
+}
+
+// ====== クイズ ======
+// 出題は尊敬8＋謙譲8の16問。卒業（3連続◯）したものは出ない。全部卒業したら復習モードで全体から。
+let cur=null, revealed=false;
+function pool(){
+  const items=[];
+  WORDS.forEach((w,i)=>{
+    items.push({id:"s"+i, w, type:"s"});
+    items.push({id:"k"+i, w, type:"k"});
+  });
+  const alive=items.filter(x=>R(x.id).streak<GRAD);
+  return alive.length?{list:alive,review:false}:{list:items,review:true};
+}
+function pick(){
+  const p=pool();
+  let cands=p.list.filter(x=>!cur||x.id!==cur.id);
+  if(!cands.length)cands=p.list;
+  cur=cands[Math.floor(Math.random()*cands.length)];
+  cur.review=p.review;
+  revealed=false;
+  draw();
+}
+function draw(){
+  const t=document.getElementById("qtype");
+  if(cur.type==="s"){ t.className="qtype sonkei"; t.textContent="尊敬語（相手を上げる）"; }
+  else{ t.className="qtype kenjo"; t.textContent="謙譲語（自分を下げる）"; }
+  document.getElementById("qword").textContent=cur.w.b;
+  document.getElementById("qask").textContent="を、"+(cur.type==="s"?"尊敬語":"謙譲語")+"の特別な言い方にすると？（口で言ってから答えを見る）";
+  document.getElementById("qans").textContent=revealed?(cur.type==="s"?cur.w.s:cur.w.k):"";
+  document.getElementById("qhint").textContent=revealed?((cur.type==="s"?cur.w.sh:cur.w.kh)||""):"";
+  const btns=document.getElementById("qbtns");
+  if(!revealed){
+    btns.innerHTML='<button class="btn reveal" onclick="reveal()">答えを見る</button>';
+  }else{
+    btns.innerHTML='<button class="btn ok" onclick="judge(true)">言えた ◯</button><button class="btn ng" onclick="judge(false)">まだ ✗</button>';
+  }
+  const r=R(cur.id);
+  document.getElementById("qdots").textContent = cur.review?"⭐卒業ずみ（復習）":("◯".repeat(r.streak)+"・".repeat(Math.max(0,GRAD-r.streak))+"　あと"+Math.max(0,GRAD-r.streak)+"回連続で卒業");
+  drawProg();
+}
+function reveal(){ revealed=true; draw(); }
+function judge(ok){
+  const r=R(cur.id);
+  r.total++;
+  r.streak = ok ? r.streak+1 : 0;
+  save(); syncQueue(cur.id);
+  pick();
+}
+function drawProg(){
+  let grad=0;
+  WORDS.forEach((w,i)=>{ if(R("s"+i).streak>=GRAD)grad++; if(R("k"+i).streak>=GRAD)grad++; });
+  document.getElementById("gbar").style.width=(grad/16*100)+"%";
+  document.getElementById("gprog").textContent="卒業 "+grad+" / 16（尊敬8・謙譲8）";
+}
+
+// ====== 表 ======
+function drawTable(){
+  const T=document.getElementById("ktable");
+  let h="<tr><th>ふつうの言い方</th><th>尊敬語<br><span style='font-weight:normal'>相手がする</span></th><th>謙譲語<br><span style='font-weight:normal'>自分がする</span></th><th>丁寧語</th></tr>";
+  WORDS.forEach((w,i)=>{
+    h+="<tr><td class='base'>"+w.b+"</td>"
+      +"<td><button class='cell hidden-a' onclick='flip(this,\""+w.s+"\")'>"+w.s+"</button></td>"
+      +"<td><button class='cell hidden-a' onclick='flip(this,\""+w.k+"\")'>"+w.k+"</button></td>"
+      +"<td class='teinei'>"+w.t+"</td></tr>";
+  });
+  T.innerHTML=h;
+}
+function flip(el){ el.classList.toggle("hidden-a"); }
+
+function mode(m){
+  document.getElementById("pane-quiz").style.display = m==="quiz"?"":"none";
+  document.getElementById("pane-table").style.display = m==="table"?"":"none";
+  document.getElementById("tb-quiz").classList.toggle("on",m==="quiz");
+  document.getElementById("tb-table").classList.toggle("on",m==="table");
+}
+
+// ====== INIT ======
+drawTable();
+pick();
+badge();
+syncPull();
+setInterval(syncPull,5*60*1000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden)syncPull(); });
+</script>
+</body>
+</html>
