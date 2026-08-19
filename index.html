@@ -59,6 +59,9 @@ body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;backgr
 .naoshi .q.grad .qhead{color:#1f9d52;}
 .naoshi .q.grad .qhead::after{content:"🎓";margin-left:6px;}
 .naoshi .gradhead{font-size:.68rem;color:#1f9d52;font-weight:900;margin:14px 0 6px;border-top:1px dashed #cfe8d8;padding-top:10px;}
+.naoshi .subhead{font-size:.72rem;font-weight:900;color:#e0533d;margin:12px 0 5px;display:flex;align-items:baseline;gap:8px;}
+.naoshi .subhead:first-child{margin-top:2px;}
+.naoshi .subhead span{font-size:.64rem;color:#bbb;font-weight:700;}
 .naoshi .empty{font-size:.8rem;color:#888;text-align:center;padding:14px 0;line-height:1.7;}
 
 /* 計算マスター（写真→丸つけ） */
@@ -585,11 +588,24 @@ function seedRand(str){
     return ((h ^= h>>>16) >>> 0) / 4294967296;
   };
 }
-function pickToday(yet){
-  const rnd = seedRand(TODAY + "#" + store.get("naoshi-shuffle",0));
-  const a = yet.slice();
+function shuffleSeeded(arr, salt){
+  const rnd = seedRand(TODAY + "#" + store.get("naoshi-shuffle",0) + "#" + salt);
+  const a = arr.slice();
   for(let i=a.length-1;i>0;i--){ const j = Math.floor(rnd()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
-  return a.slice(0, PERDAY);
+  return a;
+}
+// 教科ごとに枠を決めて出す（国語がふえても理科が埋もれないように）
+// data/naoshi.js の perSubject で調整できる。無ければ PERDAY を教科数で山分け。
+function pickToday(yet){
+  const subs = [...new Set(NAOSHI.items.map(it => it.subject))];
+  const quota = NAOSHI.perSubject || {};
+  const out = [];
+  subs.forEach(sub => {
+    const pool = yet.filter(it => it.subject === sub);
+    const n = quota[sub] != null ? quota[sub] : Math.ceil(PERDAY / subs.length);
+    out.push(...shuffleSeeded(pool, sub).slice(0, n));
+  });
+  return out;
 }
 
 function buildNaoshi(){
@@ -646,7 +662,18 @@ function buildNaoshi(){
   if(!pick.length){
     nlist.innerHTML = `<div class="empty">🎓 ぜんぶ卒業！<br>あたらしいまちがいが来るまでおやすみ</div>`;
   } else {
-    pick.forEach(it => nlist.appendChild(row(it)));
+    // 教科ごとにまとめて、見出しをつけて出す
+    const bySub = {};
+    pick.forEach(it => (bySub[it.subject] = bySub[it.subject] || []).push(it));
+    Object.keys(bySub).forEach(sub => {
+      const yetSub = yet.filter(x => x.subject === sub).length;
+      const allSub = NAOSHI.items.filter(x => x.subject === sub).length;
+      const h = document.createElement("div");
+      h.className = "subhead";
+      h.innerHTML = `${sub === "理科" ? "🔬" : "📖"} ${sub}　<span>のこり ${yetSub} / ${allSub}</span>`;
+      nlist.appendChild(h);
+      bySub[sub].forEach(it => nlist.appendChild(row(it)));
+    });
   }
   // 卒業したやつは「ぜんぶ見る」のときだけ下に出す（ふだんは邪魔しない）
   if(naoshiAll && grd.length){
