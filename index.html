@@ -143,6 +143,29 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 .note{margin-top:10px;font-size:.72rem;color:#777;background:#fdf3f7;border-radius:10px;padding:8px 11px;line-height:1.7;}
 .opencount{font-size:.72rem;color:#d84a7f;font-weight:700;margin-top:8px;}
 .footer{text-align:center;font-size:.65rem;color:#aab;margin-top:24px;}
+
+/* のびしろレーダー */
+.nobi h2{color:#0d7a8f;}
+.nobi .tabs{display:flex;gap:6px;margin-top:10px;}
+.nobi .tab{border:none;border-radius:14px;padding:6px 14px;font-family:inherit;font-weight:900;font-size:.76rem;cursor:pointer;background:#e8f3f6;color:#0d7a8f;}
+.nobi .tab.on{background:#0d7a8f;color:#fff;}
+.nobi .tab.off{opacity:.45;cursor:default;}
+.nobi .tab.off small{font-weight:700;font-size:.6rem;}
+.nobi .chartwrap{display:flex;justify-content:center;margin-top:6px;}
+.nobi .top3{margin-top:4px;}
+.nobi .trow{border:2px solid #d8ecf1;border-radius:12px;padding:9px 11px;margin-bottom:7px;cursor:pointer;}
+.nobi .trow .thead{display:flex;align-items:center;gap:8px;font-weight:900;font-size:.9rem;}
+.nobi .trow .rankb{flex:0 0 auto;width:24px;height:24px;border-radius:8px;background:#0d7a8f;color:#fff;font-size:.78rem;display:flex;align-items:center;justify-content:center;}
+.nobi .trow:nth-child(2) .rankb{background:#3d95a8;}
+.nobi .trow:nth-child(3) .rankb{background:#6fb1c0;}
+.nobi .trow .pts{margin-left:auto;font-size:.68rem;color:#0d7a8f;font-weight:900;white-space:nowrap;}
+.nobi .trow .hint{font-size:.74rem;color:#666;margin-top:3px;padding-left:32px;line-height:1.6;}
+.nobi .trow .misses{display:none;margin-top:6px;padding-left:32px;}
+.nobi .trow.open .misses{display:block;}
+.nobi .trow .miss{font-size:.72rem;color:#555;line-height:1.7;}
+.nobi .trow .miss b{color:#c0392b;}
+.nobi .trow .miss .mtest{color:#aab;font-size:.64rem;margin-left:4px;}
+.nobi .nobinote{margin-top:6px;font-size:.66rem;color:#99a;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -154,6 +177,20 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 </div></div>
 
 <div class="wrap">
+
+  <!-- のびしろレーダー -->
+  <div class="card nobi">
+    <h2>📊 のびしろレーダー <span class="badge">外側＝拾いどころ</span></h2>
+    <div class="sub">これまでのテストで「みんなは取れたのに落とした問題」を集計。にがてじゃなくて<b>のびしろ</b>！</div>
+    <div class="tabs">
+      <button class="tab on">算数</button>
+      <button class="tab off">国語 <small>じゅんび中</small></button>
+      <button class="tab off">理科 <small>じゅんび中</small></button>
+    </div>
+    <div class="chartwrap" id="nobi-chart"></div>
+    <div class="top3" id="nobi-top3"></div>
+    <div class="nobinote" id="nobi-note"></div>
+  </div>
 
   <!-- あさイチ -->
   <div class="card am">
@@ -307,7 +344,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 // config.js / rika-week.js は毎週上書きされるので、日付をキャッシュバスターにして必ず最新を取りに行く
 (function(){
   var v = new Date().toISOString().slice(0,10); // 同日内は同じURL＝キャッシュ活用、日が変われば必ず再取得
-  ["data/config.js","data/rika-week.js"].forEach(function(src){
+  ["data/config.js","data/rika-week.js","data/tests.js"].forEach(function(src){
     document.write('<script src="'+src+'?v='+v+'"><\/script>');
   });
   // まちがい直しは同じ日に何度も追加するので、日付では足りない。毎回必ず取りに行く（数KBなので軽い）
@@ -844,6 +881,83 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
   document.querySelectorAll('a[href^="tools/"]').forEach(function(a){
     a.href = a.getAttribute("href") + "?v=" + v;
   });
+})();
+</script>
+<script>
+// ===== のびしろレーダー =====
+(function(){
+  var D = window.TESTDATA && window.TESTDATA.sansu;
+  if(!D) return;
+  // 全国正答率→のびしろ点：70%以上=2（みんな取れてる）、50〜69=1、50未満=0（今は深追いしない）
+  function band(r){ return r>=70 ? 2 : (r>=50 ? 1 : 0); }
+  var score = {}, cnt = {}, detail = {};
+  D.axes.forEach(function(a){ score[a]=0; cnt[a]=0; detail[a]=[]; });
+  D.tests.forEach(function(t){
+    t.miss.forEach(function(m){
+      if(!(m.u in score)) return;
+      var b = band(m.rate);
+      score[m.u] += b * t.weight;
+      if(b>0){ cnt[m.u]++; detail[m.u].push({n:m.n, rate:m.rate, k:m.k, test:t.label}); }
+    });
+  });
+  var max = 1; D.axes.forEach(function(a){ if(score[a]>max) max=score[a]; });
+
+  // レーダーSVG
+  var n = D.axes.length, cx=170, cy=128, R=82;
+  function pt(i, f){
+    var ang = -Math.PI/2 + i*2*Math.PI/n;
+    return [cx+Math.cos(ang)*R*f, cy+Math.sin(ang)*R*f];
+  }
+  function poly(f){ var s=[]; for(var i=0;i<n;i++){ var p=pt(i,f); s.push(p[0].toFixed(1)+","+p[1].toFixed(1)); } return s.join(" "); }
+  var svg = '<svg viewBox="0 0 340 256" style="width:100%;max-width:340px;" role="img" aria-label="のびしろレーダー">';
+  [0.25,0.5,0.75,1].forEach(function(f){
+    svg += '<polygon points="'+poly(f)+'" fill="none" stroke="#d8ecf1" stroke-width="1.2"/>';
+  });
+  for(var i=0;i<n;i++){
+    var p = pt(i,1);
+    svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="#d8ecf1" stroke-width="1.2"/>';
+  }
+  var dp=[];
+  for(var i=0;i<n;i++){
+    var f = Math.max(score[D.axes[i]]/max, 0.04);
+    dp.push(pt(i,f));
+  }
+  svg += '<polygon points="'+dp.map(function(p){return p[0].toFixed(1)+","+p[1].toFixed(1);}).join(" ")+'" fill="rgba(13,122,143,.22)" stroke="#0d7a8f" stroke-width="2.5" stroke-linejoin="round"/>';
+  dp.forEach(function(p){ svg += '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="#0d7a8f"/>'; });
+  for(var i=0;i<n;i++){
+    var ang = -Math.PI/2 + i*2*Math.PI/n, c = Math.cos(ang);
+    var p = pt(i,1.13);
+    var anchor = c>0.3 ? "start" : (c<-0.3 ? "end" : "middle");
+    var dy = Math.sin(ang)<-0.5 ? -3 : (Math.sin(ang)>0.5 ? 10 : 4);
+    svg += '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+dy).toFixed(1)+'" text-anchor="'+anchor+'" font-size="11.5" font-weight="700" fill="#456" font-family="inherit">'+D.axes[i]+'</text>';
+  }
+  svg += '</svg>';
+  document.getElementById("nobi-chart").innerHTML = svg;
+
+  // トップ3（＝いま拾うところ）
+  var ranked = D.axes.slice().sort(function(a,b){ return score[b]-score[a]; }).filter(function(a){ return score[a]>0; }).slice(0,3);
+  var html = "";
+  ranked.forEach(function(a, idx){
+    var ms = detail[a].sort(function(x,y){ return y.rate-x.rate; }).slice(0,6);
+    html += '<div class="trow" onclick="this.classList.toggle(\'open\')">'
+      + '<div class="thead"><span class="rankb">'+(idx+1)+'</span>'+a
+      + '<span class="pts">みんなが取れた問題 '+cnt[a]+'問ぶん ▾</span></div>'
+      + '<div class="hint">'+(D.hints[a]||"")+'</div>'
+      + '<div class="misses">'
+      + ms.map(function(m){
+          return '<div class="miss">'+m.n+'（<b>'+m.rate+'%</b>の子が正解'+(m.k==="レ"?"・無答":"")+'）<span class="mtest">'+m.test+'</span></div>';
+        }).join("")
+      + (detail[a].length>6 ? '<div class="miss" style="color:#aab;">…ほか'+(detail[a].length-6)+'問</div>' : '')
+      + '</div></div>';
+  });
+  // いまの強み（のびしろがほぼ無い軸）
+  var weakest = D.axes.slice().sort(function(a,b){ return score[a]-score[b]; })[0];
+  if(score[weakest] < max*0.1){
+    html += '<div class="hint" style="padding-left:4px;margin-top:2px;font-size:.76rem;color:#1f9d52;font-weight:700;">💪 いまの強み：'+weakest+'（'+(D.hints[weakest]||"")+'）</div>';
+  }
+  document.getElementById("nobi-top3").innerHTML = html;
+  document.getElementById("nobi-note").textContent =
+    "集計もと：" + D.tests.map(function(t){ return t.label; }).join("・") + "（新しいテストほど重く数えてるよ）｜更新 " + window.TESTDATA.updated;
 })();
 </script>
 </body>
