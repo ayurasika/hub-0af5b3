@@ -344,11 +344,14 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 // config.js / rika-week.js は毎週上書きされるので、日付をキャッシュバスターにして必ず最新を取りに行く
 (function(){
   var v = new Date().toISOString().slice(0,10); // 同日内は同じURL＝キャッシュ活用、日が変われば必ず再取得
-  ["data/config.js","data/rika-week.js","data/tests.js"].forEach(function(src){
+  ["data/config.js","data/rika-week.js"].forEach(function(src){
     document.write('<script src="'+src+'?v='+v+'"><\/script>');
   });
-  // まちがい直しは同じ日に何度も追加するので、日付では足りない。毎回必ず取りに行く（数KBなので軽い）
-  document.write('<script src="data/naoshi.js?t='+Date.now()+'"><\/script>');
+  // まちがい直し・のびしろレーダーは同じ日に更新することがあるので、日付では足りない。
+  // 毎回必ず取りに行く（どちらも数KBなので軽い）
+  ["data/naoshi.js","data/tests.js"].forEach(function(src){
+    document.write('<script src="'+src+'?t='+Date.now()+'"><\/script>');
+  });
 })();
 </script>
 <script>
