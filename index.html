@@ -610,8 +610,14 @@ function buildRika(){
 const NAOSHI = window.NAOSHI || {updated:"", items:[]};
 const GRAD = NAOSHI.grad || 2;      // 卒業に必要な連続◯（data/naoshi.js の grad で変えられる）
 const PERDAY = NAOSHI.perDay || 5;  // 1日に出す数（data/naoshi.js の perDay で変えられる）
+// 🔁 忘却チェック：卒業した問題も、しばらくたったら1回もどす（1問1回の使い捨てにしない）
+// 理科カンペで7月に入れたのと同じ仕組み。数字は data/naoshi.js の reviewDays / reviewSlots で変えられる。
+const REVIEW_DAYS  = NAOSHI.reviewDays  != null ? NAOSHI.reviewDays  : 14; // 卒業から何日たったら戻すか
+const REVIEW_SLOTS = NAOSHI.reviewSlots != null ? NAOSHI.reviewSlots : 2;  // 1日に戻す数
+let reviewIds = new Set();  // きょう「ひさしぶりチェック」として出している問題
 const nlist = document.getElementById("naoshi-list");
 const nkey = id => `naoshi-${id}`;
+const nLastSeen = id => { const r = shared[nkey(id)]; return (r && r.t) ? r.t : 0; };
 let naoshiAll = false; // 「ぜんぶ見る」モードか
 
 // 文字列から決まった乱数列を作る。同じ日・同じシャッフル回数なら並びは毎回同じ
@@ -633,7 +639,7 @@ function shuffleSeeded(arr, salt){
 }
 // 教科ごとに枠を決めて出す（国語がふえても理科が埋もれないように）
 // data/naoshi.js の perSubject で調整できる。無ければ PERDAY を教科数で山分け。
-function pickToday(yet){
+function pickToday(yet, grd){
   const subs = [...new Set(NAOSHI.items.map(it => it.subject))];
   const quota = NAOSHI.perSubject || {};
   const out = [];
@@ -642,6 +648,11 @@ function pickToday(yet){
     const n = quota[sub] != null ? quota[sub] : Math.ceil(PERDAY / subs.length);
     out.push(...shuffleSeeded(pool, sub).slice(0, n));
   });
+  // 🔁 卒業ぐみから「しばらく見てないもの」を REVIEW_SLOTS 問だけ戻す
+  const limit = Date.now() - REVIEW_DAYS * 86400000;
+  const stale = (grd || []).filter(it => nLastSeen(it.id) < limit);
+  reviewIds = new Set(shuffleSeeded(stale, "review").slice(0, REVIEW_SLOTS).map(it => it.id));
+  out.push(...(grd || []).filter(it => reviewIds.has(it.id)));
   return out;
 }
 
@@ -659,7 +670,7 @@ function buildNaoshi(){
   }
   const yet = NAOSHI.items.filter(it => store.get(nkey(it.id),0) < GRAD);
   const grd = NAOSHI.items.filter(it => store.get(nkey(it.id),0) >= GRAD);
-  const pick = naoshiAll ? yet : pickToday(yet);
+  const pick = naoshiAll ? yet : pickToday(yet, grd);
 
   document.getElementById("naoshi-sub").textContent = naoshiAll
     ? `のこり ぜんぶ ${yet.length}こ（◯が${GRAD}回つづいたら卒業）`
@@ -668,8 +679,9 @@ function buildNaoshi(){
   const row = (it) => {
     const n = store.get(nkey(it.id),0);
     const done = n >= GRAD;
+    const isReview = reviewIds.has(it.id) && !naoshiAll;
     const div = document.createElement("div");
-    div.className = "q" + (done?" grad":"") + (openIds.has(it.id)?" open":"");
+    div.className = "q" + (done && !isReview ? " grad":"") + (openIds.has(it.id)?" open":"");
     div.dataset.id = it.id;
     div.innerHTML = `
       <div class="qhead"><span class="unit">${it.subject}・${it.unit}</span><span>${it.q}</span>${it.src?`<span class="src">${it.src}</span>`:""}</div>
@@ -679,7 +691,7 @@ function buildNaoshi(){
         <div class="nbtns">
           <button class="nbtn ok">言えた ◯</button>
           <button class="nbtn ng">まだ ✗</button>
-          <span class="streak">${done ? "🎓 卒業" : `れんぞく ${n}／${GRAD}`}</span>
+          <span class="streak">${isReview ? "🔁 ひさしぶりチェック" : (done ? "🎓 卒業" : `れんぞく ${n}／${GRAD}`)}</span>
         </div>
       </div>`;
     div.querySelector(".qhead").onclick = () => div.classList.toggle("open");
