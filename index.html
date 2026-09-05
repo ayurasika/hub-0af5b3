@@ -982,10 +982,14 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
       + (detail[a].length>6 ? '<div class="miss" style="color:#aab;">…ほか'+(detail[a].length-6)+'問</div>' : '')
       + '</div></div>';
   });
-  // いまの強み（のびしろがほぼ無い軸）
-  var weakest = D.axes.slice().sort(function(a,b){ return score[a]-score[b]; })[0];
-  if(score[weakest] < max*0.1){
-    html += '<div class="hint" style="padding-left:4px;margin-top:2px;font-size:.76rem;color:#1f9d52;font-weight:700;">💪 いまの強み：'+weakest+'（'+(D.hints[weakest]||"")+'）</div>';
+  // いまの強み：データに strength があればそれを使う（自動判定は「落としてない＝強い」とズレることがある）
+  if(D.strength && D.strength.axis){
+    html += '<div class="hint" style="padding-left:4px;margin-top:2px;font-size:.76rem;color:#1f9d52;font-weight:700;">💪 いまの強み：'+D.strength.axis+'（'+(D.strength.text||"")+'）</div>';
+  } else {
+    var weakest = D.axes.slice().sort(function(a,b){ return score[a]-score[b]; })[0];
+    if(score[weakest] < max*0.1){
+      html += '<div class="hint" style="padding-left:4px;margin-top:2px;font-size:.76rem;color:#1f9d52;font-weight:700;">💪 いまの強み：'+weakest+'（'+(D.hints[weakest]||"")+'）</div>';
+    }
   }
   document.getElementById("nobi-top3").innerHTML = html;
   document.getElementById("nobi-note").textContent =
