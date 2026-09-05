@@ -183,9 +183,9 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
     <h2>📊 のびしろレーダー <span class="badge">外側＝拾いどころ</span></h2>
     <div class="sub">これまでのテストで「みんなは取れたのに落とした問題」を集計。にがてじゃなくて<b>のびしろ</b>！</div>
     <div class="tabs">
-      <button class="tab on">算数</button>
-      <button class="tab off">国語 <small>じゅんび中</small></button>
-      <button class="tab off">理科 <small>じゅんび中</small></button>
+      <button class="tab on" data-nobi="sansu">算数</button>
+      <button class="tab off" data-nobi="kokugo">国語</button>
+      <button class="tab off" data-nobi="rika">理科</button>
     </div>
     <div class="chartwrap" id="nobi-chart"></div>
     <div class="top3" id="nobi-top3"></div>
@@ -902,7 +902,23 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
 <script>
 // ===== のびしろレーダー =====
 (function(){
-  var D = window.TESTDATA && window.TESTDATA.sansu;
+  var TD = window.TESTDATA || {};
+  var LABEL = {sansu:"算数", kokugo:"国語", rika:"理科"};
+  // タブ：データが無い教科は「じゅんび中」表示のまま押せない
+  var tabs = document.querySelectorAll('.tabs [data-nobi]');
+  tabs.forEach(function(b){
+    var key = b.getAttribute('data-nobi');
+    if(!TD[key]){ b.innerHTML = LABEL[key]+' <small>じゅんび中</small>'; return; }
+    b.onclick = function(){
+      tabs.forEach(function(x){ x.className = 'tab off'; });
+      b.className = 'tab on';
+      render(key);
+    };
+  });
+  render('sansu');
+
+  function render(key){
+  var D = TD[key];
   if(!D) return;
   // 全国正答率→のびしろ点：70%以上=2（みんな取れてる）、50〜69=1、50未満=0（今は深追いしない）
   function band(r){ return r>=70 ? 2 : (r>=50 ? 1 : 0); }
@@ -973,7 +989,8 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
   }
   document.getElementById("nobi-top3").innerHTML = html;
   document.getElementById("nobi-note").textContent =
-    "集計もと：" + D.tests.map(function(t){ return t.label; }).join("・") + "（新しいテストほど重く数えてるよ）｜更新 " + window.TESTDATA.updated;
+    LABEL[key] + "の集計もと：" + D.tests.map(function(t){ return t.label; }).join("・") + "（新しいテストほど重く数えてるよ）｜更新 " + TD.updated;
+  }
 })();
 </script>
 </body>
