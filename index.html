@@ -979,9 +979,11 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
   }
   var html = "";
   // きょうはこれ（1位の分野のアクションを一番上に）
-  if(ranked.length){
-    var top = ranked[0], ta = D.actions && D.actions[top];
-    if(ta){
+  // 「待つ分野」（wait:true）は飛ばして、いま動ける分野から選ぶ（skipWait）
+  var todayAxis = ranked.filter(function(a){ var ac=D.actions&&D.actions[a]; return ac && !ac.wait; })[0];
+  if(todayAxis){
+    var top = todayAxis, ta = D.actions[top];
+    {
       html += '<div class="todaydo">きょうはこれ：<b>'+top+'</b> → '
         + (ta.href ? '<a href="'+ta.href+'">'+ta.label+'</a>' : ta.label) + '</div>';
     }
