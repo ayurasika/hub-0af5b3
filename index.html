@@ -836,7 +836,9 @@ function kmRenderResult(){
 // ===== 漢字・ママ用 =====
 const kw = CFG.kanjiWindow || [];
 document.getElementById("kanji-range").textContent =
-  kw.length ? `今週の2回ぶん：回${kw[0]}（${CFG.kanjiThemes?.[kw[0]]||""}）＋ 回${kw[1]}（${CFG.kanjiThemes?.[kw[1]]||""}）` : "";
+  !kw.length ? "" : (kw[0]===kw[1]
+    ? `今週のぶん：回${kw[0]}（${CFG.kanjiThemes?.[kw[0]]||""}）`
+    : `今週の2回ぶん：回${kw[0]}（${CFG.kanjiThemes?.[kw[0]]||""}）＋ 回${kw[1]}（${CFG.kanjiThemes?.[kw[1]]||""}）`);
 document.getElementById("kanji-note").textContent = "2週ループ";
 document.getElementById("toilet-note").innerHTML = `🚽 今週のトイレカード：${CFG.toiletCard||"—"}`;
 

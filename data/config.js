@@ -4,8 +4,9 @@ window.HUB_CONFIG = {
   // 同期先URL（Google Apps Scriptの /exec URL）。空なら端末ごと保存。設定手順: hub-sync/設定手順.md
   syncUrl: "https://script.google.com/macros/s/AKfycbzDqRXupanKHMZRrGSdX-VGAShS-tTTmBmkAsW5FTSaP5MW4jjZrFd9s9EHBmV6fmHa/exec",
   // 漢字2週ループ：[前回, 今回] ※回番号が違ったらあゆみ→Claudeに一言（config修正します）
-  kanjiWindow: [35, 36],
-  kanjiThemes: { 35: "歴史（日本史）", 36: "歴史（日本史②）" },
+  // 後期はステージⅤ。回番号は 80＋第N回（第2回＝82）。第1回は未収録（写真待ち）
+  kanjiWindow: [82, 82],
+  kanjiThemes: { 82: "後期 第2回（自然）" },
   toiletCard: "未指名（購入カード30枚の一覧をClaudeに教えてもらえたら毎週自動指名します）",
   // チェック表（こころ＝kokoro、ママ＝ayumi）。文言はここを書き換えれば変わる
   checklist: {
