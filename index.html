@@ -45,6 +45,10 @@ body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;backgr
 .naoshi .progress{background:#ffece8;}
 .naoshi .progress .bar{background:linear-gradient(90deg,#ff9b86,#e0533d);}
 .naoshi .plabel{color:#e0533d;}
+.actbtn{display:inline-block;margin:6px 0 2px;padding:6px 12px;border-radius:999px;background:#0d7a8f;color:#fff;font-weight:700;font-size:.8rem;text-decoration:none;}
+.actbtn.plain{background:#eef6f8;color:#0d5f6f;}
+.todaydo{background:#fff7e0;border:1.5px solid #f2d27a;border-radius:10px;padding:9px 12px;margin:0 0 10px;font-size:.86rem;color:#6b4e00;}
+.todaydo a{color:#0d7a8f;font-weight:700;}
 .naoshi .q{border-color:#ffd9d2;}
 .naoshi .q .unit{color:#e0533d;background:#fff0ec;}
 .naoshi .q .src{font-size:.6rem;color:#bbb;font-weight:700;margin-left:auto;white-space:nowrap;}
@@ -200,7 +204,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
   </div>
 
   <!-- 計算マスター 写真→丸つけ -->
-  <div class="card km">
+  <div class="card km" id="card-km">
     <h2>🧮 計算マスター まるつけ <span class="badge">といたら写真をおくる</span></h2>
     <div class="sub">📷で答案をパシャ → ママとClaudeがまるつけ → ここに結果がとどくよ</div>
     <div class="btnrow" style="justify-content:flex-start;">
@@ -223,7 +227,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
   </div>
 
   <!-- 今日の四字熟語 -->
-  <div class="card yoji">
+  <div class="card yoji" id="card-yoji">
     <h2>🍚 きょうの四字熟語 <span class="badge">クイズ2問</span></h2>
     <div class="sub">意味を読んで、四字熟語を<b>漢字で書く</b>。書けたら「答えを見る」で答え合わせ</div>
     <div class="progress"><div class="bar" id="yj-bar"></div></div>
@@ -237,7 +241,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
   </div>
 
   <!-- 理科カンペ -->
-  <div class="card naoshi">
+  <div class="card naoshi" id="card-naoshi">
     <h2>🔁 まちがい直し <span class="badge">まちがえたやつだけ</span></h2>
     <div class="sub" id="naoshi-sub"></div>
     <div class="progress"><div class="bar" id="naoshi-bar"></div></div>
@@ -270,7 +274,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
   </div>
 
   <!-- 漢字 -->
-  <div class="card kanji">
+  <div class="card kanji" id="card-kanji">
     <h2>✏️ 漢字マスター <span class="badge" id="kanji-note"></span></h2>
     <div class="sub" id="kanji-range"></div>
     <div class="btnrow" style="justify-content:flex-start;">
@@ -968,13 +972,27 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
 
   // トップ3（＝いま拾うところ）
   var ranked = D.axes.slice().sort(function(a,b){ return score[b]-score[a]; }).filter(function(a){ return score[a]>0; }).slice(0,3);
+  function actBtn(a){
+    var ac = D.actions && D.actions[a]; if(!ac) return "";
+    if(ac.href) return '<a class="actbtn" href="'+ac.href+'" onclick="event.stopPropagation()">👉 '+ac.label+'</a>';
+    return '<div class="actbtn plain">👉 '+ac.label+'</div>';
+  }
   var html = "";
+  // きょうはこれ（1位の分野のアクションを一番上に）
+  if(ranked.length){
+    var top = ranked[0], ta = D.actions && D.actions[top];
+    if(ta){
+      html += '<div class="todaydo">きょうはこれ：<b>'+top+'</b> → '
+        + (ta.href ? '<a href="'+ta.href+'">'+ta.label+'</a>' : ta.label) + '</div>';
+    }
+  }
   ranked.forEach(function(a, idx){
     var ms = detail[a].sort(function(x,y){ return y.rate-x.rate; }).slice(0,6);
     html += '<div class="trow" onclick="this.classList.toggle(\'open\')">'
       + '<div class="thead"><span class="rankb">'+(idx+1)+'</span>'+a
       + '<span class="pts">みんなが取れた問題 '+cnt[a]+'問ぶん ▾</span></div>'
       + '<div class="hint">'+(D.hints[a]||"")+'</div>'
+      + actBtn(a)
       + '<div class="misses">'
       + ms.map(function(m){
           return '<div class="miss">'+m.n+'（<b>'+m.rate+'%</b>の子が正解'+(m.k==="レ"?"・無答":"")+'）<span class="mtest">'+m.test+'</span></div>';
