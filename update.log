@@ -1,0 +1,102 @@
+===== 2026-07-04 06:18:29 週次更新開始 =====
+2026-07-04: 25問生成OK（ひっかけ3問／プール残り221問）
+===== 2026-07-04 06:18:30 週次更新おわり =====
+===== 2026-07-06 05:41:31 週次更新開始 =====
+2026-07-06: 25問生成OK（ひっかけ3問／プール残り221問）
+[main db5bf8b] weekly update 2026-07-06
+ 5 files changed, 129 insertions(+), 129 deletions(-)
+ delete mode 100644 .nojekyll
+To https://github.com/ayurasika/hub-0af5b3.git
+   ff5030c..db5bf8b  main -> main
+Web公開に反映OK
+===== 2026-07-06 06:06:19 週次更新おわり =====
+===== 2026-07-13 06:06:25 週次更新開始 =====
+2026-07-13: 25問生成OK（ひっかけ3問／プール残り196問）
+[main a530393] weekly update 2026-07-13
+ 8 files changed, 1445 insertions(+), 128 deletions(-)
+ create mode 100644 "tools/\345\215\230\344\275\215_\345\217\260\346\234\254.html"
+ create mode 100644 "tools/\345\215\230\344\275\215_\346\224\273\347\225\245.html"
+ create mode 100644 "tools/\345\215\230\344\275\215\343\203\200\343\202\244\343\203\226.html"
+To https://github.com/ayurasika/hub-0af5b3.git
+   db5bf8b..a530393  main -> main
+Web公開に反映OK
+===== 2026-07-13 06:06:41 週次更新おわり =====
+===== 2026-07-20 05:57:18 週次更新開始 =====
+2026-07-20: 25問生成OK（ひっかけ3問／プール残り171問）
+[main 329469c] weekly update 2026-07-20
+ 4 files changed, 134 insertions(+), 134 deletions(-)
+fatal: unable to access 'https://github.com/ayurasika/hub-0af5b3.git/': Could not resolve host: github.com
+⚠ Web公開への反映に失敗（次回セッションでClaudeに見せて）
+===== 2026-07-20 05:57:19 週次更新おわり =====
+===== 2026-07-27 05:33:58 週次更新開始 =====
+2026-07-27: 25問生成OK（ひっかけ3問／プール残り146問）
+[main 0dca210] weekly update 2026-07-27
+ 5 files changed, 154 insertions(+), 141 deletions(-)
+To https://github.com/ayurasika/hub-0af5b3.git
+   9e3688e..0dca210  main -> main
+Web公開に反映OK
+===== 2026-07-27 05:34:02 週次更新おわり =====
+===== 2026-07-28 10:37:41 週次更新開始 =====
+2026-07-28: 25問生成OK（ひっかけ3問／プール残り121問）
+[main c2ff2c6] weekly update 2026-07-28
+ 6 files changed, 299 insertions(+), 132 deletions(-)
+ create mode 100644 data/naoshi.js
+To https://github.com/ayurasika/hub-0af5b3.git
+   0dca210..c2ff2c6  main -> main
+Web公開に反映OK
+===== 2026-07-28 10:37:43 週次更新おわり =====
+===== 2026-08-03 05:46:12 週次更新開始 =====
+2026-08-03: 25問生成OK（新規17問／復習8問／ひっかけ4問／未出題残り104問）
+[main 96d81e5] weekly update 2026-08-03
+ 4 files changed, 135 insertions(+), 135 deletions(-)
+To https://github.com/ayurasika/hub-0af5b3.git
+   8fdee66..96d81e5  main -> main
+Web公開に反映OK
+===== 2026-08-03 05:46:14 週次更新おわり =====
+===== 2026-08-17 05:30:37 週次更新開始 =====
+2026-08-17: 25問生成OK（新規17問／復習8問／ひっかけ4問／未出題残り87問）
+[main 81aa0ce] weekly update 2026-08-17
+ 4 files changed, 131 insertions(+), 131 deletions(-)
+fatal: unable to access 'https://github.com/ayurasika/hub-0af5b3.git/': Could not resolve host: github.com
+⚠ Web公開への反映に失敗（次回セッションでClaudeに見せて）
+===== 2026-08-17 05:30:38 週次更新おわり =====
+===== 2026-08-24 05:33:55 週次更新開始 =====
+2026-08-24: 25問生成OK（新規17問／復習8問／ひっかけ3問／未出題残り70問）
+[main 48e6974] weekly update 2026-08-24
+ 4 files changed, 127 insertions(+), 127 deletions(-)
+fatal: unable to access 'https://github.com/ayurasika/hub-0af5b3.git/': Could not resolve host: github.com
+⚠ Web公開への反映に失敗（次回セッションでClaudeに見せて）
+===== 2026-08-24 05:33:56 週次更新おわり =====
+===== 2026-08-31 05:43:59 週次更新開始 =====
+Traceback (most recent call last):
+  File "<stdin>", line 63, in <module>
+TypeError: '<' not supported between instances of 'NoneType' and 'int'
+[main 35f1afd] weekly update 2026-08-31
+ 3 files changed, 189 insertions(+), 13 deletions(-)
+ create mode 100644 data/tests.js
+To https://github.com/ayurasika/hub-0af5b3.git
+   9283ee5..35f1afd  main -> main
+Web公開に反映OK
+===== 2026-08-31 05:44:02 週次更新おわり =====
+===== 2026-09-07 05:32:29 週次更新開始 =====
+Traceback (most recent call last):
+  File "<stdin>", line 63, in <module>
+TypeError: '<' not supported between instances of 'NoneType' and 'int'
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+Everything up-to-date
+Web公開に反映OK
+===== 2026-09-07 05:32:32 週次更新おわり =====
+===== 2026-09-14 05:39:05 週次更新開始 =====
+Traceback (most recent call last):
+  File "<stdin>", line 63, in <module>
+TypeError: '<' not supported between instances of 'NoneType' and 'int'
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+Everything up-to-date
+Web公開に反映OK
+===== 2026-09-14 05:39:15 週次更新おわり =====
