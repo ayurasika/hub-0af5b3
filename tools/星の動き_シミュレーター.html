@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星の動き① シミュレーター（塾技90）</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:linear-gradient(180deg,#0a0e1a 0%,#101530 100%);color:#e0e6f5;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:14px 10px 60px;}
+  h1{font-size:1.2em;color:#ffd700;text-align:center;font-weight:900;}
+  .subtitle{font-size:.72em;color:#8892b0;text-align:center;margin:4px 0 12px;}
+  .tabs{display:flex;gap:5px;width:100%;max-width:440px;margin-bottom:12px;}
+  .tab-btn{flex:1;padding:9px 0;border:1px solid rgba(160,176,255,.3);border-radius:10px;background:rgba(255,255,255,.05);color:#a0b0ff;font-family:inherit;font-size:.68em;font-weight:700;cursor:pointer;}
+  .tab-btn.active{background:#ffd700;color:#0a0e1a;border-color:#ffd700;}
+  .panel{display:none;width:100%;max-width:440px;}
+  .panel.active{display:block;}
+  canvas{width:100%;display:block;border-radius:12px;background:#05070f;border:1px solid rgba(160,176,255,.2);}
+  .row{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap;}
+  .dir-btn,.opt{flex:1;padding:8px 0;border:1px solid rgba(160,176,255,.3);border-radius:8px;background:rgba(255,255,255,.05);color:#c8d0ff;font-family:inherit;font-size:.8em;font-weight:700;cursor:pointer;text-align:center;}
+  .dir-btn.active,.opt.active{background:#4f7cff;color:#fff;border-color:#4f7cff;}
+  .slider{width:100%;margin:6px 0;}
+  input[type=range]{width:100%;accent-color:#ffd700;}
+  .lab{font-size:.78em;color:#c8d0ff;display:flex;justify-content:space-between;margin-top:6px;}
+  .lab b{color:#ffd700;font-size:1.15em;}
+  .play{padding:8px 16px;border:none;border-radius:8px;background:#ffd700;color:#0a0e1a;font-family:inherit;font-weight:900;cursor:pointer;font-size:.85em;}
+  .box{background:rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;font-size:.82em;line-height:1.7;margin-top:10px;}
+  .box b{color:#ffd700;}
+  .box .pt{color:#ff9db0;font-weight:700;}
+  .step{background:rgba(255,255,255,.05);border-left:3px solid #4f7cff;padding:7px 10px;margin:6px 0;border-radius:0 8px 8px 0;font-size:.85em;cursor:pointer;}
+  .step.hide span.ans{visibility:hidden;}
+  .step .ans{color:#ffd700;font-weight:900;}
+  .step .tap{font-size:.75em;color:#8892b0;}
+  .big{font-size:1.3em;color:#ffd700;font-weight:900;}
+  table{width:100%;border-collapse:collapse;font-size:.8em;margin-top:8px;}
+  td,th{border:1px solid rgba(160,176,255,.25);padding:6px 5px;text-align:center;}
+  th{background:rgba(79,124,255,.25);}
+  .back{margin-top:18px;font-size:.8em;color:#8892b0;}
+  .back a{color:#a0b0ff;}
+</style>
+</head>
+<body>
+<h1>⭐ 星の動き① シミュレーター</h1>
+<div class="subtitle">塾技90 ／ 星は動かない。動いているのは地球。</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="sora">🧭 4つの空</button>
+  <button class="tab-btn" data-tab="hokkyoku">⭐ 北極星</button>
+  <button class="tab-btn" data-tab="nanchu">📅 南中の計算</button>
+  <button class="tab-btn" data-tab="hi">⏱ 1日の長さ</button>
+  <button class="tab-btn" data-tab="matome">📝 まとめ</button>
+</div>
+
+<!-- ===== 1 4つの空 ===== -->
+<div class="panel active" id="panel-sora">
+  <div class="row">
+    <button class="dir-btn" data-dir="0">北</button>
+    <button class="dir-btn active" data-dir="90">東</button>
+    <button class="dir-btn" data-dir="180">南</button>
+    <button class="dir-btn" data-dir="270">西</button>
+  </div>
+  <canvas id="cv-sora" width="440" height="400"></canvas>
+  <div class="lab"><span>時刻</span><b id="sora-t">20:00</b></div>
+  <input type="range" id="sora-slider" min="0" max="240" value="0">
+  <div class="row"><button class="play" id="sora-play">▶ 自転させる</button><button class="opt" id="sora-trail">残像 ON</button></div>
+  <div class="box" id="sora-msg"></div>
+</div>
+
+<!-- ===== 2 北極星 ===== -->
+<div class="panel" id="panel-hokkyoku">
+  <canvas id="cv-hok" width="440" height="420"></canvas>
+  <div class="lab"><span>いる場所の緯度（北緯）</span><b id="hok-lat">35°</b></div>
+  <input type="range" id="hok-slider" min="0" max="90" value="35">
+  <div class="row">
+    <button class="opt" data-lat="0">赤道 0°</button>
+    <button class="opt active" data-lat="35">日本 35°</button>
+    <button class="opt" data-lat="60">北欧 60°</button>
+    <button class="opt" data-lat="90">北極 90°</button>
+  </div>
+  <div class="box">
+    北極星は<b>地軸をのばした先</b>にある。地球がどれだけ回っても、軸の真上は動かない（こまの軸と同じ）。<br>
+    地平線から北極星までの角度（<b>高度</b>）は、<span class="pt">その場所の緯度とぴったり同じ</span>。<br>
+    赤道なら地平線すれすれ（0°）、北極なら真上（90°）。
+  </div>
+</div>
+
+<!-- ===== 3 南中の計算 ===== -->
+<div class="panel" id="panel-nanchu">
+  <canvas id="cv-nan" width="440" height="300"></canvas>
+  <div class="lab"><span>ある星が南中した時刻</span><b id="nan-t0">午後8時</b></div>
+  <input type="range" id="nan-t0s" min="18" max="26" value="20">
+  <div class="lab"><span>何か月後の、同じ時刻に見ると…</span><b id="nan-m">2か月後</b></div>
+  <input type="range" id="nan-ms" min="1" max="6" value="2">
+  <div class="lab"><span>その日の時刻を動かす</span><b id="nan-h">同じ時刻</b></div>
+  <input type="range" id="nan-hs" min="-8" max="0" value="0">
+  <div id="nan-steps"></div>
+  <div class="box">
+    型：<b>①か月×30°</b>で「何度ずれたか」→ <b>②÷15°</b>で「何時間か」→ <b>③その分だけ早い時刻</b>。<br>
+    あとの月ほど、同じ星の南中は<span class="pt">早く</span>なる。
+  </div>
+</div>
+
+<!-- ===== 4 1日の長さ ===== -->
+<div class="panel" id="panel-hi">
+  <canvas id="cv-hi" width="440" height="380"></canvas>
+  <div class="lab"><span>地球が回った角度</span><b id="hi-deg">0°</b></div>
+  <input type="range" id="hi-slider" min="0" max="361" value="0">
+  <div class="row"><button class="play" id="hi-play">▶ 1日回す</button><button class="opt" id="hi-360">360°へ</button><button class="opt" id="hi-361">361°へ</button></div>
+  <div class="box" id="hi-msg"></div>
+</div>
+
+<!-- ===== 5 まとめ ===== -->
+<div class="panel" id="panel-matome">
+  <div class="box">
+    <b>星は動かない。地球が動くから、動いて見える。</b>
+    <table>
+      <tr><th>地球の動き</th><th>星の見え方</th><th>名前</th></tr>
+      <tr><td>自転（1日1回）</td><td><b>1時間に15°</b><br>東→西</td><td>日周運動</td></tr>
+      <tr><td>公転（1年1周）</td><td><b>1日に1°／1か月に30°</b><br>同じ時刻で東→西</td><td>年周運動</td></tr>
+    </table>
+    <br>
+    <b>4つの空</b>：北＝北極星を中心に<span class="pt">反時計回り</span>／東＝<span class="pt">右上がり</span>／南＝東から西へ／西＝<span class="pt">右下がり</span><br>
+    <b>北極星</b>：地軸の延長上 → ほとんど動かない。高度＝<span class="pt">その地点の緯度</span>。北斗七星のAを5倍、カシオペヤ座のBを5倍のばした先<br>
+    <b>南中の計算</b>：か月×30° → ÷15° → 時間ぶん<span class="pt">早く</span>なる<br>
+    <b>星の1日</b>：南中→次の南中は<span class="pt">23時間56分</span>（太陽の24時間より4分早い。地球は太陽に向き直すのに361°回る）
+  </div>
+  <div class="box">ハブの「🔁まちがい直し」に、このページの問題が n240・n244〜n248 で入っている。</div>
+</div>
+
+<div class="back"><a href="../index.html">← ハブにもどる</a></div>
+
+<script>
+// ---------- 共通 ----------
+const D=Math.PI/180;
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  b.classList.add('active');document.getElementById('panel-'+b.dataset.tab).classList.add('active');
+  redrawAll();
+}));
+// 星の座標（赤経RA・赤緯dec）固定乱数
+const STARS=[];(function(){let s=7;const r=()=>{s=(s*9301+49297)%233280;return s/233280;};
+  for(let i=0;i<170;i++){STARS.push({ra:r()*360,dec:-35+r()*125,m:0.8+r()*1.6});}
+  STARS.push({ra:0,dec:90,m:2.4,polaris:true});
+})();
+// 地平座標：H=時角（西が＋）、dec、lat → alt, az（北=0 東=90）
+function altaz(H,dec,lat){
+  const sa=Math.sin(lat*D)*Math.sin(dec*D)+Math.cos(lat*D)*Math.cos(dec*D)*Math.cos(H*D);
+  const alt=Math.asin(Math.max(-1,Math.min(1,sa)))/D;
+  let ca=(Math.sin(dec*D)-Math.sin(lat*D)*sa)/(Math.cos(lat*D)*Math.cos(alt*D));
+  ca=Math.max(-1,Math.min(1,ca));let az=Math.acos(ca)/D;
+  if(Math.sin(H*D)>0)az=360-az;return{alt,az};
+}
+const wrap=a=>((a+180)%360+360)%360-180;
+
+// ---------- 1 4つの空 ----------
+const LAT=35;
+let dir=90,soraT=0,soraPlaying=false,trail=true;
+const cvS=document.getElementById('cv-sora'),cxS=cvS.getContext('2d');
+const DIRINFO={0:{name:'北の空',msg:'<b>北の空</b>：北極星を中心に<span class="pt">反時計回り</span>。北極星だけ動かない（地軸の延長上）。右＝東、左＝西。'},
+  90:{name:'東の空',msg:'<b>東の空</b>：星は<span class="pt">右上がり</span>にのぼる。太陽の日の出と同じ向き。左＝北、右＝南。'},
+  180:{name:'南の空',msg:'<b>南の空</b>：<span class="pt">東（左）から西（右）へ</span>、山なりに動く。いちばん高いところ＝南中。'},
+  270:{name:'西の空',msg:'<b>西の空</b>：星は<span class="pt">右下がり</span>にしずむ。左＝南、右＝北。'}};
+function drawSora(){
+  const W=cvS.width,Hh=cvS.height;cxS.fillStyle='#05070f';cxS.fillRect(0,0,W,Hh);
+  const HW=52,maxAlt=(dir===0)?80:75,ground=Hh-40;
+  const X=da=>W/2+da/HW*(W/2),Y=alt=>ground-alt/maxAlt*(ground-20);
+  // 地面
+  cxS.fillStyle='#1a2a1a';cxS.fillRect(0,ground,W,Hh-ground);
+  cxS.fillStyle='#9fb';cxS.font='bold 13px sans-serif';cxS.textAlign='center';
+  const L={0:['西','北','東'],90:['北','東','南'],180:['東','南','西'],270:['南','西','北']}[dir];
+  cxS.fillText(L[0],40,ground+25);cxS.fillText(L[1],W/2,ground+25);cxS.fillText(L[2],W-40,ground+25);
+  const hourAngle=t=>t*15; // 20:00を基準0
+  STARS.forEach(s=>{
+    const H0=(-s.ra)%360;
+    if(trail){cxS.beginPath();let started=false;
+      for(let k=-30;k<=0;k++){const t=soraT/10+k/10*1.0;const p=altaz(H0+hourAngle(t),s.dec,LAT);const da=wrap(p.az-dir);
+        if(p.alt<0||Math.abs(da)>HW){started=false;continue;}
+        const x=X(da),y=Y(p.alt);if(!started){cxS.moveTo(x,y);started=true;}else cxS.lineTo(x,y);}
+      cxS.strokeStyle=s.polaris?'rgba(255,215,0,.5)':'rgba(120,150,255,.35)';cxS.lineWidth=1;cxS.stroke();}
+    const p=altaz(H0+hourAngle(soraT/10),s.dec,LAT);const da=wrap(p.az-dir);
+    if(p.alt<0||Math.abs(da)>HW)return;
+    cxS.beginPath();cxS.arc(X(da),Y(p.alt),s.polaris?4:s.m,0,7);cxS.fillStyle=s.polaris?'#ffd700':'#fff';cxS.fill();
+    if(s.polaris){cxS.fillStyle='#ffd700';cxS.font='bold 12px sans-serif';cxS.fillText('北極星',X(da),Y(p.alt)-10);}
+  });
+  // 大きな矢印
+  cxS.strokeStyle='rgba(255,157,176,.9)';cxS.fillStyle='rgba(255,157,176,.9)';cxS.lineWidth=4;
+  const arrow=(x1,y1,x2,y2)=>{cxS.beginPath();cxS.moveTo(x1,y1);cxS.lineTo(x2,y2);cxS.stroke();const a=Math.atan2(y2-y1,x2-x1);
+    cxS.beginPath();cxS.moveTo(x2,y2);cxS.lineTo(x2-14*Math.cos(a-.4),y2-14*Math.sin(a-.4));cxS.lineTo(x2-14*Math.cos(a+.4),y2-14*Math.sin(a+.4));cxS.closePath();cxS.fill();};
+  if(dir===90)arrow(W*0.3,ground-60,W*0.62,ground-190);
+  else if(dir===270)arrow(W*0.38,ground-190,W*0.7,ground-60);
+  else if(dir===180){cxS.beginPath();cxS.arc(W/2,ground+60,W*0.42,Math.PI*1.15,Math.PI*1.85);cxS.stroke();const ex=W/2+W*0.42*Math.cos(Math.PI*1.85),ey=ground+60+W*0.42*Math.sin(Math.PI*1.85);arrow(ex-4,ey-6,ex+4,ey+6);}
+  else{const p=altaz(0,90,LAT),cx=X(0),cy=Y(p.alt),r=70;cxS.beginPath();cxS.arc(cx,cy,r,Math.PI*0.2,Math.PI*1.5,true);cxS.stroke();
+    const ex=cx+r*Math.cos(Math.PI*1.5),ey=cy+r*Math.sin(Math.PI*1.5);arrow(ex+6,ey,ex-4,ey);}
+  cxS.fillStyle='#ffd700';cxS.font='bold 15px sans-serif';cxS.textAlign='left';cxS.fillText(DIRINFO[dir].name,10,22);
+  const t=soraT/10;const hh=(20+Math.floor(t))%24,mm=Math.round((t%1)*60);
+  document.getElementById('sora-t').textContent=`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}（${t.toFixed(1)}時間後 → ${Math.round(t*15)}°）`;
+  document.getElementById('sora-msg').innerHTML=DIRINFO[dir].msg+'<br>1時間で<b>15°</b>（360°÷24時間）。動いているのは<b>地球（自転）</b>。';
+}
+document.querySelectorAll('.dir-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.dir-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');dir=+b.dataset.dir;drawSora();}));
+document.getElementById('sora-slider').addEventListener('input',e=>{soraT=+e.target.value;drawSora();});
+document.getElementById('sora-trail').addEventListener('click',e=>{trail=!trail;e.target.textContent=trail?'残像 ON':'残像 OFF';drawSora();});
+document.getElementById('sora-play').addEventListener('click',e=>{soraPlaying=!soraPlaying;e.target.textContent=soraPlaying?'⏸ 止める':'▶ 自転させる';
+  const step=()=>{if(!soraPlaying)return;soraT=(soraT+1)%241;document.getElementById('sora-slider').value=soraT;drawSora();setTimeout(step,60);};step();});
+
+// ---------- 2 北極星 ----------
+let lat=35;const cvH=document.getElementById('cv-hok'),cxH=cvH.getContext('2d');
+function drawHok(){
+  const W=cvH.width,Hh=cvH.height;cxH.fillStyle='#05070f';cxH.fillRect(0,0,W,Hh);
+  const cx=150,cy=230,R=95;
+  // 北極星（はるか上）
+  cxH.fillStyle='#ffd700';cxH.beginPath();cxH.arc(cx,28,6,0,7);cxH.fill();cxH.font='bold 12px sans-serif';cxH.textAlign='left';cxH.fillText('北極星（とても遠い）',cx+12,32);
+  // 地球
+  cxH.fillStyle='#1e4d8a';cxH.beginPath();cxH.arc(cx,cy,R,0,7);cxH.fill();
+  // 赤道・地軸
+  cxH.strokeStyle='rgba(255,255,255,.35)';cxH.setLineDash([4,4]);cxH.beginPath();cxH.moveTo(cx-R,cy);cxH.lineTo(cx+R,cy);cxH.stroke();
+  cxH.strokeStyle='#ffd700';cxH.setLineDash([]);cxH.lineWidth=2;cxH.beginPath();cxH.moveTo(cx,cy+R+15);cxH.lineTo(cx,40);cxH.stroke();
+  cxH.fillStyle='#ccc';cxH.font='11px sans-serif';cxH.fillText('赤道',cx+R+4,cy+4);cxH.fillStyle='#ffd700';cxH.fillText('地軸',cx+5,cy+R+12);
+  // 観測者
+  const a=lat*D,ox=cx+R*Math.cos(a),oy=cy-R*Math.sin(a);
+  cxH.fillStyle='#ff9db0';cxH.beginPath();cxH.arc(ox,oy,5,0,7);cxH.fill();
+  // 緯度の角
+  cxH.strokeStyle='#ff9db0';cxH.lineWidth=1.5;cxH.beginPath();cxH.moveTo(cx,cy);cxH.lineTo(ox,oy);cxH.stroke();
+  cxH.beginPath();cxH.arc(cx,cy,35,0,-a,true);cxH.stroke();cxH.fillStyle='#ff9db0';cxH.font='bold 12px sans-serif';cxH.fillText('緯度'+lat+'°',cx+38,cy-10);
+  // 地平線（接線）と北極星への線（軸に平行＝真上）
+  const tx=-Math.sin(a),ty=-Math.cos(a);// 接線方向（北向き）
+  cxH.strokeStyle='#9fb';cxH.lineWidth=2;cxH.beginPath();cxH.moveTo(ox-tx*30,oy-ty*30);cxH.lineTo(ox+tx*120,oy+ty*120);cxH.stroke();
+  cxH.fillStyle='#9fb';cxH.font='11px sans-serif';cxH.fillText('地平線',ox+tx*122+2,oy+ty*122);
+  cxH.strokeStyle='#ffd700';cxH.setLineDash([5,3]);cxH.beginPath();cxH.moveTo(ox,oy);cxH.lineTo(ox,32);cxH.stroke();cxH.setLineDash([]);
+  // 高度の角（地平線→真上）
+  cxH.strokeStyle='#ffd700';cxH.beginPath();const a0=Math.atan2(ty,tx),a1=-Math.PI/2;cxH.arc(ox,oy,28,a0,a1,lat>0?false:false);cxH.stroke();
+  cxH.fillStyle='#ffd700';cxH.font='bold 12px sans-serif';cxH.fillText('高度'+lat+'°',ox+8,oy-36);
+  // 右：見え方
+  const px=345,py=250,pr=70;cxH.fillStyle='#0d1530';cxH.beginPath();cxH.arc(px,py,pr,Math.PI,0);cxH.fill();
+  cxH.fillStyle='#1a2a1a';cxH.fillRect(px-pr,py,pr*2,20);cxH.fillStyle='#9fb';cxH.font='11px sans-serif';cxH.textAlign='center';cxH.fillText('北の空を見ると',px,py+36);
+  const sy=py-pr*Math.sin(a),sx=px-pr*Math.cos(a)*0+ (lat===90?0:0);
+  cxH.fillStyle='#ffd700';cxH.beginPath();cxH.arc(px,py-pr*Math.sin(a)*0.95,5,0,7);cxH.fill();
+  cxH.fillText('北極星',px,py-pr*Math.sin(a)*0.95-10);
+  cxH.strokeStyle='#ffd700';cxH.beginPath();cxH.moveTo(px-pr,py);cxH.lineTo(px,py-pr*Math.sin(a)*0.95);cxH.stroke();
+  cxH.fillStyle='#ffd700';cxH.font='bold 13px sans-serif';cxH.fillText('高度 ＝ 緯度 ＝ '+lat+'°',px,py+58);
+  document.getElementById('hok-lat').textContent=lat+'°';
+}
+document.getElementById('hok-slider').addEventListener('input',e=>{lat=+e.target.value;document.querySelectorAll('#panel-hokkyoku .opt').forEach(x=>x.classList.toggle('active',+x.dataset.lat===lat));drawHok();});
+document.querySelectorAll('#panel-hokkyoku .opt').forEach(b=>b.addEventListener('click',()=>{lat=+b.dataset.lat;document.getElementById('hok-slider').value=lat;document.querySelectorAll('#panel-hokkyoku .opt').forEach(x=>x.classList.remove('active'));b.classList.add('active');drawHok();}));
+
+// ---------- 3 南中の計算 ----------
+let t0=20,months=2,dh=0;const cvN=document.getElementById('cv-nan'),cxN=cvN.getContext('2d');
+const fmt=h=>{h=((h%24)+24)%24;const ap=h<12?'午前':'午後';let x=h%12;if(x===0)x=12;return `${ap}${x}時`;};
+function drawNan(){
+  const W=cvN.width,Hh=cvN.height;cxN.fillStyle='#05070f';cxN.fillRect(0,0,W,Hh);
+  const ground=Hh-36,HW=80,maxAlt=80;const X=da=>W/2+da/HW*(W/2),Y=alt=>ground-alt/maxAlt*(ground-20);
+  cxN.fillStyle='#1a2a1a';cxN.fillRect(0,ground,W,Hh-ground);cxN.fillStyle='#9fb';cxN.font='bold 12px sans-serif';cxN.textAlign='center';
+  cxN.fillText('東',40,ground+22);cxN.fillText('南',W/2,ground+22);cxN.fillText('西',W-40,ground+22);
+  cxN.strokeStyle='rgba(255,255,255,.3)';cxN.setLineDash([3,4]);cxN.beginPath();cxN.moveTo(W/2,20);cxN.lineTo(W/2,ground);cxN.stroke();cxN.setLineDash([]);
+  cxN.fillStyle='#ccc';cxN.font='11px sans-serif';cxN.fillText('南中の位置',W/2,16);
+  // 星（dec=-10：南の空を通る）
+  const dec=-10,lat0=35;
+  // 背景の星
+  STARS.forEach(s=>{const p=altaz(((-s.ra)%360)+months*30+dh*15,s.dec,lat0);const da=wrap(p.az-180);if(p.alt<0||Math.abs(da)>HW)return;cxN.fillStyle='rgba(255,255,255,.35)';cxN.beginPath();cxN.arc(X(da),Y(p.alt),s.m*0.8,0,7);cxN.fill();});
+  // 注目の星：南中時刻t0に H=0。months後の同時刻はH=+30*months、時刻をdhずらすと+15*dh
+  const H=months*30+dh*15;const p=altaz(H,dec,lat0);const da=wrap(p.az-180);
+  // 元の位置（南中）
+  const p0=altaz(0,dec,lat0);cxN.strokeStyle='rgba(255,215,0,.5)';cxN.setLineDash([4,3]);cxN.beginPath();cxN.arc(X(0),Y(p0.alt),9,0,7);cxN.stroke();cxN.setLineDash([]);
+  if(p.alt>0&&Math.abs(da)<=HW){cxN.fillStyle='#ffd700';cxN.beginPath();cxN.arc(X(da),Y(p.alt),8,0,7);cxN.fill();
+    cxN.fillStyle='#ffd700';cxN.font='bold 12px sans-serif';cxN.fillText(Math.round(H)===0?'南中！':`西へ ${Math.round(H)}°`,X(da),Y(p.alt)-14);}
+  else{cxN.fillStyle='#ff9db0';cxN.font='bold 12px sans-serif';cxN.fillText('星は地平線の下（この時刻には見えない）',W/2,ground-12);}
+  const deg=months*30,hrs=deg/15,ans=t0-hrs;
+  document.getElementById('nan-t0').textContent=fmt(t0);document.getElementById('nan-m').textContent=months+'か月後';
+  document.getElementById('nan-h').textContent=dh===0?`同じ時刻（${fmt(t0)}）`:`${fmt(t0+dh)}（${-dh}時間前）`;
+  document.getElementById('nan-steps').innerHTML=`
+    <div class="step hide" onclick="this.classList.toggle('hide')">① ${months}か月後の同じ時刻には、星は… <span class="ans">30° × ${months} ＝ ${deg}° 西にずれている</span> <span class="tap">（タップ）</span></div>
+    <div class="step hide" onclick="this.classList.toggle('hide')">② 南中の位置まで戻すには… <span class="ans">${deg}° ÷ 15° ＝ ${hrs}時間 前</span> <span class="tap">（タップ）</span></div>
+    <div class="step hide" onclick="this.classList.toggle('hide')">③ 南中する時刻は… <span class="ans big">${fmt(t0)}の${hrs}時間前 ＝ ${fmt(ans)}</span> <span class="tap">（タップ）</span></div>
+    <div class="box">上の「時刻を動かす」を <b>${-hrs}</b> にすると、星が南中の位置にもどる。確かめてみて。</div>`;
+}
+document.getElementById('nan-t0s').addEventListener('input',e=>{t0=+e.target.value;drawNan();});
+document.getElementById('nan-ms').addEventListener('input',e=>{months=+e.target.value;drawNan();});
+document.getElementById('nan-hs').addEventListener('input',e=>{dh=+e.target.value;drawNan();});
+
+// ---------- 4 1日の長さ ----------
+let hdeg=0,hiPlaying=false;const cvI=document.getElementById('cv-hi'),cxI=cvI.getContext('2d');
+function drawHi(){
+  const W=cvI.width,Hh=cvI.height;cxI.fillStyle='#05070f';cxI.fillRect(0,0,W,Hh);
+  const sx=90,sy=200,orbR=150;
+  // 太陽
+  cxI.fillStyle='#ff8c42';cxI.beginPath();cxI.arc(sx,sy,26,0,7);cxI.fill();cxI.fillStyle='#ffb';cxI.font='bold 12px sans-serif';cxI.textAlign='center';cxI.fillText('太陽',sx,sy+44);
+  // 軌道（一部）
+  cxI.strokeStyle='rgba(255,255,255,.2)';cxI.setLineDash([4,4]);cxI.beginPath();cxI.arc(sx,sy,orbR,-0.6,0.3);cxI.stroke();cxI.setLineDash([]);
+  cxI.fillStyle='#8892b0';cxI.font='10px sans-serif';cxI.textAlign='center';cxI.fillText('公転（反時計回り）',sx+orbR-10,sy-orbR*Math.sin(0.6)-8);
+  // 地球：1日で公転1°（見やすく12°に誇張）
+  const frac=Math.min(hdeg,360)/360,oa=frac*12*D;const ex=sx+orbR*Math.cos(oa),ey=sy-orbR*Math.sin(oa);
+  // 元の位置
+  cxI.strokeStyle='rgba(255,255,255,.3)';cxI.beginPath();cxI.arc(sx+orbR,sy,22,0,7);cxI.stroke();cxI.fillStyle='#8892b0';cxI.font='10px sans-serif';cxI.fillText('朝の位置',sx+orbR,sy+40);
+  // 遠い星（左のはるか遠く。向きは平行）
+  cxI.fillStyle='#ffd700';cxI.beginPath();cxI.arc(16,sy-70,7,0,7);cxI.fill();cxI.font='10px sans-serif';cxI.textAlign='left';cxI.fillText('← 遠い星（ずっと左の、はるか遠く）',6,sy-84);
+  cxI.strokeStyle='rgba(255,215,0,.45)';cxI.setLineDash([3,5]);cxI.beginPath();cxI.moveTo(ex,ey);cxI.lineTo(0,ey);cxI.stroke();cxI.beginPath();cxI.moveTo(sx+orbR,sy);cxI.lineTo(0,sy);cxI.stroke();cxI.setLineDash([]);
+  cxI.fillStyle='#ffd700';cxI.fillText('星への向き（平行）',ex-150,ey-6);
+  // 太陽への向き
+  cxI.strokeStyle='rgba(255,140,66,.5)';cxI.setLineDash([3,5]);cxI.beginPath();cxI.moveTo(ex,ey);cxI.lineTo(sx,sy);cxI.stroke();cxI.setLineDash([]);
+  cxI.textAlign='center';
+  // 地球
+  cxI.fillStyle='#1e4d8a';cxI.beginPath();cxI.arc(ex,ey,22,0,7);cxI.fill();
+  // 太陽の向き・星の向き
+  const toSun=Math.atan2(sy-ey,sx-ex),toStar=0;// 星＝真右（平行）
+  // 目印（矢印）：最初は太陽を向いている（正午）。hdegだけ回転（反時計回り）
+  const arm=(toSun0=>toSun0)(Math.atan2(sy-sy,sx-(sx+orbR)));// = π（左向き）
+  const ang=Math.PI - hdeg*D*(-1)*-1;// 反時計回りに回す（画面座標ではy下向きなので−）
+  const a2=(hdeg>=361)?Math.atan2(ey-sy,sx-ex):Math.PI + Math.min(hdeg,360)*D;// 反時計回り。361°は太陽の向きにそろえる（図の公転は大きめなので）
+  const mx=ex+34*Math.cos(a2),my=ey-34*Math.sin(a2);
+  cxI.strokeStyle='#ff9db0';cxI.lineWidth=4;cxI.beginPath();cxI.moveTo(ex,ey);cxI.lineTo(mx,my);cxI.stroke();cxI.lineWidth=1;
+  cxI.fillStyle='#ff9db0';cxI.fillText('目印',mx+(mx>ex?18:-18),my);
+  // 判定
+  const dStar=Math.abs(wrap((a2/D)-180)),dSun=Math.abs(wrap(a2/D-(toSun/D*-1)));
+  let msg;
+  if(hdeg===0)msg='はじめ：目印は<b>太陽</b>を向いている（正午）。ここから地球を回す。';
+  else if(hdeg<360)msg=`${hdeg}° 回った。まだ元の向きにもどっていない。`;
+  else if(hdeg===360)msg='<b>360°</b> 回った → 目印は<span class="pt">遠い星</span>にもう向き直した（星は遠いので向きが平行）。でも地球は公転で少し進んだので、<b>太陽にはまだ1°足りない</b>。ここが<b>星の1日＝23時間56分</b>。';
+  else msg='<b>361°</b> 回った → やっと<span class="pt">太陽</span>に向き直した。ここが<b>太陽の1日＝24時間</b>。<br>1°ぶん＝24時間÷360＝<b>4分</b>。だから星の南中は毎日<b>4分早く</b>なる。';
+  document.getElementById('hi-msg').innerHTML=msg;document.getElementById('hi-deg').textContent=hdeg+'°';
+  cxI.fillStyle='#ffd700';cxI.font='bold 14px sans-serif';cxI.textAlign='left';cxI.fillText(hdeg===360?'360° ＝ 星に向き直した（23時間56分）':hdeg===361?'361° ＝ 太陽に向き直した（24時間）':'公転は見やすく大きめに描いてある',10,Hh-14);
+}
+document.getElementById('hi-slider').addEventListener('input',e=>{hdeg=+e.target.value;drawHi();});
+document.getElementById('hi-360').addEventListener('click',()=>{hdeg=360;document.getElementById('hi-slider').value=360;drawHi();});
+document.getElementById('hi-361').addEventListener('click',()=>{hdeg=361;document.getElementById('hi-slider').value=361;drawHi();});
+document.getElementById('hi-play').addEventListener('click',e=>{if(hiPlaying)return;hiPlaying=true;hdeg=0;const step=()=>{hdeg+=3;if(hdeg>=360){hdeg=360;hiPlaying=false;}document.getElementById('hi-slider').value=hdeg;drawHi();if(hiPlaying)setTimeout(step,30);};step();});
+
+function redrawAll(){drawSora();drawHok();drawNan();drawHi();}
+redrawAll();
+</script>
+</body>
+</html>
