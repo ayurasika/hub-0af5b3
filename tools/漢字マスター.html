@@ -1584,7 +1584,6 @@ function renderHome(){
     `;
     list.appendChild(card);
   }
-  renderWeekBox();
 }
 
 // ===== WRITE =====
@@ -1778,135 +1777,58 @@ function retryWrongs(){
   renderQuestion();
 }
 
-// ===== DAILY REVIEW（今週の箱 方式）=====
-// 2026-09-14 改修。それまでは815語を薄く広く（1語あたり平均2回／6週間）なでていて、
-// 記録上マスター12語・正解済みの語も紙に書けなかった。こころは「間があくと引き出せない」ので、
-// 週30語に箱を絞り、その30語だけを毎日出す（1語が週5〜7回出る）。
-// 翌週＝前週でマスターしなかった語を持ち越し＋新しい語で30語に埋める。
-// 撤退ライン：2週やってマスターが週20語未満なら止める（あゆみと2026-09-14に決定）
-const BOX_SIZE = 30;
-const DAY_MS = 86400000;
-
-// 今週の月曜（ローカル時刻）の日付文字列。これが週のID
-function weekIdOf(d){
-  d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const dow = (d.getDay()+6)%7;             // 月=0 … 日=6
-  d.setDate(d.getDate()-dow);
-  const z=n=>String(n).padStart(2,'0');
-  return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
-}
-function allWords(){
+// ===== DAILY REVIEW =====
+// 全回横断で「今日の10語」を自動で選ぶ。
+// 優先順位：①テストで落とした漢字 ②間違いが多い漢字 ③マスター後しばらく見てない漢字 ④まだやってない漢字
+function startDailyReview(){
+  const now=Date.now();
+  const DAY=86400000;
   const all=[];
   for(const[kai,data]of Object.entries(ROUNDS)){
     for(const w of data.words){
-      const key=kai+'_'+w.k;
-      const rec=state.records[key]||(state.records[key]={correct:0,wrong:0,total:0,mastered:false});
-      all.push({w,kai,key,rec});
+      const rec=state.records[kai+'_'+w.k]||{correct:0,wrong:0,total:0,mastered:false};
+      all.push({w,kai,rec});
     }
   }
-  return all;
-}
-// 今週の箱を作る。並びは決め打ち（端末が違っても同じ記録なら同じ箱になる）
-function buildWeekBox(prevKeys){
-  const all=allWords(), byKey={}; all.forEach(x=>byKey[x.key]=x);
-  const picked=[], seen=new Set();
-  // 同じ語が別の回にも入っていることがある（率先・対象など）ので、語の字面でも重複を避ける
-  const take=(arr)=>{ for(const x of arr){ if(picked.length>=BOX_SIZE)break; if(seen.has(x.key)||seen.has('w:'+x.w.k))continue; seen.add(x.key); seen.add('w:'+x.w.k); picked.push(x.key);} };
-  const notM=x=>!(x.rec.correct>=5);
-  // ① 前の週の箱で、まだマスターしてない語（全部持ち越す）
-  take((prevKeys||[]).map(k=>byKey[k]).filter(x=>x&&notM(x)));
-  // ② テストで落とした語でマスターしてない（まちがい多い順）
-  take(all.filter(x=>DROPPED.has(x.w.k)&&notM(x)).sort((a,b)=>b.rec.wrong-a.rec.wrong));
-  // ③ まちがえたことがある語（多い順）
-  take(all.filter(x=>x.rec.wrong>0&&notM(x)).sort((a,b)=>b.rec.wrong-a.rec.wrong));
-  // ④ 正解の途中（1〜4回）
-  take(all.filter(x=>x.rec.correct>0&&notM(x)).sort((a,b)=>b.rec.correct-a.rec.correct));
-  // ⑤ まだ一度も出てない語。最近習った回（番号が大きい）から
-  take(all.filter(x=>x.rec.total===0).sort((a,b)=>parseInt(b.kai)-parseInt(a.kai)));
-  return picked;
-}
-// 週が変わっていたら箱を作り直す（前の週の成績は weekLog に残す）
-let boxReady = false;   // 起動時の同期（syncPull）が1回終わるまで箱は作らない
-function ensureWeekBox(){
-  if(!boxReady) return null;
-  const wk=weekIdOf(new Date());
-  if(state.weekBox && state.weekBox.week===wk && Array.isArray(state.weekBox.keys) && state.weekBox.keys.length) return state.weekBox;
-  const prev=state.weekBox;
-  if(prev && Array.isArray(prev.keys) && prev.week!==wk){
-    const m=prev.keys.filter(k=>(state.records[k]||{}).correct>=5).length;
-    state.weekLog=(state.weekLog||[]).filter(l=>l.week!==prev.week);
-    state.weekLog.push({week:prev.week, mastered:m, total:prev.keys.length});
-    // 前の週の箱の語は「今週の判定」に使わないよう、正解数だけ次週に持ち越す（記録はそのまま）
-  }
-  state.weekBox={week:wk, keys:buildWeekBox(prev&&prev.keys), madeAt:Date.now()};
-  saveState();
-  if(typeof syncQueueBox==='function') syncQueueBox();
-  return state.weekBox;
-}
-function boxStats(){
-  const box=ensureWeekBox(), now=Date.now();
-  if(!box) return null;
-  let mastered=0, today=0, wrong=0;
-  for(const k of box.keys){
-    const r=state.records[k]||{}; 
-    if(r.correct>=5) mastered++;
-    if(r.wrong>0 && !(r.correct>=5)) wrong++;
-    if(r.lastSeen && now-r.lastSeen<20*3600*1000) today++;
-  }
-  return {box, mastered, today, wrong, total:box.keys.length};
-}
-function startDailyReview(){
-  const now=Date.now();
-  const box=ensureWeekBox();
-  if(!box){alert('記録を同期中…もう一度おしてね');return;}
-  const all=allWords(), byKey={}; all.forEach(x=>byKey[x.key]=x);
-  const items=box.keys.map(k=>byKey[k]).filter(Boolean);
-  const doneRecently=r=>r.lastSeen&&(now-r.lastSeen)<20*3600*1000;   // 今日もうやった語は出さない
-  const days=r=>r.lastSeen?(now-r.lastSeen)/DAY_MS:999;
-  const isM=x=>x.rec.correct>=5;
-  // 優先：①まちがえたことがある ②正解が少ない順 ③マスター済み（2日以上見てないときだけ）
-  const wrongs=shuffle(items.filter(x=>!isM(x)&&x.rec.wrong>0&&!doneRecently(x.rec)));
-  const rest=shuffle(items.filter(x=>!isM(x)&&x.rec.wrong===0&&!doneRecently(x.rec))).sort((a,b)=>a.rec.correct-b.rec.correct);
-  const stale=shuffle(items.filter(x=>isM(x)&&days(x.rec)>=2));
-  const picked=[], seen=new Set();
-  const take=(arr)=>{ for(const x of arr){ if(picked.length>=10)break; if(seen.has(x.key))continue; seen.add(x.key); picked.push(x);} };
-  take(wrongs); take(rest); take(stale);
-  if(picked.length===0){alert('今週の30語、今日の分はぜんぶ終わってるよ！すごい！');return;}
+  const days=r=>r.lastSeen?(now-r.lastSeen)/DAY:999;
+  const doneRecently=r=>r.lastSeen&&(now-r.lastSeen)<20*3600*1000; // 今日もうやった語は出さない
+
+  // ①🔥テストで落とした漢字（まだマスターしてない or 久しぶり）— 最大3語、ランダム
+  const fire=shuffle(all.filter(x=>DROPPED.has(x.w.k)&&!doneRecently(x.rec)&&(!x.rec.mastered||days(x.rec)>=3)));
+  // ②間違いの多い漢字
+  const wrongs=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.wrong>0&&!x.rec.mastered&&!doneRecently(x.rec)));
+  // ③マスター済みだが3日以上見てない（忘却チェック）
+  const stale=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.mastered&&days(x.rec)>=3));
+  // ④正解の途中の語（1〜4回正解・まだマスターしてない）。ここを再訪しないと永遠に卒業できない
+  const inProgress=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&!x.rec.mastered&&x.rec.wrong===0&&x.rec.correct>0&&!doneRecently(x.rec)));
+  // ⑤まだ一度もやってない
+  const unseen=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.total===0));
+
+  const picked=[];
+  const seen=new Set();
+  const take=(arr,max)=>{
+    let added=0;
+    for(const x of arr){
+      if(picked.length>=10)break;
+      if(max&&added>=max)break;
+      const key=x.kai+'_'+x.w.k;
+      if(seen.has(key))continue;
+      seen.add(key);picked.push(x);added++;
+    }
+  };
+  take(fire,3);take(wrongs,3);take(inProgress,2);take(stale,1);take(unseen);
+
+  if(picked.length===0){alert('今日の分はぜんぶ終わってるよ！すごい！');return;}
 
   const qs=shuffle(picked.map(x=>({...x.w,_kai:x.kai})));
   goTab('write');
-  document.getElementById('write-title').textContent='🔥 今週の30語';
+  document.getElementById('write-title').textContent='🔥 今日の復習';
   document.getElementById('mode-select').style.display='none';
   pState={qs,idx:0,ok:0,ng:0,streak:0,maxStreak:0,wrongs:[],mode:'daily',dotStatus:[]};
   document.getElementById('practice-area').style.display='block';
   document.getElementById('result-area').style.display='none';
   renderQuestion();
   daifukuSay('きょうの10語、いってみよ〜！');
-}
-// ホームに今週の箱を並べる（金＝マスター／赤＝まちがえた／灰＝まだ）
-function renderWeekBox(){
-  const st=boxStats();
-  const desc=document.getElementById('daily-desc');
-  if(!st){ if(desc) desc.textContent='記録を同期中…'; return; }
-  if(desc) desc.textContent=`今週の30語から10語。マスター ${st.mastered}/${st.total}　今日 ${st.today}語すみ`;
-  let el=document.getElementById('week-box');
-  if(!el){
-    el=document.createElement('div'); el.id='week-box';
-    el.style.cssText='margin:6px 0 14px;padding:10px 12px;background:#fff;border:1.5px solid #ffe2a8;border-radius:12px;';
-    const card=document.querySelector('.daily-card'); card.parentNode.insertBefore(el, card.nextSibling);
-  }
-  const mon=st.box.week.slice(5).replace('-','/');
-  let html=`<div style="font-size:0.72em;color:#8fa8bc;margin-bottom:4px;">📦 今週の箱（${mon}の週）　<span style="color:#f5a623">■</span>マスター <span style="color:#c0392b">■</span>まちがえた <span style="color:#bbb">■</span>まだ</div><div style="font-size:0.88em;line-height:1.9;">`;
-  for(const k of st.box.keys){
-    const r=state.records[k]||{}; const w=k.split('_').slice(1).join('_');
-    const col=r.correct>=5?'#f5a623':(r.wrong>0?'#c0392b':'#bbb');
-    const bg=r.correct>=5?'#fff6e0':(r.wrong>0?'#fff0f0':'#f4f4f4');
-    html+=`<span style="display:inline-block;background:${bg};border:1px solid ${col}55;border-radius:8px;padding:1px 7px;margin:1px 3px 1px 0;">${w}<span style="color:${col};font-size:0.75em"> ${r.correct||0}</span></span>`;
-  }
-  html+='</div>';
-  const log=(state.weekLog||[]).slice(-3);
-  if(log.length) html+=`<div style="font-size:0.7em;color:#8fa8bc;margin-top:6px;">これまでの週：`+log.map(l=>`${l.week.slice(5).replace('-','/')}の週 ${l.mastered}/${l.total}`).join('　')+`</div>`;
-  el.innerHTML=html;
 }
 
 // ===== MAP =====
@@ -1955,10 +1877,6 @@ function renderOverall(){
   if(todayCount>0 && unseen>0){
     note += `<br>いまのペース（1日${todayCount}語）だと、まだ出てない${unseen}語に1回ずつ触るまで<b>約${Math.ceil(unseen/todayCount)}日</b>`;
   }
-  const bs=boxStats();
-  if(bs) note += `<br>📦 今週の箱：マスター <b>${bs.mastered}/${bs.total}</b>（まちがえた語 ${bs.wrong}）`;
-  const wl=(state.weekLog||[]).slice(-4);
-  if(wl.length) note += `　／　前の週：`+wl.map(l=>`${l.week.slice(5).replace('-','/')} ${l.mastered}/${l.total}`).join('、');
   document.getElementById('ov-note').innerHTML=note;
 
   weak.sort((a,b)=>b.wrong-a.wrong);
@@ -2216,12 +2134,6 @@ function syncQueueWord(key){
   syncTimer = setTimeout(syncFlush, 1500);
 }
 
-function syncQueueBox(){
-  if(!SYNC_URL || !state.weekBox) return;
-  syncQueue['kBox_'+state.weekBox.week] = {v:state.weekBox.keys, t:state.weekBox.madeAt||Date.now()};
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(syncFlush, 1500);
-}
 function syncFlush(){
   if(!SYNC_URL || !Object.keys(syncQueue).length) return;
   const body = JSON.stringify(syncQueue); syncQueue = {};
@@ -2236,18 +2148,6 @@ async function syncPull(){
     const r = await fetch(SYNC_URL);
     const remote = await r.json();
     let changed = false; const back = {};
-    // 今週の箱：先に作った端末のものを採用する（両端末で違う30語にならないように）
-    const wk = weekIdOf(new Date());
-    const rb = remote['kBox_'+wk];
-    if(rb && Array.isArray(rb.v) && rb.v.length){
-      const mine = state.weekBox && state.weekBox.week===wk ? state.weekBox : null;
-      if(!mine || (mine.madeAt||0) > (rb.t||0)){
-        state.weekBox = {week:wk, keys:rb.v.filter(k=>state.records[k]), madeAt:rb.t||Date.now()};
-        changed = true;
-      }
-    }else if(state.weekBox && state.weekBox.week===wk){
-      back['kBox_'+wk] = {v:state.weekBox.keys, t:state.weekBox.madeAt||Date.now()};
-    }
     for(const rk in remote){
       if(rk.indexOf(KP)!==0) continue;
       const key = rk.slice(KP.length);
@@ -2306,8 +2206,7 @@ saveState();
 updateHeader();
 renderHome();
 syncBadge();
-if(!SYNC_URL){ boxReady=true; ensureWeekBox(); renderHome(); }
-syncPull().finally(()=>{ boxReady=true; ensureWeekBox(); renderHome(); });                                   // 起動時に他の端末の記録を取り込む
+syncPull();                                   // 起動時に他の端末の記録を取り込む
 setInterval(syncPull, 5*60*1000);             // 開いている間は5分ごと
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) syncPull(); });
 setTimeout(()=>daifukuSay('きょうもいっしょにがんばろ！'),1200);
