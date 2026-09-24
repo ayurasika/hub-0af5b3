@@ -19,6 +19,11 @@ body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;backgr
 .header .date{font-size:.85rem;opacity:.92;margin-top:2px;}
 .header .week{display:inline-block;margin-top:6px;font-size:.7rem;background:rgba(255,255,255,.22);border-radius:12px;padding:2px 10px;}
 .header .sync{display:inline-block;margin-top:6px;margin-left:6px;font-size:.7rem;background:rgba(255,255,255,.22);border-radius:12px;padding:2px 10px;}
+.header .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.header .exam{flex:none;text-align:center;background:rgba(255,255,255,.2);border-radius:14px;padding:5px 12px 6px;line-height:1.15;}
+.header .exam .l{font-size:.68rem;opacity:.95;}
+.header .exam .n{font-size:1.6rem;font-weight:900;}
+.header .exam .n small{font-size:.75rem;font-weight:700;margin-left:1px;}
 
 /* cards */
 .card{background:#fff;border-radius:18px;margin-top:14px;padding:14px 16px;box-shadow:0 2px 10px rgba(30,60,120,.08);}
@@ -175,8 +180,11 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 <body>
 
 <div class="header"><div class="wrap">
-  <h1>🏠 こころのハブ</h1>
-  <div class="date" id="today"></div>
+  <div class="top">
+    <div><h1>🏠 こころのハブ</h1>
+    <div class="date" id="today"></div></div>
+    <div class="exam" id="exam"></div>
+  </div>
   <div class="week" id="weekbadge"></div><div class="sync" id="syncbadge"></div>
 </div></div>
 
@@ -473,6 +481,16 @@ store.set(`open-${TODAY}-${dev}`, store.get(`open-${TODAY}-${dev}`, 0) + 1);
 
 // ===== ヘッダー =====
 document.getElementById("today").textContent = `${today.getMonth()+1}月${today.getDate()}日（${youbi}）`;
+// 入試までの日数（三田・関大第一とも 2027/1/16 午前。日付が変わったらここだけ書き換える）
+(function(){
+  const EXAM = new Date(2027, 0, 16);
+  const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const days = Math.round((EXAM - t0) / 86400000);
+  const el = document.getElementById("exam");
+  el.innerHTML = days > 0 ? `<div class="l">入試まで あと</div><div class="n">${days}<small>日</small></div>`
+               : days === 0 ? `<div class="l">きょうは</div><div class="n" style="font-size:1.1rem">入試の日</div>` : "";
+  if (days < 0) el.style.display = "none";
+})();
 document.getElementById("weekbadge").textContent = `今週のぶん：${CFG.week||RIKA.week} 生成`;
 syncBadge();
 
