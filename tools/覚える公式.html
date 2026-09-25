@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>これだけは覚える公式（冷蔵庫用）</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;color:#1c1c2a;background:#eee;line-height:1.45;}
+.page{width:210mm;height:297mm;margin:12px auto;background:#fff;padding:9mm 9mm 7mm;page-break-after:always;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);display:flex;flex-direction:column;}
+h1{font-size:22px;font-weight:800;letter-spacing:.03em;display:flex;align-items:baseline;gap:10px;}
+h1 small{font-size:12px;font-weight:600;color:#777;}
+.lead{font-size:11.5px;color:#555;margin:2px 0 6px;}
+.lead b{color:#e60012;}
+.sec{font-size:15px;font-weight:800;color:#fff;border-radius:6px;padding:2px 10px;margin:6px 0 4px;display:inline-block;}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;}
+.c{border:1.6px solid #d7d7e2;border-radius:8px;padding:4px 8px 5px;position:relative;break-inside:avoid;}
+.c.star{border-color:#e60012;background:#fff6f6;}
+.c.star::after{content:"★テストで落とした";position:absolute;top:-1px;right:6px;font-size:9.5px;font-weight:800;color:#e60012;}
+.c .t{font-size:13px;font-weight:800;color:#555;}
+.c .f{font-size:18.5px;font-weight:800;margin:1px 0;}
+.c .f em{font-style:normal;color:#e60012;}
+.c .w{font-size:11.5px;color:#666;}
+.c .d{font-size:9.5px;color:#e60012;font-weight:700;}
+.row{display:flex;gap:8px;align-items:center;}
+.row svg{flex:none;}
+.zu .sec{background:#2f7fc1;} .kazu .sec{background:#7b4fc9;} .wari .sec{background:#d07a12;} .haya .sec{background:#1f9a6a;} .tani .sec{background:#666;}
+.tbl{border-collapse:collapse;font-size:12.5px;width:100%;}
+.tbl td{border:1.2px solid #ccc;padding:2px 6px;}
+.tbl td:first-child{font-weight:800;width:24%;background:#f6f6f9;}
+.foot{margin-top:auto;font-size:9.5px;color:#999;text-align:right;}
+.noprint{max-width:210mm;margin:12px auto 0;background:#fff6e5;border:1px solid #e8c98a;border-radius:6px;padding:8px 14px;font-size:13px;color:#7a5a1e;}
+.btn{position:fixed;top:12px;right:12px;background:#2f7fc1;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:bold;cursor:pointer;}
+@media print{body{background:#fff;}.noprint,.btn{display:none;}.page{margin:0;box-shadow:none;}.page:last-of-type{page-break-after:auto;}@page{size:A4 portrait;margin:0;}}
+</style>
+</head>
+<body>
+<button class="btn" onclick="window.print()">🖨 印刷する</button>
+<div class="noprint"><b>A4・たて・倍率100%</b>で2枚。1枚目＝図形、2枚目＝数の決まり・割合・速さ・単位。<b>赤わく★</b>は、これまでのテストで実際に落とした公式。</div>
+
+<!-- ===== 1枚目：図形 ===== -->
+<div class="page zu">
+  <h1>これだけは覚える公式 ① 図形 <small>こころ用・冷蔵庫にはる</small></h1>
+  <div class="lead">「公式」だけじゃなく<b>「なぜ？」</b>の1行もいっしょに見る。なぜが分かると、忘れても自分で作り直せる。</div>
+
+  <div class="sec">角と多角形</div>
+  <div class="g">
+    <div class="c"><div class="row">
+      <svg width="62" height="56" viewBox="0 0 62 56"><polygon points="31,3 58,22 48,53 14,53 4,22" fill="#eaf3fb" stroke="#2f7fc1" stroke-width="1.6"/><line x1="31" y1="3" x2="48" y2="53" stroke="#2f7fc1" stroke-width="1.1"/><line x1="31" y1="3" x2="14" y2="53" stroke="#2f7fc1" stroke-width="1.1"/></svg>
+      <div><div class="t">n角形の内角の和</div><div class="f">180 × (<em>n − 2</em>)</div><div class="w">なぜ？ 1つの頂点から線をひくと、三角形が<b>n−2</b>個できる（五角形なら3個）</div></div>
+    </div></div>
+    <div class="c"><div class="t">正n角形の1つの内角</div><div class="f">180 × (n − 2) ÷ n</div><div class="w">内角の和を、角の数（n）で分けるだけ。正六角形＝120°</div></div>
+    <div class="c"><div class="t">外角の和（どんな多角形でも）</div><div class="f"><em>360°</em>　正n角形の外角＝360 ÷ n</div><div class="w">外角は1つの頂点に1つずつ。まわりを1周歩くと、ちょうど1回転（360°）するから</div></div>
+    <div class="c"><div class="t">n角形の対角線の本数</div><div class="f">n × (<em>n − 3</em>) ÷ 2</div><div class="w">なぜ？ 1つの頂点から、自分ととなり2つ以外へ<b>n−3</b>本。両はしから数えて2回ずつ → ÷2</div></div>
+    <div class="c"><div class="t">三角形の外角</div><div class="f">外角 ＝ となりでない内角2つの和</div><div class="w">180 −（その角）＝ 残り2つの和、と同じこと</div></div>
+    <div class="c"><div class="t">平行線の角</div><div class="f">同位角・錯角は等しい</div><div class="w">Z形（錯角）・F形（同位角）を探す。ジグザグは「左にとがった角の和＝右にとがった角の和」</div></div>
+  </div>
+
+  <div class="sec">面積</div>
+  <div class="g">
+    <div class="c"><div class="t">三角形</div><div class="f">底辺 × 高さ ÷ 2</div><div class="w">高さは、底辺に<b>垂直</b>な長さ（ななめの辺ではない）</div></div>
+    <div class="c"><div class="t">台形</div><div class="f">(上底 ＋ 下底) × 高さ ÷ 2</div><div class="w">同じ台形をさかさにくっつけると平行四辺形 → ÷2</div></div>
+    <div class="c"><div class="t">ひし形・正方形（対角線）</div><div class="f">対角線 × 対角線 ÷ 2</div><div class="w">正方形も使える。<b>対角線の長さ</b>が分かっているときに使う</div></div>
+    <div class="c star"><div class="row">
+      <svg width="70" height="42" viewBox="0 0 70 42"><polygon points="4,38 66,38 56,6" fill="#fdecec" stroke="#e60012" stroke-width="1.5"/><line x1="56" y1="6" x2="56" y2="38" stroke="#e60012" stroke-width="1.2" stroke-dasharray="3 2"/><text x="10" y="35" font-size="8">30°</text></svg>
+      <div><div class="t">30°がある直角三角形</div><div class="f">短い辺 ＝ ななめの辺の<em>半分</em></div><div class="w">正三角形を半分にした形だから</div><div class="d">9/21 入試実戦3 [2](7)</div></div>
+    </div></div>
+    <div class="c"><div class="t">円</div><div class="f">円周＝直径×3.14　面積＝半径×半径×3.14</div><div class="w">円周は「直径」、面積は「半径×半径」。ここを取りちがえない</div></div>
+    <div class="c"><div class="t">おうぎ形</div><div class="f">円の式 × <em>中心角/360</em></div><div class="w">弧＝直径×3.14×中心角/360　面積＝半径×半径×3.14×中心角/360</div></div>
+  </div>
+
+  <div class="sec">比と立体</div>
+  <div class="g">
+    <div class="c"><div class="t">相似（形が同じ＝対応する辺の比がみんな同じ）</div><div class="f">長さ a：b → 面積 a×a：b×b</div><div class="w">体積なら a×a×a：b×b×b（3回かける）</div></div>
+    <div class="c"><div class="t">高さが同じ三角形</div><div class="f">面積の比 ＝ 底辺の比</div><div class="w">逆に「面積の比から底辺の比」も出せる（図形と比の入口）</div></div>
+    <div class="c"><div class="t">柱（角柱・円柱）の体積</div><div class="f">底面積 × 高さ</div><div class="w">表面積＝底面積×2 ＋ 側面（まわりの長さ×高さ）</div></div>
+    <div class="c"><div class="t">すい（角すい・円すい）の体積</div><div class="f">底面積 × 高さ <em>÷ 3</em></div><div class="w">同じ底・同じ高さの柱の、ちょうど3分の1</div></div>
+    <div class="c"><div class="t">円すいの側面積</div><div class="f">母線 × 半径 × 3.14</div><div class="w">側面のおうぎ形の中心角 ＝ 半径 ÷ 母線 × 360</div></div>
+    <div class="c"><div class="t">水そう・水の深さ</div><div class="f">深さ ＝ 水の体積 ÷ 底面積</div><div class="w">柱のおもりを立てて入れたら、水が入る底面積＝<b>容器の底面積−おもりの底面積</b></div></div>
+  </div>
+  <div class="foot">2026-09-25 作成　／　★＝こころのテストで実際に落とした公式</div>
+</div>
+
+<!-- ===== 2枚目：数・割合・速さ・単位 ===== -->
+<div class="page">
+  <h1>これだけは覚える公式 ② 数・割合・速さ・単位 <small>こころ用</small></h1>
+
+  <div class="kazu"><div class="sec">数の決まり（n番目）</div>
+  <div class="g">
+    <div class="c"><div class="t">等差数列の n番目</div><div class="f">はじめ ＋ 差 × (<em>n − 1</em>)</div><div class="w">なぜ？ 1番目から n番目までに、差は <b>n−1</b> 回だけ足される</div></div>
+    <div class="c star"><div class="t">等差数列の和</div><div class="f">(はじめ ＋ おわり) × 個数 ÷ 2</div><div class="w">1つずつ足さない。さかさに並べて足すと、全部「はじめ＋おわり」になる</div><div class="d">9/20 実践テスト3 [12]イ</div></div>
+    <div class="c"><div class="t">等差数列の個数</div><div class="f">(おわり − はじめ) ÷ 差 <em>＋ 1</em></div><div class="w">＋1を忘れやすい。植木算と同じ「間の数＋1」</div></div>
+    <div class="c"><div class="t">1から n までの和 ／ 奇数の和</div><div class="f">n×(n＋1)÷2 ／ 奇数 n個 ＝ <em>n × n</em></div><div class="w">1＋3＋5＋7 ＝ 4×4 ＝ 16（正方形に並ぶ）</div></div>
+    <div class="c star"><div class="row">
+      <svg width="64" height="30" viewBox="0 0 64 30"><line x1="4" y1="20" x2="60" y2="20" stroke="#999" stroke-width="1.2"/><g fill="#1f9a6a"><circle cx="6" cy="20" r="3.5"/><circle cx="25" cy="20" r="3.5"/><circle cx="44" cy="20" r="3.5"/><circle cx="60" cy="20" r="3.5"/></g><text x="12" y="12" font-size="7" fill="#666">間</text><text x="31" y="12" font-size="7" fill="#666">間</text><text x="49" y="12" font-size="7" fill="#666">間</text></svg>
+      <div><div class="t">植木算（3パターン）</div><div class="f">両はしあり 本数＝間＋1</div><div class="w">両はしなし 本数＝間−1　／　円（まわり）本数＝間</div><div class="d">6/26 全部わすれていた</div></div>
+    </div></div>
+    <div class="c star"><div class="t">周期</div><div class="f">□番目 ÷ 1セットの数 → <em>あまり</em>を見る</div><div class="w">あまり0 ＝ セットの<b>最後</b>。まず4回目くらいまで書き出してセットを見つける</div><div class="d">9/21 入試実戦3 [3](2)</div></div>
+  </div></div>
+
+  <div class="wari"><div class="sec">割合・比</div>
+  <div class="g">
+    <div class="c star"><div class="t">割合の3つの式</div><div class="f">比べる量 ＝ もとにする量 × 割合</div><div class="w">割合＝比べる量÷もと。「何％増し」＝<b>増えた分 ÷ もと</b> ×100</div><div class="d">9/21 入試実戦3 [2](2)</div></div>
+    <div class="c"><div class="t">食塩水の濃さ</div><div class="f">食塩 ＝ 食塩水 × 濃さ</div><div class="w">濃さ＝食塩÷食塩水（<b>％は小数にしてから</b>かける）。水を足しても食塩の重さは変わらない</div></div>
+    <div class="c"><div class="t">売り買い</div><div class="f">定価＝原価×(1＋利益の割合)</div><div class="w" style="margin-top:-1px">利益の割合は<b>原価</b>が基準。値引きの割合は<b>定価</b>が基準</div><div class="w">売り値＝定価×(1−値引きの割合)　利益＝売り値−原価</div></div>
+    <div class="c star"><div class="t">差一定・和一定の比</div><div class="f">変わらない方を<em>そろえる</em></div><div class="w">2人とも同じだけ増える・へる → <b>差一定</b>。2人の間でやりとり → <b>和一定</b></div><div class="d">9/21 入試実戦3 [5](1)</div></div>
+  </div></div>
+
+  <div class="haya"><div class="sec">速さ</div>
+  <div class="g">
+    <div class="c"><div class="t">速さの3つの式</div><div class="f">道のり ＝ 速さ × 時間</div><div class="w">速さ＝道のり÷時間　時間＝道のり÷速さ。<b>単位をそろえてから</b></div></div>
+    <div class="c star"><div class="t">出会い・追いつき（旅人算）</div><div class="f">反対向き→速さの<em>和</em>　同じ向き→速さの<em>差</em></div><div class="w">かかる時間 ＝ はなれている道のり ÷（和 か 差）。まず矢印の向きを見る</div><div class="d">9/21 入試実戦3 [6](1)</div></div>
+    <div class="c"><div class="t">流水算</div><div class="f">下り＝静水＋流れ　上り＝静水−流れ</div><div class="w">流れ＝(下り−上り)÷2　静水＝(下り＋上り)÷2</div></div>
+    <div class="c"><div class="t">通過算・時計算</div><div class="f">進む長さ ＝ 電車の長さ ＋ 通過するものの長さ</div><div class="w">人・電柱なら0、トンネル・鉄橋ならその長さ。時計：長針 1分に6°、短針 1分に0.5° → 1分に<b>5.5°</b>ずつ差がつく</div></div>
+  </div></div>
+
+  <div class="tani"><div class="sec">単位（先にそろえる）</div>
+  <table class="tbl">
+    <tr><td>かさ・体積 ★</td><td><b>1L ＝ 10dL ＝ 1000cm³（1000mL）</b>　1dL＝100cm³　1m³＝1000L　<span style="color:#e60012;font-weight:700;font-size:10px">9/21 入試実戦3 [1](6)</span></td></tr>
+    <tr><td>長さ・面積</td><td>1km＝1000m　1m＝100cm　／　1m²＝10000cm²　1a＝100m²　1ha＝10000m²</td></tr>
+    <tr><td>時間 ★</td><td><b>1時間＝60分＝3600秒</b>（ひき算で1時間くずすと <b>60分</b>。100じゃない）　<span style="color:#e60012;font-weight:700;font-size:10px">9/21 [1](4)・9/24 計マス</span></td></tr>
+    <tr><td>平均</td><td>平均 ＝ 合計 ÷ 個数　／　合計 ＝ 平均 × 個数</td></tr>
+  </table></div>
+  <div class="foot">★＝こころのテストで実際に落とした公式・考え方</div>
+</div>
+
+</body>
+</html>
