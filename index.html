@@ -24,6 +24,7 @@ body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;backgr
 .header .exam .l{font-size:.68rem;opacity:.95;}
 .header .exam .n{font-size:1.6rem;font-weight:900;}
 .header .exam .n small{font-size:.75rem;font-weight:700;margin-left:1px;}
+.header .exam .wk{font-size:.7rem;font-weight:700;opacity:.95;margin-top:1px;}
 
 /* cards */
 .card{background:#fff;border-radius:18px;margin-top:14px;padding:14px 16px;box-shadow:0 2px 10px rgba(30,60,120,.08);}
@@ -496,7 +497,9 @@ document.getElementById("today").textContent = `${today.getMonth()+1}月${today.
   const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const days = Math.round((EXAM - t0) / 86400000);
   const el = document.getElementById("exam");
-  el.innerHTML = days > 0 ? `<div class="l">入試まで あと</div><div class="n">${days}<small>日</small></div>`
+  const w = Math.floor(days / 7), r = days % 7;
+  const wk = r === 0 ? `ちょうど${w}週` : (w > 0 ? `${w}週と${r}日` : `${r}日`);
+  el.innerHTML = days > 0 ? `<div class="l">入試まで あと</div><div class="n">${days}<small>日</small></div><div class="wk">${wk}</div>`
                : days === 0 ? `<div class="l">きょうは</div><div class="n" style="font-size:1.1rem">入試の日</div>` : "";
   if (days < 0) el.style.display = "none";
 })();
