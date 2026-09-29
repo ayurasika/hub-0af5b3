@@ -275,7 +275,9 @@ body::before{
       <div class="ts"><div class="ts-num blue" id="ts-total">208</div><div class="ts-label">ぜんぶ</div></div>
       <div class="ts"><div class="ts-num" id="ts-pct" style="color:#3fa96a">+0</div><div class="ts-label">この1週間で<br>書けるようになった</div></div>
     </div>
-    <div id="ts-star" style="text-align:center;font-size:0.75em;color:#8fa8bc;margin:-6px 0 12px;"></div>
+    <div id="ts-star" style="text-align:center;font-size:0.75em;color:#8fa8bc;margin:-6px 0 10px;"></div>
+    <!-- これまでの積み重ね（減らない数字だけ） -->
+    <div id="ts-pile" style="display:flex;gap:8px;margin-bottom:14px;"></div>
     <div class="daily-card" onclick="startDailyReview()">
       <div class="daily-icon">🔥</div>
       <div class="daily-info">
@@ -1664,6 +1666,24 @@ function renderHome(){
   document.getElementById('ts-total').textContent=ts.totalWords;
   document.getElementById('ts-pct').textContent='+'+okWeek;
   document.getElementById('ts-star').textContent='⭐マスター（何回も正解した漢字）：'+ts.totalMastered+'語';
+  // これまでの積み重ね：書いた回数・正解した回数・練習した日・今日書いた数
+  let wrote=0,rights=0;
+  const dayset=new Set(Object.keys(state.days||{}));
+  const dkey=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+  for(const k in state.records){
+    const r=state.records[k];
+    wrote+=r.total||0; rights+=r.correct||0;
+    if(r.lastSeen)dayset.add(dkey(r.lastSeen));   // 日ごとの記録がない前の分は、最後にやった日から拾う
+  }
+  const today=(state.days&&state.days[dkey(now)])||0;
+  const pile=(num,unit,label,color)=>`<div style="flex:1;background:#fff;border:1.5px solid ${color}40;border-radius:12px;padding:8px 4px;text-align:center;">
+    <div style="font-size:1.25em;font-weight:900;color:${color}">${num}<span style="font-size:0.6em;font-weight:700">${unit}</span></div>
+    <div style="font-size:0.62em;color:#8fa8bc;line-height:1.3">${label}</div></div>`;
+  document.getElementById('ts-pile').innerHTML=
+    pile(wrote,'回','これまでに<br>書いた','#4a9bd9')+
+    pile(rights,'回','そのうち<br>正解','#3fa96a')+
+    pile(dayset.size,'日','練習した日','#e08a2e')+
+    pile(today,'回','今日<br>書いた','#d4a017');
   document.getElementById('daily-desc').textContent=dueCount>0
     ?'そろそろ出したい漢字が'+dueCount+'語あるよ。今日はその中から10語'
     :'テストで落とした漢字＋そろそろわすれそうな漢字を10語';
@@ -1815,6 +1835,9 @@ function judge(correct){
   const now=Date.now();
   rec.total++;
   rec.lastSeen=now;
+  // 日ごとに書いた数（「練習した日」「今日書いた」に使う）
+  {const d=new Date(now),dk=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+   state.days=state.days||{};state.days[dk]=(state.days[dk]||0)+1;}
 
   if(correct){
     pState.ok++;pState.streak++;
