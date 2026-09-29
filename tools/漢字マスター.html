@@ -242,6 +242,7 @@ body::before{
 @keyframes xpfly{0%{opacity:1;transform:translate(-50%,-50%);}100%{opacity:0;transform:translate(-50%,-120px);}}
 
 @media(max-width:400px){.kanji-grid{grid-template-columns:repeat(4,1fr);}}
+@keyframes stampPop{0%{transform:scale(2.2) rotate(-18deg);opacity:0}60%{transform:scale(.92) rotate(4deg);opacity:1}100%{transform:scale(1) rotate(0)}}
 </style>
 <!-- ハブの共通設定（syncUrl）。tools/ から見た相対パス。読めなくても動く（同期しないだけ） -->
 <script src="../data/config.js"></script>
@@ -278,10 +279,11 @@ body::before{
     <div id="ts-star" style="text-align:center;font-size:0.75em;color:#8fa8bc;margin:-6px 0 10px;"></div>
     <!-- これまでの積み重ね（減らない数字だけ） -->
     <div id="ts-pile" style="display:flex;gap:8px;margin-bottom:14px;"></div>
+    <div id="stamp-card" style="background:#fff;border:2px solid #ffe2bf;border-radius:16px;padding:12px 12px 10px;margin-bottom:14px;"></div>
     <div class="daily-card" onclick="startDailyReview()">
       <div class="daily-icon">🔥</div>
       <div class="daily-info">
-        <div class="daily-title">今日の復習</div>
+        <div class="daily-title" id="daily-title">今日の復習</div>
         <div class="daily-desc" id="daily-desc">テストで落とした漢字＋そろそろわすれそうな漢字を10語</div>
       </div>
       <div class="daily-go">スタート</div>
@@ -1578,6 +1580,57 @@ function ensureSched(rec){
 }
 // 「書ける」＝最後に出たとき正解した語
 function canWrite(rec){return !!(rec&&ensureSched(rec).last);}
+
+// ===== ハンコカード（今日の10語でハンコ・おかわり10語でキラキラ）=====
+// 画像はあとで差し替える（data URI）。空のあいだは絵文字で出す
+const STAMP_IMG={normal:'',kira:''};
+function ymd(ms){const d=new Date(ms);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function stampHTML(n,size){
+  if(!n)return '';
+  const kira=n>=2, img=kira?STAMP_IMG.kira:STAMP_IMG.normal;
+  if(img)return `<img src="${img}" alt="" style="width:${size}px;height:${size}px;object-fit:contain">`;
+  return `<span style="font-size:${Math.round(size*0.8)}px;line-height:1">${kira?'🌟':'🌸'}</span>`;
+}
+function pressStamp(){
+  const k=ymd(Date.now());
+  state.stamps=state.stamps||{};
+  state.stamps[k]=(state.stamps[k]||0)+1;
+  saveState();
+  if(typeof syncQueueStamp==='function')syncQueueStamp(k);
+  return state.stamps[k];
+}
+function renderStampCard(){
+  const box=document.getElementById('stamp-card');if(!box)return;
+  const st=state.stamps||{}, now=new Date(), dow=(now.getDay()+6)%7;   // 月曜はじまり
+  const mon=new Date(now.getFullYear(),now.getMonth(),now.getDate()-dow);
+  const names=['月','火','水','木','金','土','日'], todayK=ymd(now.getTime());
+  let cells='';
+  for(let i=0;i<7;i++){
+    const d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);
+    const k=ymd(d.getTime()), n=st[k]||0, isToday=k===todayK;
+    cells+=`<div style="flex:1;text-align:center;">
+      <div style="font-size:0.65em;color:${isToday?'#e08a2e':'#8fa8bc'};font-weight:${isToday?800:600}">${names[i]}</div>
+      <div style="aspect-ratio:1;margin-top:3px;border-radius:50%;border:2px ${isToday?'solid #ffb35c':'dashed #e8dccb'};background:#fffdf8;display:flex;align-items:center;justify-content:center;overflow:hidden">${stampHTML(n,40)}</div>
+    </div>`;
+  }
+  // 先週までの4週ぶん（押せなかった日は小さな点。×は出さない）
+  let past='';
+  for(let w=4;w>=1;w--){
+    let row='';
+    for(let i=0;i<7;i++){
+      const d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()-7*w+i), n=st[ymd(d.getTime())]||0;
+      row+=`<span style="display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center">${n?stampHTML(n,16):'<span style="width:5px;height:5px;border-radius:50%;background:#ece6dc;display:inline-block"></span>'}</span>`;
+    }
+    const m=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()-7*w);
+    past+=`<div style="display:flex;align-items:center;gap:6px;font-size:0.68em;color:#b0a79a"><span style="width:46px">${m.getMonth()+1}/${m.getDate()}〜</span>${row}</div>`;
+  }
+  const n=st[todayK]||0;
+  const msg=n>=2?'キラキラハンコ！きょうはばっちり✨':n===1?'ハンコ押せたよ！おかわり10語でキラキラになるよ':'今日の10語でハンコがもらえるよ';
+  box.innerHTML=`<div style="font-weight:800;color:#e08a2e;font-size:0.9em;margin-bottom:6px">📮 今週のハンコ</div>
+    <div style="display:flex;gap:6px">${cells}</div>
+    <div style="font-size:0.72em;color:#8a7a66;margin-top:8px;text-align:center">${msg}</div>
+    <details style="margin-top:6px"><summary style="font-size:0.68em;color:#b0a79a;cursor:pointer">これまでのカード</summary><div style="margin-top:4px;display:grid;gap:3px">${past}</div></details>`;
+}
 function getLevel(xp){
   let lv=1,need=100;
   while(xp>=need){xp-=need;lv++;need=Math.floor(100+lv*20);}
@@ -1684,7 +1737,11 @@ function renderHome(){
     pile(rights,'回','そのうち<br>正解','#3fa96a')+
     pile(dayset.size,'日','練習した日','#e08a2e')+
     pile(today,'回','今日<br>書いた','#d4a017');
-  document.getElementById('daily-desc').textContent=dueCount>0
+  renderStampCard();
+  const stToday=(state.stamps||{})[ymd(now)]||0;
+  document.getElementById('daily-title').textContent=stToday>=1?'おかわり10語':'今日の復習';
+  if(stToday>=1){document.getElementById('daily-desc').textContent=stToday>=2?'キラキラ済み！まだやるなら、もう10語':'あと10語でキラキラハンコ';}
+  else document.getElementById('daily-desc').textContent=dueCount>0
     ?'そろそろ出したい漢字が'+dueCount+'語あるよ。今日はその中から10語'
     :'テストで落とした漢字＋そろそろわすれそうな漢字を10語';
 
@@ -1884,6 +1941,7 @@ function showResult(){
 
   const perfect=pState.ng===0;
   if(perfect)addXP(30);
+  const stampN=pState.mode==='daily'?pressStamp():0;
 
   let html=`
     <div class="result-area">
@@ -1895,6 +1953,12 @@ function showResult(){
       ${perfect?'<div class="result-msg">🎉 パーフェクトボーナス +30 XP！</div>':''}
       ${pState.maxStreak>=3?'<div class="result-msg">🔥 最高連続正解：'+pState.maxStreak+'</div>':''}
   `;
+  if(stampN){
+    html+=`<div style="text-align:center;margin:14px 0 6px">
+      <div style="display:inline-flex;width:96px;height:96px;align-items:center;justify-content:center;border-radius:50%;background:#fffdf8;border:3px solid #ffb35c;animation:stampPop .5s ease-out">${stampHTML(stampN,80)}</div>
+      <div style="font-weight:800;color:#e08a2e;margin-top:6px">${stampN>=2?'キラキラハンコ ゲット！':'ハンコ ゲット！'}</div></div>`;
+    html+=`<button class="btn-primary" style="margin-bottom:10px" onclick="startDailyReview()">${stampN>=2?'もう10語やる':'おかわり10語（キラキラハンコ）'}</button>`;
+  }
   if(pState.wrongs.length>0){
     html+=`<button class="btn-retry" onclick="retryWrongs()">間違えたやつだけ再練習</button>`;
   }
@@ -2270,6 +2334,13 @@ let syncQueue = {}, syncTimer = null, syncedAt = null;
 
 // 同期で送る中身：[正解, まちがい, 回数, 最後にやった時刻, 書ける(1/0), 間隔の段, 次に出す日, 書けるようになった日]
 function packV(r){ ensureSched(r); return [r.correct||0, r.wrong||0, r.total||0, r.lastSeen||0, r.last?1:0, r.step||0, r.due||0, r.okAt||0]; }
+// ハンコ（日付ごとの回数）も同期する。キーは kD_2026-09-30
+function syncQueueStamp(k){
+  if(!SYNC_URL) return;
+  syncQueue['kD_'+k]={v:[(state.stamps||{})[k]||0], t:Date.now()};
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncFlush, 1500);
+}
 function syncQueueWord(key){
   if(!SYNC_URL) return;
   const r = state.records[key]; if(!r) return;
@@ -2292,7 +2363,14 @@ async function syncPull(){
     const r = await fetch(SYNC_URL);
     const remote = await r.json();
     let changed = false; const back = {};
+    state.stamps=state.stamps||{};
     for(const rk in remote){
+      if(rk.indexOf('kD_')===0){             // ハンコ：多い方を残す
+        const dk=rk.slice(3), rn=(remote[rk].v||[])[0]||0, cn=state.stamps[dk]||0;
+        if(rn>cn){state.stamps[dk]=rn;changed=true;}
+        else if(cn>rn) back[rk]={v:[cn],t:Date.now()};
+        continue;
+      }
       if(rk.indexOf(KP)!==0) continue;
       const key = rk.slice(KP.length);
       const v = remote[rk] && remote[rk].v;
@@ -2319,6 +2397,9 @@ async function syncPull(){
       const c = state.records[key];
       if((c.total||0)>0 && !(KP+key in remote)) back[KP+key]={v:packV(c), t:Date.now()};
     }
+    // 同期先は45日で古いものを消すので、送り直すのは40日以内のハンコだけ
+    const cut40=ymd(Date.now()-40*86400000);
+    for(const dk in state.stamps){ if(dk>=cut40 && !(('kD_'+dk) in remote)) back['kD_'+dk]={v:[state.stamps[dk]],t:Date.now()}; }
     if(Object.keys(back).length){ Object.assign(syncQueue, back); syncFlush(); }
     syncedAt = new Date(); syncBadge();
     if(changed){
