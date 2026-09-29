@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スイッチ＆ショート可視化</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a2a4a;--accent:#2563eb;--card:#fff;--line:#dde6f3;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans JP',sans-serif;color:var(--ink);background:linear-gradient(165deg,#eaf3ff,#f1ecff);min-height:100vh;padding:14px 12px 60px;line-height:1.6;}
+.wrap{max-width:780px;margin:0 auto;}
+h1{font-size:1.25rem;font-weight:900;text-align:center;margin-bottom:4px;}
+.sub{text-align:center;font-size:.75rem;color:#5a6e95;margin-bottom:12px;}
+.help{background:#fff;border:1px dashed var(--accent);border-radius:12px;padding:10px 14px;font-size:.78rem;color:#3a4a6e;margin-bottom:14px;}
+.help b{color:var(--accent);}
+.modes{display:flex;gap:6px;margin-bottom:12px;}
+.modes button{font-family:inherit;flex:1;font-weight:700;font-size:.86rem;background:#fff;color:#5a6e95;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;}
+.modes button.act{background:linear-gradient(120deg,#2563eb,#06b6d4);color:#fff;border-color:transparent;box-shadow:0 3px 9px rgba(37,99,235,.3);}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 4px 14px rgba(56,130,220,.1);margin-bottom:14px;}
+.stage-title{font-weight:900;font-size:1.05rem;margin-bottom:2px;color:#0e6fd1;}
+.stage-desc{font-size:.78rem;color:#5a6e95;margin-bottom:8px;}
+svg{width:100%;height:auto;display:block;background:#fbfdff;border:1px solid var(--line);border-radius:12px;}
+.switch-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.sw{font-family:inherit;flex:1 0 auto;min-width:80px;background:#fff;color:#5a6e95;border:2px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:700;font-size:.85rem;cursor:pointer;}
+.sw.on{background:linear-gradient(120deg,#22c55e,#16a34a);color:#fff;border-color:transparent;box-shadow:0 3px 9px rgba(34,197,94,.3);}
+.sw.on::before{content:"✓ ON ";}
+.sw:not(.on)::before{content:"OFF ";color:#94a3b8;}
+.summary{margin-top:12px;background:#eef7f1;border:1px solid #cfe9da;border-radius:12px;padding:11px 14px;font-size:.84rem;}
+.summary b{color:#1f6f4a;}
+.warn{margin-top:10px;background:#fff7ec;border:1px solid #f3e2c4;border-radius:10px;padding:9px 12px;font-size:.78rem;color:#8a6a2f;}
+.warn b{color:#c98a16;}
+.bulb-glow{animation:glow 1.4s ease-in-out infinite;}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 4px #fde047);}50%{filter:drop-shadow(0 0 18px #fbbf24);}}
+.flow{stroke-dasharray:6 4;animation:flow 1.2s linear infinite;}
+@keyframes flow{to{stroke-dashoffset:-30;}}
+.toggle-q{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:.82rem;}
+.toggle-q h3{font-size:.92rem;margin-bottom:6px;color:#0e6fd1;}
+.q-line{margin:6px 0;}
+.q-line span{display:inline-block;background:#dceaff;color:#0e6fd1;font-weight:700;font-size:.75rem;padding:2px 8px;border-radius:6px;margin-right:6px;}
+</style>
+</head>
+<body>
+<div style="text-align:center;margin:8px 0 14px;font-size:.78rem"><a href="電流_攻略.html" style="display:inline-block;background:#fff;color:#0e6fd1;border:1.5px solid #dde6f3;border-radius:8px;padding:6px 14px;text-decoration:none;font-weight:700" class="hub-link">⚡ 攻略ツールに戻る</a></div>
+<div class="wrap">
+<h1>🔌 スイッチ＆ショート可視化</h1>
+<p class="sub">スイッチをON/OFFして、どの豆電球が光るか自分の目で確かめる</p>
+
+<div class="help">
+<b>使い方：</b>下の<b>スイッチボタン</b>を押すと、ON/OFFが切り替わる。<br>
+🟡光る豆電球＝ON状態で電流が流れる豆電球。動く矢印＝電流の通り道。<br>
+⚠️<b>「導線だけの近道（ショート）」があると、その豆電球は光らない</b>のがポイント。
+</div>
+
+<div class="modes">
+  <button class="act" onclick="setMode(0)">① 基本：スイッチで光るのを切り替える</button>
+  <button onclick="setMode(1)">② ショート発見</button>
+  <button onclick="setMode(2)">③ 並列複合</button>
+</div>
+
+<div id="stage"></div>
+
+<div id="cliff" class="toggle-q"></div>
+
+</div>
+
+<script>
+const state = {
+  mode: 0,
+  switches: {} // {s1:true, s2:false ...}
+};
+const SCENES = [
+  // ① 基本：3つの豆電球が3つのスイッチで個別にON/OFF
+  {
+    title: "① スイッチを入れると、その先の豆電球だけ光る",
+    desc: "豆電球A・B・C はそれぞれスイッチ1・2・3 で電池とつながる並列回路。",
+    switches: ["s1","s2","s3"],
+    init: {s1:true, s2:false, s3:false},
+    bulbs: [
+      {id:"A", x:170, y:80, on: st => st.s1, label:"A"},
+      {id:"B", x:300, y:80, on: st => st.s2, label:"B"},
+      {id:"C", x:430, y:80, on: st => st.s3, label:"C"},
+    ],
+    render: (st) => `
+      <svg viewBox="0 0 580 280">
+        <!-- 上の幹線 -->
+        <line x1="80" y1="200" x2="80" y2="40" stroke="#1e40af" stroke-width="3"/>
+        <line x1="80" y1="40" x2="500" y2="40" stroke="#1e40af" stroke-width="3"/>
+        <line x1="500" y1="40" x2="500" y2="200" stroke="#1e40af" stroke-width="3"/>
+        <!-- 下の幹線 -->
+        <line x1="80" y1="200" x2="500" y2="200" stroke="#1e40af" stroke-width="3"/>
+        <!-- 各枝 -->
+        ${[[170,"s1","A"],[300,"s2","B"],[430,"s3","C"]].map(([x,sw,lab]) => {
+          const on = st[sw];
+          return `
+            <line x1="${x}" y1="40" x2="${x}" y2="60" stroke="#1e40af" stroke-width="3" class="${on?'flow':''}"/>
+            <line x1="${x}" y1="100" x2="${x}" y2="150" stroke="#1e40af" stroke-width="3" class="${on?'flow':''}"/>
+            <!-- スイッチ部分 -->
+            <line x1="${x-12}" y1="170" x2="${x+12}" y2="170" stroke="#444" stroke-width="2"/>
+            <line x1="${x-12}" y1="${on?170:160}" x2="${x+12}" y2="170" stroke="${on?'#16a34a':'#94a3b8'}" stroke-width="3"/>
+            <circle cx="${x-12}" cy="170" r="3" fill="#444"/>
+            <circle cx="${x+12}" cy="170" r="3" fill="#444"/>
+            <line x1="${x}" y1="150" x2="${x}" y2="165" stroke="#1e40af" stroke-width="3" class="${on?'flow':''}"/>
+            <line x1="${x}" y1="175" x2="${x}" y2="200" stroke="#1e40af" stroke-width="3" class="${on?'flow':''}"/>
+            <text x="${x+22}" y="174" fill="#444" font-size="13" font-weight="700">${sw[1]}</text>
+            <!-- 豆電球 -->
+            <g class="${on?'bulb-glow':''}" transform="translate(${x},80)">
+              <circle r="20" fill="${on?'#fde68a':'#cbd5e1'}" stroke="${on?'#ca8a04':'#94a3b8'}" stroke-width="2.5"/>
+              <text y="6" text-anchor="middle" font-size="14" font-weight="900" fill="${on?'#854d0e':'#64748b'}">${lab}</text>
+            </g>
+          `;
+        }).join('')}
+        <!-- 電池 -->
+        <line x1="280" y1="188" x2="280" y2="212" stroke="#222" stroke-width="3"/>
+        <line x1="292" y1="193" x2="292" y2="207" stroke="#222" stroke-width="3"/>
+      </svg>`,
+    analysis: (st) => {
+      const lit = ["s1","s2","s3"].filter(s=>st[s]);
+      const labs = lit.map(s=>({s1:"A",s2:"B",s3:"C"}[s]));
+      if(labs.length===0) return {txt:"光ってる豆電球＝<b>なし</b>。すべてのスイッチが切れているので、どの道も電池まで一周できない。", danger:false};
+      return {txt:`光ってる豆電球＝<b>${labs.join("・")}</b>。並列なので、ONにしたスイッチの先だけ電流が流れる。1個ずつは独立。`, danger:false};
+    }
+  },
+
+  // ② ショート発見：豆電球Bに並列に近道導線。S1=メイン、S2=ショート
+  {
+    title: "② ショート（近道）があると豆電球は光らない",
+    desc: "豆電球Bに並列に導線が引いてある。スイッチ2をONにすると、導線だけで電池まで戻れる近道ができる。",
+    switches: ["s1","s2"],
+    init: {s1:true, s2:false},
+    bulbs: [
+      {id:"A", x:170, y:80, label:"A"},
+      {id:"B", x:380, y:80, label:"B"},
+    ],
+    render: (st) => {
+      const mainOn = st.s1;
+      const shortOn = st.s1 && st.s2;
+      // s1がON: 電流は流れる
+      // s2もON: 全部の電流がショートを通り、Bは光らない。Aは光る（直列だから）
+      // ※直列だがBが短絡されたとみなす→電流増（実機通り）
+      const aOn = mainOn;
+      const bOn = mainOn && !shortOn;
+      return `
+        <svg viewBox="0 0 580 320">
+          <!-- 電池 -->
+          <line x1="280" y1="248" x2="280" y2="272" stroke="#222" stroke-width="3"/>
+          <line x1="292" y1="253" x2="292" y2="267" stroke="#222" stroke-width="3"/>
+          <!-- 左下〜上〜スイッチ1〜A〜B〜右下 -->
+          <line x1="80" y1="260" x2="80" y2="60" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <line x1="80" y1="60" x2="120" y2="60" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <!-- スイッチ1 -->
+          <line x1="120" y1="60" x2="144" y2="60" stroke="#444" stroke-width="2"/>
+          <line x1="120" y1="${st.s1?60:50}" x2="144" y2="60" stroke="${st.s1?'#16a34a':'#94a3b8'}" stroke-width="3"/>
+          <circle cx="120" cy="60" r="3" fill="#444"/>
+          <circle cx="144" cy="60" r="3" fill="#444"/>
+          <text x="115" y="48" fill="#444" font-size="13" font-weight="700">1</text>
+          <line x1="144" y1="60" x2="150" y2="60" stroke="#1e40af" stroke-width="3"/>
+          <line x1="150" y1="60" x2="150" y2="80" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <!-- A -->
+          <g class="${aOn?'bulb-glow':''}" transform="translate(170,80)">
+            <circle r="20" fill="${aOn?'#fde68a':'#cbd5e1'}" stroke="${aOn?'#ca8a04':'#94a3b8'}" stroke-width="2.5"/>
+            <text y="6" text-anchor="middle" font-size="14" font-weight="900" fill="${aOn?'#854d0e':'#64748b'}">A</text>
+          </g>
+          <line x1="190" y1="80" x2="380" y2="80" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <!-- Bの真上の幹線 -->
+          <line x1="380" y1="60" x2="380" y2="80" stroke="#1e40af" stroke-width="3"/>
+          <line x1="380" y1="60" x2="500" y2="60" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <line x1="500" y1="60" x2="500" y2="260" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <line x1="500" y1="260" x2="80" y2="260" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <!-- B -->
+          <g class="${bOn?'bulb-glow':''}" transform="translate(380,80)">
+            <circle r="20" fill="${bOn?'#fde68a':'#cbd5e1'}" stroke="${bOn?'#ca8a04':'#94a3b8'}" stroke-width="2.5"/>
+            <text y="6" text-anchor="middle" font-size="14" font-weight="900" fill="${bOn?'#854d0e':'#64748b'}">B</text>
+          </g>
+          <!-- ショート導線：Bの上下を短絡する近道（赤色で目立たせる） -->
+          <line x1="360" y1="80" x2="360" y2="140" stroke="${shortOn?'#dc2626':'#94a3b8'}" stroke-width="${shortOn?4:2.5}" stroke-dasharray="${shortOn?'':'4 3'}" class="${shortOn?'flow':''}"/>
+          <line x1="360" y1="140" x2="400" y2="140" stroke="${shortOn?'#dc2626':'#94a3b8'}" stroke-width="${shortOn?4:2.5}" stroke-dasharray="${shortOn?'':'4 3'}" class="${shortOn?'flow':''}"/>
+          <!-- スイッチ2（ショート側） -->
+          <line x1="400" y1="140" x2="424" y2="140" stroke="#444" stroke-width="2"/>
+          <line x1="400" y1="${st.s2?140:130}" x2="424" y2="140" stroke="${st.s2?'#dc2626':'#94a3b8'}" stroke-width="3"/>
+          <circle cx="400" cy="140" r="3" fill="#444"/>
+          <circle cx="424" cy="140" r="3" fill="#444"/>
+          <text x="395" y="128" fill="#444" font-size="13" font-weight="700">2</text>
+          <line x1="424" y1="140" x2="430" y2="140" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="${shortOn?'':'4 3'}"/>
+          <line x1="430" y1="140" x2="430" y2="80" stroke="${shortOn?'#dc2626':'#94a3b8'}" stroke-width="${shortOn?4:2.5}" stroke-dasharray="${shortOn?'':'4 3'}" class="${shortOn?'flow':''}"/>
+          <text x="350" y="170" fill="${shortOn?'#dc2626':'#64748b'}" font-size="11" font-weight="700">${shortOn?'⚡ショート発動！':'(近道：スイッチ2をONで発動)'}</text>
+        </svg>`;
+    },
+    analysis: (st) => {
+      if(!st.s1) return {txt:"スイッチ1がOFFなので<b>どこにも電流が流れない</b>。AもBも光らない。", danger:false};
+      if(st.s2) return {txt:"⚡<b>ショート発生！</b> スイッチ2をONにすると、Bを飛ばす近道（赤い導線）に全電流が流れる。<br>→ <b>B は光らない</b>（電流が来ない）。A は光る（直列なので必ず通る）。", danger:true};
+      return {txt:"スイッチ1ONでふつうに直列回路。<b>A も B も光る</b>。スイッチ2をONにしてみると…？", danger:false};
+    }
+  },
+
+  // ③ 並列複合：スイッチで光る豆電球の組が変わる
+  {
+    title: "③ 並列複合：どのスイッチで何が光る？",
+    desc: "豆電球A・Bが並列、その手前にメインスイッチ1。さらにBには専用スイッチ2。",
+    switches: ["s1","s2"],
+    init: {s1:true, s2:true},
+    bulbs: [],
+    render: (st) => {
+      const mainOn = st.s1;
+      const aOn = mainOn;
+      const bOn = mainOn && st.s2;
+      return `
+        <svg viewBox="0 0 580 280">
+          <!-- 電池 -->
+          <line x1="280" y1="208" x2="280" y2="232" stroke="#222" stroke-width="3"/>
+          <line x1="292" y1="213" x2="292" y2="227" stroke="#222" stroke-width="3"/>
+          <!-- 左下〜上 -->
+          <line x1="80" y1="220" x2="80" y2="60" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <line x1="80" y1="60" x2="150" y2="60" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <!-- スイッチ1（メイン） -->
+          <line x1="150" y1="60" x2="174" y2="60" stroke="#444" stroke-width="2"/>
+          <line x1="150" y1="${st.s1?60:50}" x2="174" y2="60" stroke="${st.s1?'#16a34a':'#94a3b8'}" stroke-width="3"/>
+          <circle cx="150" cy="60" r="3" fill="#444"/>
+          <circle cx="174" cy="60" r="3" fill="#444"/>
+          <text x="145" y="48" fill="#444" font-size="13" font-weight="700">1 メイン</text>
+          <line x1="174" y1="60" x2="220" y2="60" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <!-- A の枝（縦に） -->
+          <line x1="220" y1="60" x2="220" y2="100" stroke="#1e40af" stroke-width="3" class="${aOn?'flow':''}"/>
+          <g class="${aOn?'bulb-glow':''}" transform="translate(220,120)">
+            <circle r="20" fill="${aOn?'#fde68a':'#cbd5e1'}" stroke="${aOn?'#ca8a04':'#94a3b8'}" stroke-width="2.5"/>
+            <text y="6" text-anchor="middle" font-size="14" font-weight="900" fill="${aOn?'#854d0e':'#64748b'}">A</text>
+          </g>
+          <line x1="220" y1="140" x2="220" y2="180" stroke="#1e40af" stroke-width="3" class="${aOn?'flow':''}"/>
+          <!-- 上幹線が右へ続く -->
+          <line x1="220" y1="60" x2="360" y2="60" stroke="#1e40af" stroke-width="3" class="${aOn?'flow':''}"/>
+          <!-- スイッチ2（Bの直前） -->
+          <line x1="360" y1="60" x2="384" y2="60" stroke="#444" stroke-width="2"/>
+          <line x1="360" y1="${st.s2?60:50}" x2="384" y2="60" stroke="${st.s2?'#16a34a':'#94a3b8'}" stroke-width="3"/>
+          <circle cx="360" cy="60" r="3" fill="#444"/>
+          <circle cx="384" cy="60" r="3" fill="#444"/>
+          <text x="355" y="48" fill="#444" font-size="13" font-weight="700">2</text>
+          <line x1="384" y1="60" x2="430" y2="60" stroke="#1e40af" stroke-width="3" class="${bOn?'flow':''}"/>
+          <line x1="430" y1="60" x2="430" y2="100" stroke="#1e40af" stroke-width="3" class="${bOn?'flow':''}"/>
+          <g class="${bOn?'bulb-glow':''}" transform="translate(430,120)">
+            <circle r="20" fill="${bOn?'#fde68a':'#cbd5e1'}" stroke="${bOn?'#ca8a04':'#94a3b8'}" stroke-width="2.5"/>
+            <text y="6" text-anchor="middle" font-size="14" font-weight="900" fill="${bOn?'#854d0e':'#64748b'}">B</text>
+          </g>
+          <line x1="430" y1="140" x2="430" y2="180" stroke="#1e40af" stroke-width="3" class="${bOn?'flow':''}"/>
+          <!-- 下幹線 -->
+          <line x1="80" y1="220" x2="500" y2="220" stroke="#1e40af" stroke-width="3" class="${mainOn?'flow':''}"/>
+          <line x1="220" y1="180" x2="220" y2="220" stroke="#1e40af" stroke-width="3" class="${aOn?'flow':''}"/>
+          <line x1="430" y1="180" x2="430" y2="220" stroke="#1e40af" stroke-width="3" class="${bOn?'flow':''}"/>
+          <line x1="500" y1="220" x2="500" y2="60" stroke="#1e40af" stroke-width="3" class="${bOn?'flow':''}"/>
+          <line x1="430" y1="60" x2="500" y2="60" stroke="#1e40af" stroke-width="3" class="${bOn?'flow':''}"/>
+        </svg>`;
+    },
+    analysis: (st) => {
+      if(!st.s1) return {txt:"メインスイッチ1がOFF → <b>AもBも光らない</b>。", danger:false};
+      if(!st.s2) return {txt:"メイン1ONだがスイッチ2 OFF → Bの道は切れている。<br><b>Aだけ光る</b>。", danger:false};
+      return {txt:"両方ON → A・B 両方光る。並列なので<b>1個ずつは独立した明るさ</b>（電池1個＋豆1個と同じ明るさ）。", danger:false};
+    }
+  },
+];
+
+function toggle(sw){
+  state.switches[sw] = !state.switches[sw];
+  renderStage();
+}
+function setMode(i){
+  state.mode = i;
+  state.switches = {...SCENES[i].init};
+  document.querySelectorAll('.modes button').forEach((b,k)=>b.classList.toggle('act', k===i));
+  renderStage();
+}
+function renderStage(){
+  const s = SCENES[state.mode];
+  const a = s.analysis(state.switches);
+  document.getElementById('stage').innerHTML = `
+    <div class="stage">
+      <div class="stage-title">${s.title}</div>
+      <div class="stage-desc">${s.desc}</div>
+      ${s.render(state.switches)}
+      <div class="switch-row">
+        ${s.switches.map(sw=>`<button class="sw ${state.switches[sw]?'on':''}" onclick="toggle('${sw}')">スイッチ ${sw[1]}</button>`).join('')}
+      </div>
+      <div class="summary"><b>結果：</b>${a.txt}</div>
+      ${a.danger ? `<div class="warn"><b>⚡ショートのポイント：</b>電流は「楽な道」（抵抗のない導線）を全部通る。豆電球（抵抗あり）には流れない。これがテストの定番ひっかけ。</div>` : ''}
+    </div>`;
+}
+
+document.getElementById('cliff').innerHTML = `
+  <h3>💡 こんなふうに思考する</h3>
+  <div class="q-line"><span>① 電池の＋極から出発</span>つながっている道を指で1本ずつたどる</div>
+  <div class="q-line"><span>② OFFのスイッチは消す</span>そこから先には電流は行かない</div>
+  <div class="q-line"><span>③ ＋から−へ一周できる？</span>できる豆電球だけ光る</div>
+  <div class="q-line"><span>④ ショート探し</span>豆電球を飛ばして導線だけで戻る道があったら、その豆は光らない</div>
+`;
+
+setMode(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第34回 電流 攻略ツール</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --elec: linear-gradient(90deg,#2563eb,#06b6d4,#22d3ee,#818cf8,#c084fc);
+  --ink:#1a2a4a;
+  --accent:#0e7490;
+  --card:rgba(255,255,255,0.88);
+  --line:rgba(56,130,220,0.18);
+  --red:#ff6b6b; --blue:#3c8cdb; --green:#4abf4a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Noto Sans JP',sans-serif;color:var(--ink);
+  background:linear-gradient(165deg,#e8f1ff 0%,#eef6ff 45%,#f1ecff 100%);
+  background-attachment:fixed;min-height:100vh;line-height:1.7;overflow-x:hidden;
+}
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.particles span{
+  position:absolute;bottom:-20px;width:10px;height:10px;border-radius:50%;
+  background:radial-gradient(circle,#fff,rgba(255,255,255,0));opacity:.7;
+  animation:rise linear infinite;
+}
+@keyframes rise{
+  0%{transform:translateY(0) scale(.6);opacity:0;}
+  10%{opacity:.8;}
+  100%{transform:translateY(-110vh) scale(1.2);opacity:0;}
+}
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:14px 12px 80px;}
+
+header{
+  background:var(--card);backdrop-filter:blur(8px);border:1px solid var(--line);
+  border-radius:18px;padding:14px 16px;box-shadow:0 6px 22px rgba(56,130,220,.14);
+  position:relative;overflow:hidden;
+}
+header::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:var(--elec);}
+h1.title{font-size:1.25rem;font-weight:900;letter-spacing:.02em;}
+h1.title small{display:block;font-size:.72rem;font-weight:500;color:#6b8ab5;margin-top:2px;}
+.bar-wrap{margin-top:10px;}
+.bar-label{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;margin-bottom:4px;}
+.bar-label .goal{color:#0891b2;}
+.bar-bg{height:16px;background:rgba(56,130,220,.16);border-radius:10px;overflow:hidden;}
+.bar-fill{height:100%;width:0;background:var(--elec);background-size:200% 100%;
+  border-radius:10px;transition:width .6s cubic-bezier(.2,.9,.3,1);animation:shimmer 3s linear infinite;}
+@keyframes shimmer{to{background-position:200% 0;}}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+.badges .b{font-size:.68rem;font-weight:700;background:rgba(255,255,255,.7);
+  border:1px solid var(--line);border-radius:20px;padding:2px 9px;}
+header.maxed{background:linear-gradient(120deg,#c4f0ff,#8adfff,#d6e4ff);}
+header.maxed h1.title{color:#0369a1;}
+
+nav{display:flex;gap:5px;margin:12px 0;overflow-x:auto;padding-bottom:4px;}
+nav button{
+  flex:0 0 auto;font-family:inherit;font-size:.8rem;font-weight:700;color:#5a7bae;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:9px 13px;cursor:pointer;transition:.2s;white-space:nowrap;
+}
+nav button.active{color:#fff;background:linear-gradient(120deg,#2563eb,#06b6d4);border-color:transparent;
+  box-shadow:0 4px 12px rgba(37,99,235,.35);}
+
+section{display:none;animation:fade .35s ease;}
+section.show{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:15px 16px;margin-bottom:13px;box-shadow:0 4px 16px rgba(56,130,220,.09);}
+h2.sec{font-size:1.05rem;font-weight:900;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+h2.sec::before{content:"";width:6px;height:20px;border-radius:3px;background:var(--elec);}
+.lead{font-size:.86rem;color:#5a6e95;margin-bottom:12px;}
+
+.tag{display:inline-block;font-size:.66rem;font-weight:700;color:#fff;border-radius:6px;padding:1px 7px;margin-right:4px;vertical-align:middle;}
+.t-anki{background:var(--red);} .t-calc{background:var(--blue);} .t-read{background:var(--green);}
+
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:10px 0;}
+.stat{background:linear-gradient(135deg,rgba(37,99,235,.10),rgba(6,182,212,.10));
+  border:1px solid var(--line);border-radius:13px;padding:11px 6px;text-align:center;}
+.stat .n{font-size:1.4rem;font-weight:900;color:#0e6fd1;line-height:1.1;}
+.stat .l{font-size:.66rem;color:#5a6e95;margin-top:2px;}
+.stat .l small{display:block;font-size:.56rem;color:#9fb0c8;}
+.group{border-left:4px solid #38bdf8;padding:4px 0 4px 11px;margin:9px 0;}
+.group b{font-size:.92rem;}
+.group span{font-size:.78rem;color:#5a6e95;}
+.must{background:linear-gradient(135deg,#e8f6ff,#def0ff);border:1.5px solid #78c0ff;border-radius:14px;padding:13px 15px;margin:12px 0;}
+.must h3{font-size:.92rem;color:#0369a1;margin-bottom:7px;}
+.must ul{list-style:none;}
+.must li{font-size:.82rem;padding:3px 0 3px 20px;position:relative;}
+.must li::before{content:"⚡";position:absolute;left:0;}
+.must strong{color:#0369a1;}
+.btn-go{display:block;width:100%;font-family:inherit;font-size:.9rem;font-weight:800;color:#fff;
+  background:linear-gradient(120deg,#2563eb,#06b6d4);border:none;border-radius:13px;padding:13px;
+  margin-top:8px;cursor:pointer;box-shadow:0 5px 15px rgba(37,99,235,.3);}
+
+.flow-note{background:rgba(37,99,235,.08);border:1px dashed #38bdf8;border-radius:11px;padding:9px 12px;font-size:.78rem;color:#5a6e95;margin-bottom:13px;}
+.stage{position:relative;margin-left:42px;margin-bottom:11px;}
+.stage::before{content:attr(data-n);position:absolute;left:-42px;top:0;width:32px;height:32px;
+  border-radius:50%;background:var(--elec);color:#fff;font-weight:900;font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.12);}
+.stage:not(:last-child)::after{content:"";position:absolute;left:-26px;top:34px;bottom:-11px;width:3px;
+  background:linear-gradient(#38bdf8,#818cf8);opacity:.5;}
+.stage-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.stage-head{padding:11px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.stage-head.done{background:linear-gradient(90deg,rgba(74,191,74,.12),transparent);}
+.stage-title{font-size:.92rem;font-weight:800;}
+.stage-arrow{color:#9fb0c8;transition:.3s;flex:0 0 auto;}
+.stage.open .stage-arrow{transform:rotate(90deg);}
+.stage-body{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.stage.open .stage-body{max-height:1600px;}
+.stage-inner{padding:0 14px 14px;}
+.goal-ex{background:rgba(6,182,212,.1);border-radius:9px;padding:7px 10px;font-size:.8rem;margin-bottom:9px;}
+.step{font-size:.84rem;margin:6px 0;padding-left:6px;}
+.step b{color:#0e6fd1;}
+.hint{font-size:.78rem;color:#0e7490;background:rgba(74,191,74,.1);border-radius:8px;padding:6px 9px;margin-top:7px;}
+.trap{font-size:.78rem;color:#b91c1c;background:rgba(255,107,107,.12);border-radius:8px;padding:6px 9px;margin-top:6px;}
+.kw{margin-top:9px;}
+.kw span{display:inline-block;font-size:.68rem;background:rgba(37,99,235,.12);color:#0e6fd1;border-radius:6px;padding:2px 8px;margin:2px 3px 0 0;}
+.wakatta{font-family:inherit;font-size:.82rem;font-weight:800;color:#fff;border:none;border-radius:10px;
+  padding:8px 16px;margin-top:11px;cursor:pointer;background:linear-gradient(120deg,#f59e0b,#f97316);box-shadow:0 3px 9px rgba(249,115,22,.3);}
+.wakatta.done{background:linear-gradient(120deg,#22c55e,#16a34a);}
+
+.anki{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden;}
+.anki-head{padding:12px 14px;cursor:pointer;font-weight:800;font-size:.92rem;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.anki-head.done{background:linear-gradient(90deg,rgba(74,191,74,.12),transparent);}
+.anki-body{max-height:0;overflow:hidden;transition:max-height .45s ease;}
+.anki.open .anki-body{max-height:2400px;}
+.anki-inner{padding:0 14px 14px;}
+table{width:100%;border-collapse:collapse;font-size:.8rem;margin:8px 0;}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:center;}
+th{background:rgba(37,99,235,.12);font-weight:700;}
+.hide{filter:blur(7px);opacity:.5;cursor:pointer;border-radius:5px;
+  background:linear-gradient(90deg,rgba(6,182,212,.25),rgba(37,99,235,.25));
+  background-size:200% 100%;animation:pulseb 2s ease-in-out infinite;transition:.6s;font-weight:700;}
+@keyframes pulseb{0%,100%{background-position:0 0;}50%{background-position:100% 0;}}
+.hide.show{filter:blur(0);opacity:1;background:#ffe9a8;animation:none;color:#9a3412;}
+.formula-box{background:#fff8e1;border:1.5px solid #ffd54f;border-radius:11px;padding:10px 12px;margin:9px 0;font-size:.84rem;}
+.formula-box b{color:#b8860b;}
+.warn-box{background:rgba(255,107,107,.12);border:1.5px solid #ff9b9b;border-radius:11px;padding:9px 12px;margin:9px 0;font-size:.8rem;color:#b91c1c;}
+.tip-box{background:rgba(74,191,74,.12);border:1.5px solid #8fd98f;border-radius:11px;padding:9px 12px;margin:9px 0;font-size:.8rem;color:#15803d;}
+.anki-done-btn{font-family:inherit;font-size:.82rem;font-weight:800;color:#fff;border:none;border-radius:10px;
+  padding:8px 16px;margin-top:10px;cursor:pointer;background:linear-gradient(120deg,#f59e0b,#f97316);box-shadow:0 3px 9px rgba(249,115,22,.3);}
+.anki-done-btn.done{background:linear-gradient(120deg,#22c55e,#16a34a);}
+
+.enemy{text-align:center;margin:10px 0;}
+.enemy .face{font-size:3.4rem;display:inline-block;transition:.15s;}
+.enemy .face.hit{animation:hit .4s;}
+@keyframes hit{0%{transform:scale(1) rotate(0);}30%{transform:scale(1.25) rotate(-12deg);filter:brightness(2);}100%{transform:scale(1);}}
+.enemy .name{font-size:.78rem;font-weight:700;color:#0e6fd1;}
+.ehp{height:10px;background:rgba(255,107,107,.2);border-radius:6px;overflow:hidden;margin:6px auto;max-width:240px;}
+.ehp i{display:block;height:100%;background:linear-gradient(90deg,#ff6b6b,#ff9f43);transition:width .4s;}
+.qcat{font-size:.7rem;font-weight:700;color:#fff;background:#2563eb;border-radius:6px;padding:1px 9px;display:inline-block;margin-bottom:7px;}
+.qtext{font-size:.95rem;font-weight:700;margin-bottom:11px;}
+.opts{display:grid;gap:8px;}
+.opt{font-family:inherit;font-size:.86rem;text-align:left;background:#fff;border:1.5px solid var(--line);
+  border-radius:11px;padding:11px 13px;cursor:pointer;transition:.15s;color:var(--ink);}
+.opt:hover{border-color:#38bdf8;}
+.opt.correct{background:#dcfce7;border-color:#22c55e;font-weight:700;}
+.opt.wrong{background:#fee2e2;border-color:#ef4444;}
+.opt:disabled{cursor:default;}
+.expl{background:rgba(6,182,212,.1);border-radius:10px;padding:9px 12px;font-size:.8rem;margin-top:11px;}
+.expl b{color:#0e7490;}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:13px;}
+.qprog{font-size:.78rem;color:#6b8ab5;font-weight:700;}
+.btn-next{font-family:inherit;font-weight:800;color:#fff;background:linear-gradient(120deg,#2563eb,#06b6d4);
+  border:none;border-radius:11px;padding:10px 20px;cursor:pointer;}
+.result{text-align:center;padding:18px;}
+.result .score{font-size:2.6rem;font-weight:900;color:#0e6fd1;}
+.start-screen{text-align:center;padding:16px;}
+.boss-face{font-size:4.5rem;margin:10px 0;}
+.btn-start{font-family:inherit;font-size:1rem;font-weight:800;color:#fff;background:linear-gradient(120deg,#ef4444,#f97316);
+  border:none;border-radius:13px;padding:13px 28px;cursor:pointer;box-shadow:0 5px 15px rgba(239,68,68,.3);margin-top:10px;}
+
+.day{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden;}
+.day-head{padding:13px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.day-head .d-title{font-size:.98rem;font-weight:900;}
+.day-head .d-time{font-size:.72rem;color:#6b8ab5;font-weight:700;}
+.day-head.done{background:linear-gradient(90deg,rgba(74,191,74,.14),transparent);}
+.day-body{max-height:0;overflow:hidden;transition:max-height .45s ease;}
+.day.open .day-body{max-height:1600px;}
+.day-inner{padding:0 15px 15px;}
+.task{display:flex;gap:9px;align-items:flex-start;font-size:.83rem;padding:7px 0;border-bottom:1px dashed var(--line);}
+.task input{margin-top:4px;width:17px;height:17px;flex:0 0 auto;accent-color:#2563eb;}
+.task .tt{flex:1;}
+.ttag{display:inline-block;font-size:.62rem;font-weight:700;color:#fff;border-radius:5px;padding:1px 7px;margin-right:5px;}
+.tag-read{background:#3c8cdb;} .tag-write{background:#ff9933;} .tag-quiz{background:#a066d6;}
+.tag-review{background:#4abf4a;} .tag-boss{background:#cc3333;} .tag-anki{background:#ff6b6b;}
+.day-clear{font-family:inherit;font-size:.84rem;font-weight:800;color:#fff;border:none;border-radius:10px;
+  padding:9px 18px;margin-top:11px;cursor:pointer;background:linear-gradient(120deg,#f59e0b,#f97316);box-shadow:0 3px 9px rgba(249,115,22,.3);}
+.day-clear.done{background:linear-gradient(120deg,#22c55e,#16a34a);}
+.day-prog{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:.82rem;font-weight:700;color:#5a6e95;}
+.day-prog .pb{flex:1;height:12px;background:rgba(56,130,220,.16);border-radius:8px;overflow:hidden;}
+.day-prog .pb i{display:block;height:100%;width:0;background:var(--elec);transition:width .5s;}
+
+.toast{position:fixed;left:50%;top:30%;transform:translateX(-50%);font-size:1.4rem;font-weight:900;
+  color:#0891b2;pointer-events:none;z-index:99;text-shadow:0 2px 8px rgba(255,255,255,.8);animation:gain 1.1s ease forwards;}
+@keyframes gain{0%{opacity:0;transform:translate(-50%,10px) scale(.7);}25%{opacity:1;transform:translate(-50%,-10px) scale(1.15);}100%{opacity:0;transform:translate(-50%,-70px) scale(1);}}
+.confetti{position:fixed;top:-10px;width:11px;height:11px;z-index:98;pointer-events:none;animation:cfall linear forwards;}
+@keyframes cfall{to{transform:translateY(105vh) rotate(640deg);opacity:.3;}}
+footer{text-align:center;font-size:.7rem;color:#9fb0c8;margin-top:20px;}
+.related{margin-top:10px;background:linear-gradient(135deg,#eef5ff,#f1ecff);border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:.74rem;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.related .rel-label{font-weight:700;color:#0e6fd1;margin-right:2px;}
+.related a{display:inline-block;background:#fff;color:#0e6fd1;border:1px solid var(--line);border-radius:8px;padding:4px 9px;text-decoration:none;font-weight:700;}
+.related a:hover{background:#dceaff;}
+</style>
+</head>
+<body>
+<div class="particles" id="particles"></div>
+<div class="wrap">
+
+<header id="header">
+  <h1 class="title">第34回 電流 攻略<small>回路を流れる電流 ／ 3日で基本マスター ⚡🔌</small></h1>
+  <div class="bar-wrap">
+    <div class="bar-label"><span>ばっちり度</span><span class="goal" id="goalTxt">ゴールまであと 100%</span></div>
+    <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+  </div>
+  <div class="badges" id="badges"></div>
+</header>
+
+<div class="related">
+  <span class="rel-label">🔗 セットツール：</span>
+  <a href="電流_説明台本.html">📖 説明台本（ママ用）</a>
+  <a href="電流_暗記シート.html">📕 暗記シート（赤シート用）</a>
+  <a href="電流_シミュレーター.html">🎮 シミュレーター（ア〜サ）</a>
+  <a href="電流_スイッチショート.html">🔌 スイッチ＆ショート</a>
+</div>
+
+<nav id="nav">
+  <button data-t="0" class="active">⚡ 全体像</button>
+  <button data-t="1">🗺️ 攻略マップ</button>
+  <button data-t="2">📖 暗記カード</button>
+  <button data-t="3">⚔️ クイズ</button>
+  <button data-t="4">👑 ボス戦</button>
+  <button data-t="5">📅 3日攻略</button>
+</nav>
+
+<section class="show" id="sec0">
+  <div class="card">
+    <h2 class="sec">この単元はコレ</h2>
+    <p class="lead">「電流」は<strong>回路に流れる電流の大きさ</strong>を考える単元。軸は3本。①<strong>豆電球とかん電池のつなぎ方</strong>（直列・並列）で明るさや電池の持ちがどう変わるか。②<strong>ニクロム線の長さ・断面積</strong>で電流（電気抵抗）がどう変わるか＝比例・反比例の計算。③<strong>スイッチ</strong>で電流の通り道を読む。前半は明るさ比べ、後半は数で表す計算が中心です。</p>
+    <div class="grid3">
+      <div class="stat"><div class="n">10</div><div class="l">ステージ</div></div>
+      <div class="stat"><div class="n">7</div><div class="l">暗記カード</div></div>
+      <div class="stat"><div class="n">30</div><div class="l">クイズ問題</div></div>
+      <div class="stat"><div class="n">10</div><div class="l">ボス問題</div></div>
+      <div class="stat"><div class="n">3日</div><div class="l">攻略プラン</div></div>
+      <div class="stat"><div class="n">6〜8h</div><div class="l">総学習時間<small>(中断・つまり込み)</small></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="sec">内容で分けると</h2>
+    <div class="group"><b>Ａ 豆電球・かん電池のつなぎ方</b><br><span>直列・並列と明るさ／電流／電池の持ち。基準を1として比べる（Stage 1〜4）</span></div>
+    <div class="group"><b>Ｂ ニクロム線と電気抵抗</b><br><span>長さ＝反比例・断面積＝比例。表から電流を計算・合成抵抗（Stage 5〜8）</span></div>
+    <div class="group"><b>Ｃ スイッチ・電流計・複合</b><br><span>電流の通り道を読む・電流計の使い方・立体回路の平面化（Stage 9〜10）</span></div>
+  </div>
+
+  <div class="card">
+    <h2 class="sec">やることで分けると</h2>
+    <div class="group" style="border-color:#ff6b6b"><b><span class="tag t-anki">暗記</span>覚えるもの</b><br><span>直列・並列のことば／明るさ・電池の持ちの結論／抵抗は長さに比例・断面積に反比例／電流計の使い方</span></div>
+    <div class="group" style="border-color:#3c8cdb"><b><span class="tag t-calc">計算</span>手順で解く</b><br><span>基準1としたときの電流（ア〜サ型）／ニクロム線の電流（30mA基準）／合成抵抗（直列・並列）</span></div>
+    <div class="group" style="border-color:#4abf4a"><b><span class="tag t-read">読取</span>図を読む</b><br><span>回路図が直列か並列かの判別／スイッチで電流の通り道を読む／立体回路を平面に直す</span></div>
+  </div>
+
+  <div class="must">
+    <h3>⚡ 必ず暗記するもの</h3>
+    <ul>
+      <li>豆電球を<strong>直列</strong>に増やす→電流は<strong>小さく</strong>なる（2個で1/2）→暗い。電池は<strong>長持ち</strong></li>
+      <li>豆電球を<strong>並列</strong>に増やす→1個ずつの明るさは<strong>変わらない</strong>。でも電池から出る電流は増えて<strong>早く消耗</strong></li>
+      <li>かん電池を<strong>直列</strong>に増やす→電流が<strong>大きく</strong>なる（2個で2倍）→明るい</li>
+      <li>かん電池を<strong>並列</strong>に増やす→明るさは<strong>変わらない</strong>。でも電池は<strong>長持ち</strong>（2倍）</li>
+      <li>ニクロム線は<strong>長い</strong>ほど電流が流れ<strong>にくい</strong>（長さに<strong>反比例</strong>）</li>
+      <li>ニクロム線は<strong>太い</strong>（断面積大）ほど電流が流れ<strong>やすい</strong>（断面積に<strong>比例</strong>）</li>
+      <li><strong>電気抵抗</strong>は電流と逆＝<strong>長さに比例・断面積に反比例</strong></li>
+      <li>ニクロム線を<strong>直列</strong>につなぐ＝長さの足し算（抵抗大）／<strong>並列</strong>＝断面積の足し算（抵抗小）</li>
+      <li>電流計は回路に<strong>直列</strong>につなぐ。＋たんしは電池の<strong>＋極</strong>側へ。最初は<strong>いちばん大きい（5A）</strong>のーたんしから</li>
+      <li>明るさ＝豆電球1個に流れる<strong>電流の大きさ</strong>で決まる（電流が大きいほど明るい）</li>
+    </ul>
+  </div>
+  <button class="btn-go" onclick="goTab(5)">📅 3日攻略プランを見る →</button>
+</section>
+
+<section id="sec1">
+  <div class="flow-note">📌 使い方：<b>まずここ（攻略マップ）で「こう出たらこう解く」型を読む</b> → 「暗記カード」で覚える → テスト前にもう一度ここを確認。各ステージを読んで納得したら「✋わかった！」を押そう。</div>
+  <div id="stages"></div>
+</section>
+
+<section id="sec2">
+  <div class="flow-note">📌 答えは<b>うっすら隠れてる</b> → まず<b>自分で答えを言ってみる</b> → タップすると答えがふわっと浮き出る → ぜんぶ言えたら「✋覚えた！」を押す。</div>
+  <div id="ankis"></div>
+</section>
+
+<section id="sec3">
+  <div class="card" id="quizBox"></div>
+</section>
+
+<section id="sec4">
+  <div class="card" id="bossBox"></div>
+</section>
+
+<section id="sec5">
+  <div class="card">
+    <h2 class="sec">3日攻略プラン</h2>
+    <p class="lead">理科は守りの教科。<strong>テストに出る共通レベルを3日でざっと固める</strong>プラン。各日「Stageを読む→暗記カードで覚える→書く→解く」の順番が大事。時間は中断やつまずきも込みの現実値です。</p>
+    <div class="day-prog"><span id="dpTxt">0/3 日クリア</span><div class="pb"><i id="dpBar"></i></div></div>
+    <div id="days"></div>
+  </div>
+</section>
+
+<footer>第34回 電流 攻略ツール ／ こころ専用 ⚡</footer>
+</div>
+
+<script>
+/* ===== データ ===== */
+const UNIT="denryu";
+
+const stages=[
+ {n:1,cat:"anki",title:"豆電球の数（直列・並列）で明るさ・電流を答える問題",ex:"「豆電球を2個直列にすると、1個のときと比べて明るさは？」",
+  steps:["<b>STEP1</b> 豆電球1個＋かん電池1個を<b>基準（明るさ1・電流1）</b>とする。",
+   "<b>STEP2</b> <b>直列</b>に2個→電流の通り道が長く（流れにくく）なる→電流は<b>1/2</b>→2個とも<b>暗い（明るさ1/2）</b>。電池は長持ち。",
+   "<b>STEP3</b> <b>並列</b>に2個→それぞれが別の道で電池とつながる→1個ずつは<b>明るさ1のまま</b>。ただし電池からは合計<b>2</b>の電流が出るので電池は早く減る。"],
+  hint:"直列＝みんなで電流を分け合う（暗い）。並列＝それぞれフルで光る（明るさそのまま・電池消耗早い）。",
+  trap:"並列の豆電球を「暗くなる」と勘違いしやすい。並列は1個ずつは<b>変わらない</b>。暗くなるのは直列。",
+  kw:["直列","並列","豆電球","明るさ"]},
+
+ {n:2,cat:"anki",title:"かん電池の数（直列・並列）で明るさ・電池の持ちを答える問題",ex:"「かん電池を2個直列／並列にすると明るさと電池の持ちは？」",
+  steps:["<b>STEP1</b> かん電池<b>直列</b>2個→押す力（電圧）が2倍→電流<b>2倍</b>→豆電球は<b>明るい</b>。",
+   "<b>STEP2</b> かん電池<b>並列</b>2個→押す力は1個と同じ→電流<b>1倍</b>→明るさは<b>変わらない</b>。でも2個で分担するので電池は<b>長持ち（約2倍）</b>。",
+   "<b>STEP3</b> まとめ：明るくしたい＝電池<b>直列</b>。長持ちさせたい＝電池<b>並列</b>。"],
+  hint:"電池<b>直列</b>＝明るいが早く減る。電池<b>並列</b>＝明るさそのままで長持ち。",
+  trap:"電池並列で「明るくなる」は誤り。明るさは1個のときと同じ。明るくなるのは直列。",
+  kw:["かん電池","直列","並列","電池の持ち"]},
+
+ {n:3,cat:"calc",title:"基準を1として各回路の電流の大きさを求める問題",ex:"「ア(豆1・電池1)を1とすると、イ〜サの豆電球・電池に流れる電流は？」",
+  steps:["<b>STEP1</b> 豆電球1個＝抵抗1。<b>直列</b>は抵抗を足す、<b>並列</b>は抵抗が半分（2個で1/2）。電池<b>直列</b>は電圧を足す、<b>並列</b>は電圧そのまま。",
+   "<b>STEP2</b> 電流＝電圧÷抵抗で考える。例：豆2直列＋電池1＝1÷2＝<b>1/2</b>。豆2並列＋電池1＝1÷(1/2)＝<b>2</b>が電池から出て各豆は1。",
+   "<b>STEP3</b> 電池2直列＋豆1＝2÷1＝<b>2</b>。電池2並列＋豆1＝1÷1＝<b>1</b>（各電池0.5ずつ）。",
+   "<b>STEP4</b> <b>豆電球1個の明るさ</b>はその豆に流れる電流、<b>電池の減りの速さ</b>は電池1個から出る電流で比べる。"],
+  hint:"電流＝（電池のつなぎ方で決まる電圧）÷（豆電球のつなぎ方で決まる抵抗）。直列は足す、並列は半分／そのまま。",
+  trap:"「豆電球に流れる電流」と「電池から出る電流」は並列だと別物。聞かれているのがどっちか必ず確認。",
+  kw:["基準","電流の大きさ","直列","並列"]},
+
+ {n:4,cat:"calc",title:"一番明るい・暗い・長持ちの回路を選ぶ問題",ex:"「ア〜サで豆電球が一番明るいのは？電池が一番長持ちは？」",
+  steps:["<b>STEP1</b> <b>明るい順</b>＝豆電球1個に流れる電流の大きい順。電池直列で増やすと明るい、豆電球直列で増やすと暗い。",
+   "<b>STEP2</b> 例：電池2直列＋豆1（明るさ2）や、豆2並列＋電池2直列（各豆2）が明るい。豆2直列（各1/2）は暗い。",
+   "<b>STEP3</b> <b>電池の持ち（長持ち）</b>＝電池1個から出る電流の<b>小さい</b>順。電池並列・豆直列は長持ち。",
+   "<b>STEP4</b> 一番減りが速い＝電池1個あたりの電流が最大の回路（例：豆2並列＋電池2直列）。"],
+  hint:"明るさ＝豆に流れる電流。長持ち＝電池1個から出る電流が小さいほど良い。",
+  trap:"「明るい＝長持ち」ではない。むしろ明るい（電流大）ほど電池は早く減ることが多い。別々に考える。",
+  kw:["明るい","暗い","長持ち","比べる"]},
+
+ {n:5,cat:"anki",title:"ニクロム線の長さ・断面積と電流・抵抗の関係を答える問題",ex:"「ニクロム線を長く／太くすると電流はどうなる？電気抵抗は？」",
+  steps:["<b>STEP1</b> <b>電流</b>は、ニクロム線が<b>長い</b>ほど流れにくい＝<b>長さに反比例</b>（2倍長い→電流1/2）。",
+   "<b>STEP2</b> <b>電流</b>は、ニクロム線が<b>太い（断面積大）</b>ほど流れやすい＝<b>断面積に比例</b>（2倍太い→電流2倍）。",
+   "<b>STEP3</b> <b>電気抵抗</b>は電流と<b>逆</b>＝<b>長さに比例・断面積に反比例</b>。長い・細いほど抵抗が大きい。"],
+  hint:"電流：長さ↑で↓（反比例）、断面積↑で↑（比例）。抵抗はその逆。",
+  trap:"電流と抵抗は逆向き。「長いと電流が増える」「太いと抵抗が増える」は逆。混同しやすい最頻出ミス。",
+  kw:["ニクロム線","長さ","断面積","電気抵抗"]},
+
+ {n:6,cat:"calc",title:"表からニクロム線の電流を計算する問題",ex:"「0.1mm²・10cmで30mA。0.2mm²・8cmなら電流は何mA？」",
+  steps:["<b>STEP1</b> 基準を決める（例：断面積0.1mm²・長さ10cmで電流30mA）。",
+   "<b>STEP2</b> <b>断面積</b>の倍率をかける（比例）。0.1→0.2は2倍なので<b>×2</b>。",
+   "<b>STEP3</b> <b>長さ</b>の倍率の<b>逆数</b>をかける（反比例）。10cm→8cmは長さ8/10なので電流は<b>×10/8</b>。",
+   "<b>STEP4</b> 30×2×(10/8)＝<b>75mA</b>。順にかけ算すれば必ず出る。"],
+  hint:"電流＝基準×（断面積の倍率）×（長さの逆倍率）。断面積はそのまま、長さはひっくり返す。",
+  trap:"長さを「そのままかける」とまちがい。長さは<b>反比例</b>なので逆数（10/8など）をかける。",
+  kw:["比例","反比例","電流","計算"]},
+
+ {n:7,cat:"calc",title:"ニクロム線の直列・並列＝合成抵抗を求める問題",ex:"「同じニクロム線を直列2本／並列4本にすると、もとの抵抗の何倍？」",
+  steps:["<b>STEP1</b> ニクロム線を<b>直列</b>につなぐ＝<b>長さを足す</b>のと同じ→抵抗が増える（2本直列＝抵抗2倍、電流1/2）。",
+   "<b>STEP2</b> ニクロム線を<b>並列</b>につなぐ＝<b>断面積を足す</b>のと同じ→抵抗が減る（4本並列＝抵抗1/4、電流4倍）。",
+   "<b>STEP3</b> 抵抗が分かれば電流は逆数。抵抗1/4倍→電流は4倍。基準30mAなら<b>120mA</b>。"],
+  hint:"直列＝長さの足し算（抵抗大・電流小）。並列＝断面積の足し算（抵抗小・電流大）。豆電球とちょうど対応。",
+  trap:"直列と並列で抵抗が増えるか減るか逆に覚えやすい。<b>直列は増、並列は減</b>。",
+  kw:["合成抵抗","直列","並列","ニクロム線"]},
+
+ {n:8,cat:"calc",title:"豆電球の回路をニクロム線（電気抵抗）に置き換える発展問題",ex:"「豆電球の複雑な回路全体の電気抵抗はいくつ？各部に流れる電流は？」",
+  steps:["<b>STEP1</b> 豆電球1個＝<b>電気抵抗1</b>とみなす。",
+   "<b>STEP2</b> 並列部分は抵抗が減る（2個並列＝1/2）。直列部分は足す。1本のニクロム線（抵抗）にまとめる。",
+   "<b>STEP3</b> 例：並列2個（1/2）＋直列1個（1）＝合計<b>3/2</b>。これが回路全体の抵抗。",
+   "<b>STEP4</b> 全体の電流＝電圧÷全体の抵抗。各部に分かれる電流は、並列なら均等に分ける。"],
+  hint:"豆電球を抵抗の数値に置き換えてから、直列は足す・並列は半分でまとめる。日能研テキストの『置き換え』のやり方。",
+  trap:"並列を足し算してしまうミス。並列は抵抗が<b>減る</b>（2個で1/2）。",
+  kw:["置き換え","電気抵抗","合成","発展"]},
+
+ {n:9,cat:"read",title:"スイッチ回路で電流の通り道を読む問題",ex:"「スイッチ1と3を入れたとき、光る豆電球はどれ？」",
+  steps:["<b>STEP1</b> <b>入れた（閉じた）スイッチ</b>だけ電流が通れる。切れたスイッチの先には電流は行かない。",
+   "<b>STEP2</b> 電池の＋極から出発して、つながっている道を<b>電流が流れる部分だけ</b>たどり、＋から−へ一周できる豆電球を探す。",
+   "<b>STEP3</b> <b>導線だけ</b>で豆電球を飛びこえる近道（ショート）があると、その豆電球には電流が流れず<b>光らない</b>。",
+   "<b>STEP4</b> 流れる部分だけを抜き出して<b>かんたんな回路に書き直す</b>と、直列・並列が見やすくなる。"],
+  hint:"『電流が流れる部分だけ』に注目して回路を単純化するのが日能研のやり方。切れたスイッチの先は消して考える。",
+  trap:"導線だけの近道（ショート）があると、そっちに電流が流れて豆電球は光らない。見落としやすい。",
+  kw:["スイッチ","通り道","ショート","単純化"]},
+
+ {n:10,cat:"read",title:"電流計の使い方・立体回路の平面化の問題",ex:"「電流計の正しいつなぎ方は？」「立体（四角すい）の回路を平面に直すと？」",
+  steps:["<b>STEP1</b> 電流計は回路に<b>直列</b>につなぐ（はかりたい所に割りこませる）。並列につなぐと壊れる。",
+   "<b>STEP2</b> ＋たんしは電池の<b>＋極</b>側につなぐ。ーたんしは最初に<b>いちばん大きい5A</b>から使い、針のふれが小さければ小さい端子に変える。",
+   "<b>STEP3</b> 立体回路（四角すいなど）は、<b>頂点と辺をそのまま平面に開く</b>と、どの豆電球が直列・並列か見やすくなる。",
+   "<b>STEP4</b> つながっている点どうしを線で結び直すだけ。位置が変わっても<b>つながり（回路）は同じ</b>。"],
+  hint:"電流計＝直列・＋極へ・大きい端子から。立体は『つながりを変えずに平面に開く』。",
+  trap:"電流計を並列につなぐ／いきなり小さい端子から使うのは誤り。立体を平面に直すときは線のつながりを変えないこと。",
+  kw:["電流計","直列","立体回路","平面化"]},
+];
+const ankis=[
+ {title:"① 豆電球のつなぎ方と明るさ",
+  html:`<table><tr><th>つなぎ方</th><th>1個の明るさ</th><th>電池の持ち</th></tr>
+  <tr><td>豆1個（基準）</td><td class="hide">明るさ1（基準）</td><td class="hide">基準</td></tr>
+  <tr><td>豆2個 直列</td><td class="hide">暗い（1/2）</td><td class="hide">長持ち（電流が半分）</td></tr>
+  <tr><td>豆2個 並列</td><td class="hide">変わらない（1）</td><td class="hide">早く減る（電流が合計2）</td></tr>
+  <tr><td>豆3個 並列</td><td class="hide">変わらない（1）</td><td class="hide">もっと早く減る（電流3）</td></tr></table>
+  <div class="tip-box">合言葉：<span class="hide">直列＝分け合う（暗い）／並列＝それぞれフル（変わらない・電池消耗）</span>。</div>
+  <div class="warn-box">ひっかけ：並列の豆電球は<span class="hide">暗くならない</span>。暗くなるのは直列。</div>`},
+
+ {title:"② かん電池のつなぎ方と明るさ・持ち",
+  html:`<table><tr><th>つなぎ方</th><th>豆の明るさ</th><th>電池の持ち</th></tr>
+  <tr><td>電池1個（基準）</td><td class="hide">明るさ1（基準）</td><td class="hide">基準</td></tr>
+  <tr><td>電池2個 直列</td><td class="hide">明るい（電流2倍）</td><td class="hide">早く減る</td></tr>
+  <tr><td>電池2個 並列</td><td class="hide">変わらない（電流1）</td><td class="hide">長持ち（約2倍）</td></tr></table>
+  <div class="formula-box"><b>使い分け：</b>明るくしたい→電池<span class="hide">直列</span>。長持ちさせたい→電池<span class="hide">並列</span>。</div>
+  <div class="warn-box">ひっかけ：電池並列で「明るくなる」は<span class="hide">×</span>。明るさは変わらない（長持ちするだけ）。</div>`},
+
+ {title:"③ 基準1としたときの電流まとめ",
+  html:`<p>豆1個＋電池1個の電流を<span class="hide">1（基準）</span>として考える。</p>
+  <table><tr><th>回路</th><th>豆1個の電流</th><th>電池1個から出る電流</th></tr>
+  <tr><td>ア：豆1・電池1</td><td class="hide">1</td><td class="hide">1</td></tr>
+  <tr><td>イ：豆1・電池2直列</td><td class="hide">2</td><td class="hide">2</td></tr>
+  <tr><td>ウ：豆1・電池2並列</td><td class="hide">1</td><td class="hide">1/2</td></tr>
+  <tr><td>エ：豆2直列・電池1</td><td class="hide">1/2</td><td class="hide">1/2</td></tr>
+  <tr><td>オ：豆2並列・電池1</td><td class="hide">1</td><td class="hide">2</td></tr>
+  <tr><td>カ：豆2直列・電池2直列</td><td class="hide">1</td><td class="hide">1</td></tr>
+  <tr><td>ク：豆2並列・電池2直列</td><td class="hide">2（一番明るい）</td><td class="hide">4（一番減る）</td></tr></table>
+  <div class="tip-box">電流＝<span class="hide">（電池の電圧）÷（豆の合計抵抗）</span>。直列は足す、並列は1/2。</div>`},
+
+ {title:"④ ニクロム線の長さ・断面積と電流・抵抗",
+  html:`<table><tr><th>変えること</th><th>電流</th><th>電気抵抗</th></tr>
+  <tr><td>長さを2倍</td><td class="hide">1/2倍（反比例）</td><td class="hide">2倍（比例）</td></tr>
+  <tr><td>長さを1/2</td><td class="hide">2倍</td><td class="hide">1/2倍</td></tr>
+  <tr><td>断面積を2倍（太く）</td><td class="hide">2倍（比例）</td><td class="hide">1/2倍（反比例）</td></tr>
+  <tr><td>断面積を1/2（細く）</td><td class="hide">1/2倍</td><td class="hide">2倍</td></tr></table>
+  <div class="formula-box"><b>覚え方：</b>電流は <span class="hide">長さに反比例・断面積に比例</span>。抵抗はその逆＝<span class="hide">長さに比例・断面積に反比例</span>。</div>
+  <div class="warn-box">ひっかけ：「長いほど電流が増える」「太いほど抵抗が増える」は<span class="hide">逆</span>。混同最頻出。</div>`},
+
+ {title:"⑤ ニクロム線の電流計算・合成抵抗",
+  html:`<div class="formula-box"><b>電流計算の式：</b>電流＝<span class="hide">基準 × 断面積の倍率 × 長さの逆倍率</span>。<br>例：30mA基準（0.1mm²・10cm）で 0.2mm²・8cm → <span class="hide">30×2×(10/8)＝75mA</span>。</div>
+  <table><tr><th>ニクロム線のつなぎ方</th><th>合成抵抗</th><th>電流</th></tr>
+  <tr><td>同じ線を直列に2本</td><td class="hide">2倍（長さ2倍と同じ）</td><td class="hide">1/2倍</td></tr>
+  <tr><td>同じ線を並列に2本</td><td class="hide">1/2倍（断面積2倍と同じ）</td><td class="hide">2倍</td></tr>
+  <tr><td>同じ線を並列に4本</td><td class="hide">1/4倍</td><td class="hide">4倍</td></tr></table>
+  <div class="tip-box">直列＝<span class="hide">長さの足し算</span>。並列＝<span class="hide">断面積の足し算</span>。豆電球の直列/並列とちょうど対応。</div>`},
+
+ {title:"⑥ 電流計の使い方",
+  html:`<table><tr><th>項目</th><th>正しい使い方</th></tr>
+  <tr><td>つなぎ方</td><td class="hide">回路に直列（並列はこわれる）</td></tr>
+  <tr><td>＋たんし</td><td class="hide">電池の＋極側につなぐ</td></tr>
+  <tr><td>ーたんし</td><td class="hide">最初はいちばん大きい5Aから使う</td></tr>
+  <tr><td>針が小さくふれたら</td><td class="hide">500mA→50mAと小さい端子に変える</td></tr></table>
+  <div class="warn-box">ひっかけ：電流計を<span class="hide">並列につなぐ</span>のは×（こわれる）。いきなり<span class="hide">小さい端子から使う</span>のも×（針が振り切れる）。</div>`},
+
+ {title:"⑦ ことば・ひっかけまとめ",
+  html:`<table><tr><th>用語</th><th>意味</th></tr>
+  <tr><td>直列</td><td class="hide">1本道で順番につなぐ</td></tr>
+  <tr><td>並列</td><td class="hide">枝分かれして別の道でつなぐ</td></tr>
+  <tr><td>電気抵抗</td><td class="hide">電流の流れにくさ</td></tr>
+  <tr><td>ショート</td><td class="hide">導線だけの近道。豆電球を飛ばして電流が流れる</td></tr></table>
+  <div class="warn-box">ひっかけ5選：<br>① 並列の豆電球は<span class="hide">暗くならない</span><br>② 電池並列は<span class="hide">明るくならない</span>（長持ちするだけ）<br>③ ニクロム線「長いと電流が増える」は<span class="hide">逆</span><br>④ 並列につなぐと抵抗は<span class="hide">減る</span>（足し算ではない）<br>⑤ ショートがあると豆電球は<span class="hide">光らない</span></div>`},
+];
+const quiz=[
+ {c:"豆電球のつなぎ方",q:"豆電球を2個直列につなぐと、1個のときと比べて明るさは？",o:["明るくなる","暗くなる","変わらない","消える"],a:1,e:"直列だと電流が1/2に減るので2個とも暗くなる。"},
+ {c:"豆電球のつなぎ方",q:"豆電球を2個並列につなぐと、1個ずつの明るさは？",o:["明るくなる","暗くなる","変わらない","2倍になる"],a:2,e:"並列はそれぞれ電池とつながるので、1個ずつは基準と同じ明るさ。"},
+ {c:"豆電球のつなぎ方",q:"豆電球2個を並列にしたとき、電池はどうなる？",o:["長持ちする","早く減る","変わらない","充電される"],a:1,e:"電池からは合計2の電流が出るので、1個のときより早く減る。"},
+ {c:"豆電球のつなぎ方",q:"電流を分け合うので暗くなるのは、どちらのつなぎ方？",o:["直列","並列","どちらも","どちらも明るい"],a:0,e:"直列は1本道を分け合うので暗い。並列は1個ずつは変わらない。"},
+ {c:"かん電池のつなぎ方",q:"かん電池を2個直列につなぐと、豆電球の明るさは？",o:["変わらない","暗くなる","明るくなる","消える"],a:2,e:"電圧が2倍になり電流も2倍。明るくなる。"},
+ {c:"かん電池のつなぎ方",q:"かん電池を2個並列につなぐと、豆電球の明るさは？",o:["明るくなる","変わらない","暗くなる","2倍"],a:1,e:"並列は電圧が1個と同じなので明るさは変わらない。"},
+ {c:"かん電池のつなぎ方",q:"かん電池を2個並列にすると、電池の持ちは？",o:["短くなる","変わらない","長持ちする（約2倍）","すぐ切れる"],a:2,e:"2個で分担するので長持ち（約2倍）。"},
+ {c:"かん電池のつなぎ方",q:"明るくしたいときの電池のつなぎ方は？",o:["直列","並列","どちらでもよい","つながない"],a:0,e:"電池は直列にすると電圧が上がって明るくなる。"},
+ {c:"かん電池のつなぎ方",q:"長持ちさせたいときの電池のつなぎ方は？",o:["直列","並列","ショート","1個だけ"],a:1,e:"電池を並列にすると分担して長持ちする。"},
+ {c:"電流の大きさ",q:"ア（豆1・電池1）を1とする。豆電球2個を直列にした回路の豆電球に流れる電流は？",o:["1","2","1/2","1/4"],a:2,e:"直列で抵抗2倍→電流1/2。"},
+ {c:"電流の大きさ",q:"かん電池を2個直列にして豆電球1個をつなぐと、電流は基準の何倍？",o:["1/2倍","1倍","2倍","4倍"],a:2,e:"電圧2倍÷抵抗1＝電流2倍。"},
+ {c:"電流の大きさ",q:"豆電球2個を並列、かん電池2個を直列にした回路。豆電球1個に流れる電流は基準の何倍？",o:["1倍","2倍","4倍","1/2倍"],a:1,e:"電圧2倍÷（並列で抵抗1/2）＝全体4。各豆はその半分で2倍。"},
+ {c:"電流の大きさ",q:"豆電球1個に、かん電池2個を並列につないだ回路。豆電球の電流は基準の何倍？",o:["1/2倍","1倍","2倍","4倍"],a:1,e:"電池並列は電圧1倍なので電流は1倍（明るさは変わらない）。"},
+ {c:"明るさ比べ",q:"ア〜サの中で豆電球が一番明るいのは、どんな回路？",o:["豆2直列・電池1","豆1・電池2直列","豆3並列・電池1","豆2直列・電池2並列"],a:1,e:"電池2直列＋豆1は電流2で最も明るいグループ。"},
+ {c:"明るさ比べ",q:"豆電球が一番暗いのはどれ？",o:["豆1・電池1","豆2直列・電池1","豆2並列・電池1","豆1・電池2直列"],a:1,e:"豆2直列は各豆の電流が1/2で暗い。"},
+ {c:"明るさ比べ",q:"豆電球1個の明るさは何で決まる？",o:["電池の数","豆電球に流れる電流の大きさ","導線の長さ","豆電球の色"],a:1,e:"豆電球に流れる電流が大きいほど明るい。"},
+ {c:"電池の持ち",q:"電池が一番長持ちするのは、電池1個から出る電流がどうなる回路？",o:["大きいほど","小さいほど","関係ない","ゼロのとき"],a:1,e:"電池1個から出る電流が小さいほど長持ち。"},
+ {c:"ニクロム線",q:"ニクロム線を長くすると、流れる電流は？",o:["増える","減る","変わらない","止まる"],a:1,e:"長さに反比例。長いほど流れにくく電流は減る。"},
+ {c:"ニクロム線",q:"ニクロム線を太く（断面積を大きく）すると、流れる電流は？",o:["増える","減る","変わらない","止まる"],a:0,e:"断面積に比例。太いほど流れやすく電流は増える。"},
+ {c:"ニクロム線",q:"ニクロム線の電気抵抗が大きくなるのはどんなとき？",o:["太く短い","細く長い","太く長い","細く短い"],a:1,e:"抵抗は長さに比例・断面積に反比例。細くて長いほど大きい。"},
+ {c:"ニクロム線",q:"電流と電気抵抗の関係は？",o:["同じ向きに変化","逆向きに変化","無関係","常に等しい"],a:1,e:"抵抗が大きいほど電流は小さい＝逆向き。"},
+ {c:"ニクロム線計算",q:"0.1mm²・10cmで30mA。同じ材質で0.3mm²・10cmなら電流は？",o:["10mA","30mA","60mA","90mA"],a:3,e:"断面積3倍→電流3倍＝90mA。"},
+ {c:"ニクロム線計算",q:"0.1mm²・10cmで30mA。0.1mm²・30cmなら電流は？",o:["10mA","30mA","90mA","15mA"],a:0,e:"長さ3倍→電流1/3＝10mA。"},
+ {c:"ニクロム線計算",q:"0.1mm²・10cmで30mA。0.2mm²・20cmなら電流は？",o:["15mA","30mA","60mA","120mA"],a:1,e:"断面積2倍(×2)・長さ2倍(×1/2)→30×2×1/2＝30mA。"},
+ {c:"ニクロム線計算",q:"0.1mm²・10cmで30mA。0.2mm²・8cmなら電流は？",o:["48mA","60mA","75mA","30mA"],a:2,e:"30×2×(10/8)＝75mA。長さは逆数をかける。"},
+ {c:"合成抵抗",q:"同じニクロム線を直列に2本つなぐと、全体の電気抵抗はもとの何倍？",o:["1/2倍","1倍","2倍","4倍"],a:2,e:"直列＝長さの足し算なので抵抗2倍。"},
+ {c:"合成抵抗",q:"同じニクロム線を並列に4本つなぐと、全体の電気抵抗はもとの何倍？",o:["4倍","2倍","1/2倍","1/4倍"],a:3,e:"並列＝断面積の足し算なので抵抗1/4。"},
+ {c:"スイッチ",q:"導線だけで豆電球を飛びこえる近道（ショート）があると、その豆電球は？",o:["明るく光る","ふつうに光る","光らない","こわれる"],a:2,e:"電流は抵抗のない近道を通るので、飛ばされた豆電球は光らない。"},
+ {c:"スイッチ",q:"スイッチ回路で電流が流れるのは？",o:["切れたスイッチの先","入れた（閉じた）スイッチの道","全部の道","電池の中だけ"],a:1,e:"入れた（閉じた）スイッチの道だけ電流が通れる。"},
+ {c:"電流計",q:"電流計の正しいつなぎ方は？",o:["回路に直列","回路に並列","豆電球と置きかえる","電池に直接つなぐ"],a:0,e:"電流計は回路に直列につなぐ。並列はこわれる。"},
+];
+
+const boss=[
+ {c:"複合",q:"豆電球2個を並列、かん電池2個を直列にした回路。豆電球1個の明るさは基準（豆1・電池1）の何倍？",o:["1倍","1/2倍","2倍","4倍"],a:2,e:"電圧2倍÷（並列で抵抗1/2）＝全体4。各豆はその半分で2倍。最も明るいグループ。"},
+ {c:"複合",q:"豆電球2個を直列、かん電池2個を並列にした回路。豆電球1個の明るさは基準の何倍？",o:["1/2倍","1倍","2倍","1/4倍"],a:0,e:"電池並列で電圧1倍÷（直列で抵抗2倍）＝電流1/2。暗いグループ。"},
+ {c:"電池の持ち",q:"次のうち、かん電池が一番長持ちする回路は？",o:["豆1・電池1","豆2直列・電池2並列","豆2並列・電池2直列","豆1・電池2直列"],a:1,e:"豆2直列・電池2並列は電池1個から出る電流が1/4で最小→一番長持ち。"},
+ {c:"電池の持ち",q:"次のうち、かん電池が一番早く減る回路は？",o:["豆2並列・電池2直列","豆1・電池2並列","豆2直列・電池1","豆1・電池1"],a:0,e:"豆2並列・電池2直列は電池1個から出る電流が4で最大→一番早く減る。"},
+ {c:"ニクロム線計算",q:"0.1mm²・10cmで30mA。電流を50mAにしたい。太さ0.1mm²のまま長さを何cmにする？",o:["5cm","6cm","8cm","15cm"],a:1,e:"電流は長さに反比例。30×(10/L)=50→L=6cm。"},
+ {c:"ニクロム線計算",q:"0.1mm²・10cmで30mA。長さ20cmで電流を75mAにしたい。断面積は何mm²？",o:["0.2mm²","0.3mm²","0.5mm²","0.6mm²"],a:2,e:"長さ20cm・0.1mm²なら電流15mA。75mAは5倍→断面積も5倍で0.5mm²。"},
+ {c:"合成抵抗",q:"0.1mm²・10cm（抵抗1）を基準に、0.2mm²・10cmのニクロム線を直列に2本つなぐと全体の抵抗は基準の何倍？",o:["0.5倍","1倍","2倍","4倍"],a:1,e:"0.2mm²・10cm1本＝抵抗0.5。直列2本＝0.5×2＝1倍。"},
+ {c:"合成抵抗",q:"0.1mm²・10cm（抵抗1）を基準に、同じ線を並列4本にした。電池1個での電流は基準30mAの何倍で何mA？",o:["2倍・60mA","4倍・120mA","1/4倍・約8mA","変わらず30mA"],a:1,e:"並列4本で抵抗1/4→電流4倍＝120mA。"},
+ {c:"スイッチ",q:"豆電球に並列に導線（ショート）をつないだ。この豆電球の明るさは？",o:["明るくなる","変わらない","光らなくなる","点滅する"],a:2,e:"電流は抵抗のない導線を通るので、豆電球には流れず光らない。"},
+ {c:"電流計",q:"電流計を使うとき、いちばん最初につなぐーたんしは？",o:["50mA","500mA","5A（いちばん大きい）","どれでもよい"],a:2,e:"針が振り切れて壊れないよう、最初はいちばん大きい5Aから。"},
+];
+
+const days=[
+ {t:"Day 1：豆電球・かん電池のつなぎ方と明るさ",time:"60〜80分",tasks:[
+  {tag:"read",l:"「⚡全体像」タブを最初から最後まで読む。何を覚える単元か、ボリュームをつかむ（ブレーキを外す）"},
+  {tag:"read",l:"攻略マップ Stage 1〜4 を読む（豆電球の直列/並列、かん電池の直列/並列、基準1の電流、明るさ比べ）。「✋わかった！」を押す"},
+  {tag:"anki",l:"暗記カード ①豆電球のつなぎ方 ②かん電池のつなぎ方 ③基準1の電流まとめ を、答えを隠したまま自分で言う→「✋覚えた！」"},
+  {tag:"write",l:"ノートに「豆直列＝暗い／豆並列＝そのまま・電池早く減る」「電池直列＝明るい／電池並列＝長持ち」を書き写す"},
+  {tag:"quiz",l:"クイズで『豆電球のつなぎ方・かん電池のつなぎ方・電流の大きさ・明るさ比べ』の問題を解いてみる"},
+ ]},
+ {t:"Day 2：ニクロム線・電気抵抗の計算",time:"70〜90分",tasks:[
+  {tag:"review",l:"前日の暗記カード①②③をもう一度、隠したまま言えるか確認（5分）"},
+  {tag:"read",l:"攻略マップ Stage 5〜8 を読む（長さ・断面積と電流/抵抗、表からの計算、合成抵抗、置き換え）。「✋わかった！」を押す"},
+  {tag:"anki",l:"暗記カード ④長さ・断面積と電流・抵抗 ⑤合成と計算 を覚える→「✋覚えた！」"},
+  {tag:"write",l:"ノートに「電流＝基準×断面積の倍率×長さの逆倍率」と、30×2×(10/8)=75mA の計算を1問書いて練習"},
+  {tag:"quiz",l:"クイズを最後まで通しで解く。80%を目指す（1回でも80%でボーナス＋30%）"},
+ ]},
+ {t:"Day 3：スイッチ・電流計＋総復習＋ボス",time:"60〜80分",tasks:[
+  {tag:"read",l:"攻略マップ Stage 9〜10 を読む（スイッチで電流の通り道、電流計の使い方、立体回路）。「✋わかった！」を押す"},
+  {tag:"anki",l:"暗記カード ⑥電流計の使い方 ⑦ことば・ひっかけ を覚える。ひっかけ5つを声に出して言う"},
+  {tag:"boss",l:"ボス戦『ボルト大王』に挑戦！ 80%以上で討伐（＋20%）"},
+  {tag:"quiz",l:"問題集の、まちがえた問題だけ解き直す。特にニクロム線の計算と、スイッチで光る豆電球を選ぶ問題"},
+  {tag:"review",l:"ばっちり度100%になっているか確認。足りない所をもう一度"},
+ ]},
+];
+
+/* ===== 状態 ===== */
+const ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(UNIT+"_"+k))??d}catch(e){return d}};
+const save=(k,v)=>localStorage.setItem(UNIT+"_"+k,JSON.stringify(v));
+let st={
+  stages:ls("stages",Array(stages.length).fill(false)),
+  anki:ls("anki",Array(ankis.length).fill(false)),
+  quiz:ls("quiz",false),
+  boss:ls("boss",false),
+  days:ls("days",Array(days.length).fill(false)),
+};
+
+/* ===== 加点計算 ===== */
+function calc(){
+  let p=0;
+  const sN=st.stages.filter(Boolean).length; p+=sN*(30/stages.length);
+  const aN=st.anki.filter(Boolean).length;   p+=aN*(10/ankis.length);
+  if(st.quiz)p+=30;
+  if(st.boss)p+=20;
+  const dN=st.days.filter(Boolean).length;    p+=dN*(10/days.length);
+  return Math.min(100,Math.round(p));
+}
+function renderBar(){
+  const p=calc();
+  document.getElementById("barFill").style.width=p+"%";
+  document.getElementById("goalTxt").textContent=p>=100?"ばっちりマスター達成！🏆":("ゴールまであと "+(100-p)+"%");
+  document.getElementById("badges").innerHTML=
+    `<span class="b">🗺️ ${st.stages.filter(Boolean).length}/${stages.length}</span>`+
+    `<span class="b">📖 ${st.anki.filter(Boolean).length}/${ankis.length}</span>`+
+    `<span class="b">⚔️ ${st.quiz?"✓":"未"}</span>`+
+    `<span class="b">👑 ${st.boss?"✓":"未"}</span>`+
+    `<span class="b">📅 ${st.days.filter(Boolean).length}/${days.length}</span>`;
+  const h=document.getElementById("header");
+  if(p>=100&&!h.classList.contains("maxed")){h.classList.add("maxed");confetti();}
+}
+function gain(txt){
+  const t=document.createElement("div");t.className="toast";t.textContent=txt;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),1100);
+}
+function confetti(){
+  const cols=["#2563eb","#06b6d4","#22d3ee","#818cf8","#c084fc","#ffd93d","#4ade80"];
+  for(let i=0;i<80;i++){const c=document.createElement("div");c.className="confetti";
+    c.style.left=Math.random()*100+"vw";c.style.background=cols[i%cols.length];
+    c.style.animationDuration=(2+Math.random()*2)+"s";c.style.animationDelay=Math.random()+"s";
+    if(Math.random()>.5)c.style.borderRadius="50%";
+    document.body.appendChild(c);setTimeout(()=>c.remove(),4500);}
+}
+
+/* ===== タブ ===== */
+function goTab(i){
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.t==i));
+  document.querySelectorAll("section").forEach((s,k)=>s.classList.toggle("show",k==i));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.getElementById("nav").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(b)goTab(b.dataset.t);
+});
+
+/* ===== 攻略マップ ===== */
+function renderStages(){
+  const tagMap={anki:'<span class="tag t-anki">暗記</span>',calc:'<span class="tag t-calc">計算</span>',read:'<span class="tag t-read">読取</span>'};
+  document.getElementById("stages").innerHTML=stages.map((s,i)=>`
+   <div class="stage" data-n="${s.n}" id="stg${i}">
+    <div class="stage-card">
+     <div class="stage-head ${st.stages[i]?'done':''}" onclick="toggleStage(${i})">
+       <span class="stage-title">${tagMap[s.cat]}${s.title}</span>
+       <span class="stage-arrow">▶</span>
+     </div>
+     <div class="stage-body"><div class="stage-inner">
+       <div class="goal-ex">🎯 ${s.ex}</div>
+       ${s.steps.map(t=>`<div class="step">${t}</div>`).join("")}
+       <div class="hint">💡 ${s.hint}</div>
+       <div class="trap">⚠️ ${s.trap}</div>
+       <div class="kw">${s.kw.map(k=>`<span>${k}</span>`).join("")}</div>
+       <button class="wakatta ${st.stages[i]?'done':''}" id="wk${i}" onclick="event.stopPropagation();doneStage(${i})">${st.stages[i]?'✓ わかった':'✋ わかった！'}</button>
+     </div></div>
+    </div>
+   </div>`).join("");
+}
+function toggleStage(i){document.getElementById("stg"+i).classList.toggle("open");}
+function doneStage(i){
+  if(st.stages[i])return;
+  st.stages[i]=true;save("stages",st.stages);
+  document.getElementById("wk"+i).textContent="✓ わかった";
+  document.getElementById("wk"+i).classList.add("done");
+  document.querySelector("#stg"+i+" .stage-head").classList.add("done");
+  gain("+"+(30/stages.length).toFixed(1)+"%");renderBar();
+}
+
+/* ===== 暗記カード ===== */
+function renderAnki(){
+  document.getElementById("ankis").innerHTML=ankis.map((a,i)=>`
+   <div class="anki" id="ank${i}">
+     <div class="anki-head ${st.anki[i]?'done':''}" onclick="toggleAnki(${i})">
+       <span>${a.title}</span><span class="stage-arrow">▶</span>
+     </div>
+     <div class="anki-body"><div class="anki-inner">
+       ${a.html}
+       <button class="anki-done-btn ${st.anki[i]?'done':''}" id="ad${i}" onclick="event.stopPropagation();doneAnki(${i})">${st.anki[i]?'✓ 覚えた':'✋ 覚えた！'}</button>
+     </div></div>
+   </div>`).join("");
+  document.querySelectorAll(".hide").forEach(el=>{
+    el.addEventListener("click",ev=>{ev.stopPropagation();el.classList.toggle("show");});
+  });
+}
+function toggleAnki(i){document.getElementById("ank"+i).classList.toggle("open");}
+function doneAnki(i){
+  if(st.anki[i])return;
+  st.anki[i]=true;save("anki",st.anki);
+  document.getElementById("ad"+i).textContent="✓ 覚えた";
+  document.getElementById("ad"+i).classList.add("done");
+  document.querySelector("#ank"+i+" .anki-head").classList.add("done");
+  gain("+"+(10/ankis.length).toFixed(2)+"%");renderBar();
+}
+
+/* ===== クイズ ===== */
+const enemies=["👻","🐉","🦑","👾","🧌","🔌"];
+let qOrder=[],qIdx=0,qScore=0;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function renderQuiz(){
+  qOrder=shuffle([...Array(quiz.length).keys()]);qIdx=0;qScore=0;showQ();
+}
+function showQ(){
+  const box=document.getElementById("quizBox");
+  if(qIdx>=qOrder.length){
+    const pct=Math.round(qScore/quiz.length*100);
+    let bonus="";
+    if(pct>=80&&!st.quiz){st.quiz=true;save("quiz",st.quiz);gain("+30%");bonus="<p style='color:#16a34a;font-weight:800'>🎉 80%達成ボーナス +30%！</p>";renderBar();}
+    box.innerHTML=`<div class="result"><div class="score">${pct}%</div>
+      <p>${quiz.length}問中 ${qScore}問正解！</p>${bonus}
+      ${pct<80?"<p style='color:#b91c1c;font-size:.82rem'>80%以上でボーナス＋30%。もう一度挑戦しよう！</p>":""}
+      <button class="btn-start" onclick="renderQuiz()">🔄 もう一度</button></div>`;
+    return;
+  }
+  const qi=qOrder[qIdx],qd=quiz[qi];
+  box.innerHTML=`
+   <div class="enemy"><span class="face" id="qface">${enemies[qIdx%enemies.length]}</span>
+     <div class="ehp"><i style="width:${100-qIdx/qOrder.length*100}%"></i></div>
+     <div class="name">のこり ${qOrder.length-qIdx} 体</div></div>
+   <span class="qcat">${qd.c}</span>
+   <div class="qtext">${qd.q}</div>
+   <div class="opts" id="opts">${qd.o.map((o,k)=>`<button class="opt" onclick="answer(${k})">${o}</button>`).join("")}</div>
+   <div id="qa"></div>
+   <div class="qnav"><span class="qprog">${qIdx+1} / ${qOrder.length}　正解 ${qScore}</span></div>`;
+}
+function answer(k){
+  const qi=qOrder[qIdx],qd=quiz[qi];
+  document.querySelectorAll("#opts .opt").forEach((b,idx)=>{
+    b.disabled=true;
+    if(idx===qd.a)b.classList.add("correct");
+    if(idx===k&&k!==qd.a)b.classList.add("wrong");
+  });
+  if(k===qd.a){qScore++;const f=document.getElementById("qface");f.classList.add("hit");setTimeout(()=>f.classList.remove("hit"),400);}
+  document.getElementById("qa").innerHTML=`<div class="expl"><b>${k===qd.a?'⭕ 正解！':'❌ 正解は「'+qd.o[qd.a]+'」'}</b><br>${qd.e}</div>
+    <div class="qnav"><span class="qprog">${qIdx+1} / ${qOrder.length}　正解 ${qScore}</span>
+    <button class="btn-next" onclick="qIdx++;showQ()">${qIdx+1>=qOrder.length?'結果を見る':'次へ →'}</button></div>`;
+}
+
+/* ===== ボス ===== */
+let bOrder=[],bIdx=0,bScore=0,bStarted=false;
+function renderBoss(){
+  const box=document.getElementById("bossBox");
+  box.innerHTML=`<div class="start-screen">
+    <div class="boss-face">⚡👑</div>
+    <h2 class="sec" style="justify-content:center">ボルト大王に挑戦</h2>
+    <p class="lead">電流ぜんぶの総合テスト（全${boss.length}問）。明るさ・電池の持ち・ニクロム線の計算・合成抵抗・スイッチ。<br>80%以上で討伐成功＝ばっちり度＋20%！</p>
+    <button class="btn-start" onclick="startBoss()">⚔️ 挑戦する</button>
+   </div>`;
+}
+function startBoss(){bOrder=shuffle([...Array(boss.length).keys()]);bIdx=0;bScore=0;bStarted=true;showB();}
+function showB(){
+  const box=document.getElementById("bossBox");
+  if(bIdx>=bOrder.length){
+    const pct=Math.round(bScore/boss.length*100);
+    let bonus="";
+    if(pct>=80&&!st.boss){st.boss=true;save("boss",st.boss);gain("+20%");bonus="<p style='color:#16a34a;font-weight:800'>🎉 討伐成功ボーナス +20%！</p>";renderBar();}
+    box.innerHTML=`<div class="result"><div class="boss-face">${pct>=80?"💥⚡":"👑"}</div>
+      <div class="score">${pct}%</div><p>${boss.length}問中 ${bScore}問正解！</p>
+      ${pct>=80?"<p style='font-weight:800;color:#16a34a'>ボルト大王 討伐成功！</p>":"<p style='color:#b91c1c;font-size:.82rem'>あと一歩！80%で討伐成功。</p>"}${bonus}
+      <button class="btn-start" onclick="renderBoss()">🔄 もう一度挑戦</button></div>`;
+    return;
+  }
+  const qi=bOrder[bIdx],qd=boss[qi];
+  box.innerHTML=`
+   <div class="enemy"><span class="boss-face" id="bface">⚡👑</span>
+     <div class="ehp" style="max-width:300px"><i style="width:${100-bScore/boss.length*100}%"></i></div>
+     <div class="name">ボルト大王 HP</div></div>
+   <span class="qcat" style="background:#cc3333">${qd.c}</span>
+   <div class="qtext">${qd.q}</div>
+   <div class="opts" id="bopts">${qd.o.map((o,k)=>`<button class="opt" onclick="banswer(${k})">${o}</button>`).join("")}</div>
+   <div id="ba"></div>
+   <div class="qnav"><span class="qprog">${bIdx+1} / ${bOrder.length}　正解 ${bScore}</span></div>`;
+}
+function banswer(k){
+  const qi=bOrder[bIdx],qd=boss[qi];
+  document.querySelectorAll("#bopts .opt").forEach((b,idx)=>{
+    b.disabled=true;
+    if(idx===qd.a)b.classList.add("correct");
+    if(idx===k&&k!==qd.a)b.classList.add("wrong");
+  });
+  if(k===qd.a){bScore++;const f=document.getElementById("bface");f.classList.add("hit");setTimeout(()=>f.classList.remove("hit"),400);}
+  document.getElementById("ba").innerHTML=`<div class="expl"><b>${k===qd.a?'⭕ 正解！':'❌ 正解は「'+qd.o[qd.a]+'」'}</b><br>${qd.e}</div>
+    <div class="qnav"><span class="qprog">${bIdx+1} / ${bOrder.length}　正解 ${bScore}</span>
+    <button class="btn-next" onclick="bIdx++;showB()">${bIdx+1>=bOrder.length?'結果を見る':'次へ →'}</button></div>`;
+}
+
+/* ===== 3日プラン ===== */
+function renderPlan(){
+  document.getElementById("days").innerHTML=days.map((d,i)=>`
+   <div class="day" id="day${i}">
+     <div class="day-head ${st.days[i]?'done':''}" onclick="toggleDay(${i})">
+       <span class="d-title">${d.t}</span>
+       <span class="d-time">⏱ ${d.time}</span>
+     </div>
+     <div class="day-body"><div class="day-inner">
+       ${d.tasks.map((t,k)=>`<label class="task"><input type="checkbox" ${ls("tasks_"+i,[])[k]?'checked':''} onchange="checkTask(${i},${k},this.checked)">
+         <span class="tt"><span class="ttag tag-${t.tag}">${({read:'読む',write:'書く',quiz:'解く',review:'復習',boss:'ボス',anki:'暗記'})[t.tag]}</span>${t.l}</span></label>`).join("")}
+       <button class="day-clear ${st.days[i]?'done':''}" id="dc${i}" onclick="event.stopPropagation();clearDay(${i})">${st.days[i]?'✓ クリア済み':'この日をクリア！'}</button>
+     </div></div>
+   </div>`).join("");
+  renderDayProg();
+}
+function toggleDay(i){document.getElementById("day"+i).classList.toggle("open");}
+function checkTask(i,k,v){const arr=ls("tasks_"+i,[]);arr[k]=v;save("tasks_"+i,arr);}
+function clearDay(i){
+  if(st.days[i])return;
+  st.days[i]=true;save("days",st.days);
+  document.getElementById("dc"+i).textContent="✓ クリア済み";
+  document.getElementById("dc"+i).classList.add("done");
+  document.querySelector("#day"+i+" .day-head").classList.add("done");
+  gain("+"+(10/days.length).toFixed(1)+"%");renderBar();renderDayProg();
+}
+function renderDayProg(){
+  const n=st.days.filter(Boolean).length;
+  document.getElementById("dpTxt").textContent=n+"/"+days.length+" 日クリア";
+  document.getElementById("dpBar").style.width=(n/days.length*100)+"%";
+}
+
+/* ===== パーティクル ===== */
+function makeParticles(){
+  const p=document.getElementById("particles");
+  const cols=["#22d3ee","#38bdf8","#818cf8","#c084fc","#2563eb"];
+  for(let i=0;i<22;i++){const s=document.createElement("span");
+    s.style.left=Math.random()*100+"vw";
+    s.style.animationDuration=(7+Math.random()*9)+"s";
+    s.style.animationDelay=(Math.random()*9)+"s";
+    const sz=5+Math.random()*8;s.style.width=sz+"px";s.style.height=sz+"px";
+    s.style.background=`radial-gradient(circle,#fff,${cols[i%cols.length]}00)`;
+    s.style.boxShadow=`0 0 8px ${cols[i%cols.length]}`;
+    p.appendChild(s);}
+}
+
+/* ===== init ===== */
+function init(){
+  makeParticles();
+  renderStages();
+  renderAnki();
+  renderQuiz();
+  renderBoss();
+  renderPlan();
+  renderBar();
+}
+init();
+</script>
+</body>
+</html>
+</parameter>
+</invoke>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>電流の大きさシミュレーター</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a2a4a;--accent:#2563eb;--card:#fff;--line:#dde6f3;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans JP',sans-serif;color:var(--ink);background:linear-gradient(165deg,#eaf3ff,#f1ecff);min-height:100vh;padding:14px 12px 60px;line-height:1.6;}
+.wrap{max-width:780px;margin:0 auto;}
+h1{font-size:1.25rem;font-weight:900;text-align:center;margin-bottom:4px;}
+.sub{text-align:center;font-size:.75rem;color:#5a6e95;margin-bottom:12px;}
+.help{background:#fff;border:1px dashed var(--accent);border-radius:12px;padding:10px 14px;font-size:.78rem;color:#3a4a6e;margin-bottom:14px;}
+.help b{color:var(--accent);}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.tabs button{font-family:inherit;flex:1 0 auto;font-weight:700;font-size:.85rem;background:#fff;color:#5a6e95;border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;min-width:62px;}
+.tabs button.act{background:linear-gradient(120deg,#2563eb,#06b6d4);color:#fff;border-color:transparent;box-shadow:0 3px 9px rgba(37,99,235,.3);}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 4px 14px rgba(56,130,220,.1);}
+.stage-title{font-weight:900;font-size:1.05rem;margin-bottom:2px;color:#0e6fd1;}
+.stage-desc{font-size:.78rem;color:#5a6e95;margin-bottom:8px;}
+svg{width:100%;height:auto;display:block;background:#fbfdff;border:1px solid var(--line);border-radius:12px;}
+.info{margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+@media (max-width:520px){.info{grid-template-columns:1fr;}}
+.box{background:linear-gradient(135deg,#e8f1ff,#f1eaff);border:1px solid var(--line);border-radius:10px;padding:9px 11px;}
+.box .l{font-size:.7rem;color:#5a6e95;}
+.box .n{font-size:1.4rem;font-weight:900;color:#0e6fd1;line-height:1.2;}
+.box .n.bright{color:#dc2626;}
+.box .n.dim{color:#94a3b8;}
+.legend{margin-top:8px;font-size:.74rem;color:#444;background:#fff9ec;border:1px solid #f3e2c4;border-radius:9px;padding:7px 10px;}
+.legend b{color:#c98a16;}
+.bulb-glow{animation:glow 1.4s ease-in-out infinite;}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 4px #fde047);}50%{filter:drop-shadow(0 0 18px #fbbf24);}}
+.bulb-glow-strong{animation:glowS 1s ease-in-out infinite;}
+@keyframes glowS{0%,100%{filter:drop-shadow(0 0 6px #fde047);}50%{filter:drop-shadow(0 0 28px #f97316);}}
+.bulb-dim{animation:dim 2s ease-in-out infinite;}
+@keyframes dim{0%,100%{filter:drop-shadow(0 0 2px #94a3b8);}50%{filter:drop-shadow(0 0 6px #cbd5e1);}}
+.flow{stroke-dasharray:6 4;animation:flow 1.2s linear infinite;}
+@keyframes flow{to{stroke-dashoffset:-30;}}
+.flow-strong{stroke-dasharray:6 4;animation:flowS .6s linear infinite;}
+@keyframes flowS{to{stroke-dashoffset:-30;}}
+.flow-dim{stroke-dasharray:6 4;animation:flowD 2.4s linear infinite;opacity:.5;}
+@keyframes flowD{to{stroke-dashoffset:-30;}}
+.summary{margin-top:14px;background:#eef7f1;border:1px solid #cfe9da;border-radius:12px;padding:11px 14px;font-size:.82rem;}
+.summary b{color:#1f6f4a;}
+.compare{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 14px;}
+.compare h3{font-size:.88rem;margin-bottom:6px;color:#0e6fd1;}
+table{width:100%;border-collapse:collapse;font-size:.74rem;margin-top:4px;}
+th,td{border:1px solid var(--line);padding:4px 5px;text-align:center;}
+th{background:#dceaff;}
+td.now{background:#fde68a;font-weight:900;}
+</style>
+</head>
+<body>
+<div style="text-align:center;margin:8px 0 14px;font-size:.78rem"><a href="電流_攻略.html" style="display:inline-block;background:#fff;color:#0e6fd1;border:1.5px solid #dde6f3;border-radius:8px;padding:6px 14px;text-decoration:none;font-weight:700" class="hub-link">⚡ 攻略ツールに戻る</a></div>
+<div class="wrap">
+<h1>⚡ 電流の大きさシミュレーター</h1>
+<p class="sub">ア〜サを切り替えて、豆電球の明るさ・電流・電池の持ちを目で見る</p>
+
+<div class="help">
+<b>使い方：</b>ボタンで回路を切り替えてね。<br>
+🟡光ってる豆電球＝光る・<span style="color:#dc2626;font-weight:700">赤数字</span>＝基準より明るい・<span style="color:#94a3b8;font-weight:700">グレー</span>＝暗い／光らない。<br>
+矢印の<b>動きの速さ</b>＝電流の大きさ。動きが速い＝電流大きい＝明るい。
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div id="stage"></div>
+
+<div class="compare">
+<h3>📊 全部の早見表（今選んでる回路に黄色マーカー）</h3>
+<table id="cmpTable"></table>
+</div>
+
+</div>
+
+<script>
+const C = [
+ {k:"ア", title:"豆1個・電池1個", desc:"基準。これを1として全部を比べる。",
+  bulbA:1, total:1, life:1, comment:"基準（明るさ1）。"},
+ {k:"イ", title:"豆1個・電池2個（直列）", desc:"電池の押す力が2倍。電流も2倍で明るい。",
+  bulbA:2, total:2, life:2, comment:"電池直列で電圧2倍→電流2倍→明るい。"},
+ {k:"ウ", title:"豆1個・電池2個（並列）", desc:"電池の押す力は1個と同じ。明るさは変わらない。",
+  bulbA:1, total:1, lifePer:0.5, life:0.5, comment:"電池並列＝電圧1倍なので明るさそのまま。1個あたり0.5でラク→長持ち。"},
+ {k:"エ", title:"豆2個（直列）・電池1個", desc:"豆を直列にすると電流を分け合うので暗い。",
+  bulbA:0.5, bulbB:0.5, total:0.5, life:0.5, comment:"豆直列で抵抗2倍→電流1/2。両方とも暗い。電池はラク。"},
+ {k:"オ", title:"豆2個（並列）・電池1個", desc:"並列だから1個ずつは変わらない。でも電池からは2倍出る。",
+  bulbA:1, bulbB:1, total:2, life:2, comment:"並列なので各豆は1のまま。でも電池からは合計2→早く減る。"},
+ {k:"カ", title:"豆2個（直列）・電池2個（直列）", desc:"電圧2倍・抵抗2倍。打ち消し合って基準と同じ。",
+  bulbA:1, bulbB:1, total:1, life:1, comment:"2÷2＝1。各豆は基準と同じ明るさ。"},
+ {k:"キ", title:"豆2個（直列）・電池2個（並列）", desc:"電圧1倍・抵抗2倍。電流半分で暗い。",
+  bulbA:0.5, bulbB:0.5, total:0.5, lifePer:0.25, life:1, comment:"電池1個あたり0.25→とても長持ち。明るさは1/2。"},
+ {k:"ク", title:"豆2個（並列）・電池2個（直列）", desc:"電圧2倍・抵抗1/2。電流4倍で最強に明るい。",
+  bulbA:2, bulbB:2, total:4, life:4, comment:"一番明るいグループ（明るさ2）。電池は一番早く減る。"},
+ {k:"ケ", title:"豆2個（並列）・電池2個（並列）", desc:"オと同じ明るさ。電池は分担で長持ち。",
+  bulbA:1, bulbB:1, total:2, lifePer:1, life:2, comment:"各豆1（基準と同じ）。電池1個あたり1で長持ち。"},
+ {k:"コ", title:"豆3個（並列）・電池1個", desc:"並列なので各豆は1のまま。電池からは3出る。",
+  bulbA:1, bulbB:1, bulbC:1, total:3, life:3, comment:"各豆1。電池からは合計3で一番速く減る系。"},
+ {k:"サ", title:"豆2個（直列）・電池3個（直列）", desc:"電圧3倍・抵抗2倍。1.5倍の明るさ。",
+  bulbA:1.5, bulbB:1.5, total:1.5, life:1.5, comment:"3÷2＝1.5。各豆は基準より明るい。"},
+];
+
+let cur = 0;
+
+function bulb(x, y, lit, level){
+  // level: 0=光らない/dim, 1=基準, 2=明るい, 3=最強
+  const cls = !lit ? "bulb-dim" : (level>=2 ? "bulb-glow-strong" : "bulb-glow");
+  const fill = !lit ? "#cbd5e1" : (level>=2 ? "#facc15" : "#fde68a");
+  const stroke = !lit ? "#94a3b8" : "#ca8a04";
+  return `
+    <g class="${cls}" transform="translate(${x},${y})">
+      <circle r="22" fill="${fill}" stroke="${stroke}" stroke-width="2.5"/>
+      <path d="M -10,-3 L 0,7 L 10,-3" stroke="${stroke}" stroke-width="2.5" fill="none"/>
+      <line x1="-22" y1="0" x2="-30" y2="0" stroke="#444" stroke-width="2"/>
+      <line x1="22" y1="0" x2="30" y2="0" stroke="#444" stroke-width="2"/>
+    </g>`;
+}
+function battery(x, y, n=1){
+  // 電池記号 n個直列
+  let s = '';
+  const w = 36;
+  for(let i=0;i<n;i++){
+    const cx = x + i*w - (n-1)*w/2;
+    s += `
+      <line x1="${cx-8}" y1="${y-12}" x2="${cx-8}" y2="${y+12}" stroke="#222" stroke-width="3"/>
+      <line x1="${cx+4}" y1="${y-7}" x2="${cx+4}" y2="${y+7}" stroke="#222" stroke-width="3"/>`;
+  }
+  // 両端の引き出し線
+  const lx = x - (n-1)*w/2 - 8;
+  const rx = x + (n-1)*w/2 + 4;
+  return s;
+}
+function wire(d, cls){
+  return `<path d="${d}" stroke="#1e40af" stroke-width="3" fill="none" class="${cls||''}" stroke-linecap="round"/>`;
+}
+
+// 各回路の描画関数
+function renderCircuit(k){
+  const w = 560, h = 280;
+  const cx = w/2;
+  // 共通の枠は省略。各k別に。
+  const c = C.find(x=>x.k===k);
+  const speedClass = c.total>=2 ? "flow-strong" : (c.total>=1 ? "flow" : "flow-dim");
+
+  if(k==="ア"){
+    return svg(w,h, `
+      ${wire(`M 100,200 L 100,80 L ${cx-30},80`, speedClass)}
+      ${wire(`M ${cx+30},80 L 460,80 L 460,200 L 100,200`, speedClass)}
+      ${bulb(cx,80, true, 1)}
+      ${batteryAt(280,200)}
+    `);
+  }
+  if(k==="イ"){
+    return svg(w,h, `
+      ${wire(`M 80,200 L 80,80 L ${cx-30},80`, speedClass)}
+      ${wire(`M ${cx+30},80 L 480,80 L 480,200 L 80,200`, speedClass)}
+      ${bulb(cx,80, true, 2)}
+      ${batteryAt2(280,200)}
+    `);
+  }
+  if(k==="ウ"){
+    // 電池並列
+    return svg(w,h, `
+      ${wire(`M 100,200 L 100,80 L ${cx-30},80`, speedClass)}
+      ${wire(`M ${cx+30},80 L 460,80 L 460,200`, speedClass)}
+      ${wire(`M 460,200 L 100,200`, speedClass)}
+      ${wire(`M 200,200 L 200,240 L 360,240 L 360,200`, speedClass)}
+      ${bulb(cx,80, true, 1)}
+      ${batteryAtSingle(220,200)}
+      ${batteryAtSingle(340,240)}
+    `);
+  }
+  if(k==="エ"){
+    // 豆2個直列
+    return svg(w,h, `
+      ${wire(`M 100,200 L 100,80 L 200,80`, speedClass)}
+      ${wire(`M 240,80 L 320,80`, speedClass)}
+      ${wire(`M 360,80 L 460,80 L 460,200 L 100,200`, speedClass)}
+      ${bulb(220,80, true, 0)}
+      ${bulb(340,80, true, 0)}
+      ${batteryAt(280,200)}
+    `);
+  }
+  if(k==="オ"){
+    // 豆2個並列・電池1（はしご型）
+    return svg(w,h, `
+      ${wire(`M 140,200 L 140,80 L 280,80`, speedClass)}
+      ${wire(`M 280,80 L 280,160`, speedClass)}
+      ${wire(`M 320,80 L 460,80 L 460,200`, speedClass)}
+      ${wire(`M 320,160 L 460,160`, speedClass)}
+      ${wire(`M 280,160 L 320,160`, speedClass)}
+      ${wire(`M 460,200 L 140,200`, speedClass)}
+      ${bulb(300,80, true, 1)}
+      ${bulb(300,160, true, 1)}
+      ${batteryAt(280,200)}
+    `);
+  }
+  if(k==="カ"){
+    return svg(w,h, `
+      ${wire(`M 80,210 L 80,80 L 200,80`, speedClass)}
+      ${wire(`M 240,80 L 320,80`, speedClass)}
+      ${wire(`M 360,80 L 480,80 L 480,210 L 80,210`, speedClass)}
+      ${bulb(220,80, true, 1)}
+      ${bulb(340,80, true, 1)}
+      ${batteryAt2(280,210)}
+    `);
+  }
+  if(k==="キ"){
+    // 豆2直列＋電池2並列
+    return svg(w,h, `
+      ${wire(`M 80,210 L 80,80 L 200,80`, speedClass)}
+      ${wire(`M 240,80 L 320,80`, speedClass)}
+      ${wire(`M 360,80 L 480,80 L 480,210 L 80,210`, speedClass)}
+      ${wire(`M 200,210 L 200,250 L 360,250 L 360,210`, speedClass)}
+      ${bulb(220,80, true, 0)}
+      ${bulb(340,80, true, 0)}
+      ${batteryAtSingle(220,210)}
+      ${batteryAtSingle(340,250)}
+    `);
+  }
+  if(k==="ク"){
+    // 豆2並列＋電池2直列（最強）はしご型
+    return svg(w,h, `
+      ${wire(`M 140,200 L 140,80 L 280,80`, speedClass)}
+      ${wire(`M 280,80 L 280,160`, speedClass)}
+      ${wire(`M 320,80 L 460,80 L 460,200`, speedClass)}
+      ${wire(`M 320,160 L 460,160`, speedClass)}
+      ${wire(`M 280,160 L 320,160`, speedClass)}
+      ${wire(`M 460,200 L 140,200`, speedClass)}
+      ${bulb(300,80, true, 3)}
+      ${bulb(300,160, true, 3)}
+      ${batteryAt2(300,200)}
+    `);
+  }
+  if(k==="ケ"){
+    // 豆2並列＋電池2並列 はしご型
+    return svg(w,h, `
+      ${wire(`M 140,200 L 140,80 L 280,80`, speedClass)}
+      ${wire(`M 280,80 L 280,160`, speedClass)}
+      ${wire(`M 320,80 L 460,80 L 460,200`, speedClass)}
+      ${wire(`M 320,160 L 460,160`, speedClass)}
+      ${wire(`M 280,160 L 320,160`, speedClass)}
+      ${wire(`M 460,200 L 140,200`, speedClass)}
+      ${wire(`M 220,200 L 220,240 L 380,240 L 380,200`, speedClass)}
+      ${bulb(300,80, true, 1)}
+      ${bulb(300,160, true, 1)}
+      ${batteryAtSingle(240,200)}
+      ${batteryAtSingle(360,240)}
+    `);
+  }
+  if(k==="コ"){
+    // 豆3並列 はしご型
+    return svg(w,h, `
+      ${wire(`M 140,230 L 140,60 L 280,60`, speedClass)}
+      ${wire(`M 280,60 L 280,130`, speedClass)}
+      ${wire(`M 280,130 L 280,200`, speedClass)}
+      ${wire(`M 320,60 L 460,60 L 460,230`, speedClass)}
+      ${wire(`M 320,130 L 460,130`, speedClass)}
+      ${wire(`M 320,200 L 460,200`, speedClass)}
+      ${wire(`M 280,130 L 320,130`, speedClass)}
+      ${wire(`M 280,200 L 320,200`, speedClass)}
+      ${wire(`M 460,230 L 140,230`, speedClass)}
+      ${bulb(300,60, true, 1)}
+      ${bulb(300,130, true, 1)}
+      ${bulb(300,200, true, 1)}
+      ${batteryAt(280,230)}
+    `);
+  }
+  if(k==="サ"){
+    // 豆2直列＋電池3直列
+    return svg(w,h, `
+      ${wire(`M 60,210 L 60,80 L 200,80`, speedClass)}
+      ${wire(`M 240,80 L 320,80`, speedClass)}
+      ${wire(`M 360,80 L 500,80 L 500,210 L 60,210`, speedClass)}
+      ${bulb(220,80, true, 2)}
+      ${bulb(340,80, true, 2)}
+      ${batteryAt3(280,210)}
+    `);
+  }
+  return svg(w,h,'');
+}
+function svg(w,h,body){return `<svg viewBox="0 0 ${w} ${h}">${body}</svg>`;}
+
+function batteryAt(x,y){
+  // 1個
+  return `
+    <line x1="${x-8}" y1="${y-12}" x2="${x-8}" y2="${y+12}" stroke="#222" stroke-width="3"/>
+    <line x1="${x+4}" y1="${y-7}" x2="${x+4}" y2="${y+7}" stroke="#222" stroke-width="3"/>`;
+}
+function batteryAtSingle(x,y){return batteryAt(x,y);}
+function batteryAt2(x,y){
+  // 2個直列 - 左右に配置
+  return `
+    ${batteryAt(x-20,y)}
+    ${batteryAt(x+20,y)}`;
+}
+function batteryAt3(x,y){
+  return `
+    ${batteryAt(x-32,y)}
+    ${batteryAt(x,y)}
+    ${batteryAt(x+32,y)}`;
+}
+
+function renderStage(){
+  const c = C[cur];
+  const bulbs = ['bulbA','bulbB','bulbC'].map(k=>c[k]).filter(v=>v!==undefined);
+  const bulbStr = bulbs.map(v=>v.toString()).join(' ／ ');
+  const per = c.lifePer !== undefined ? c.lifePer : c.total;
+  const lifeJudge = per >= 2 ? "<span style='color:#dc2626'>早く減る</span>" : (per <= 0.5 ? "<span style='color:#16a34a'>長持ち</span>" : "ふつう");
+
+  document.getElementById('stage').innerHTML = `
+   <div class="stage">
+    <div class="stage-title">${c.k}：${c.title}</div>
+    <div class="stage-desc">${c.desc}</div>
+    ${renderCircuit(c.k)}
+    <div class="info">
+      <div class="box"><div class="l">🔆 豆電球1個の明るさ（電流）</div><div class="n ${c.bulbA>=2?'bright':(c.bulbA<=0.5?'dim':'')}">${bulbStr}</div></div>
+      <div class="box"><div class="l">🔋 電池の合計の電流</div><div class="n ${c.total>=2?'bright':(c.total<=0.5?'dim':'')}">${c.total}</div></div>
+      <div class="box"><div class="l">🔋 電池1個あたりの電流</div><div class="n ${per>=2?'bright':(per<=0.5?'dim':'')}">${per}</div></div>
+    </div>
+    <div class="legend"><b>💡</b> ${c.comment}<br>電池の持ち：${lifeJudge}（電池1個あたり${per}）</div>
+   </div>`;
+  renderTable();
+}
+function renderTable(){
+  const head = `<tr><th>記号</th><th>豆1個の明るさ</th><th>電池から</th><th>結論</th></tr>`;
+  const rows = C.map((c,i)=>{
+    const bulbs = ['bulbA','bulbB','bulbC'].map(k=>c[k]).filter(v=>v!==undefined);
+    const bulbStr = bulbs.map(v=>v.toString()).join('・');
+    const r = i===cur?'class="now"':'';
+    const verdict = c.bulbA>=2 ? '🔥明るい' : (c.bulbA<=0.5 ? '💧暗い' : '基準');
+    return `<tr ${r}><td ${r}>${c.k}</td><td ${r}>${bulbStr}</td><td ${r}>${c.total}</td><td ${r}>${verdict}</td></tr>`;
+  }).join('');
+  document.getElementById('cmpTable').innerHTML = head + rows;
+}
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = C.map((c,i)=>
+    `<button class="${i===cur?'act':''}" onclick="select(${i})">${c.k}</button>`).join('');
+}
+function select(i){ cur=i; renderTabs(); renderStage(); }
+renderTabs(); renderStage();
+</script>
+</body>
+</html>
