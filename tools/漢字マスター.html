@@ -271,15 +271,16 @@ body::before{
   <!-- HOME -->
   <div class="tab active" id="tab-home">
     <div class="total-stats">
-      <div class="ts"><div class="ts-num gold" id="ts-master">0</div><div class="ts-label">マスター</div></div>
+      <div class="ts"><div class="ts-num gold" id="ts-master">0</div><div class="ts-label">書ける</div></div>
       <div class="ts"><div class="ts-num blue" id="ts-total">208</div><div class="ts-label">ぜんぶ</div></div>
-      <div class="ts"><div class="ts-num gray" id="ts-pct">0%</div><div class="ts-label">達成率</div></div>
+      <div class="ts"><div class="ts-num" id="ts-pct" style="color:#3fa96a">+0</div><div class="ts-label">この1週間で<br>書けるようになった</div></div>
     </div>
+    <div id="ts-star" style="text-align:center;font-size:0.75em;color:#8fa8bc;margin:-6px 0 12px;"></div>
     <div class="daily-card" onclick="startDailyReview()">
       <div class="daily-icon">🔥</div>
       <div class="daily-info">
         <div class="daily-title">今日の復習</div>
-        <div class="daily-desc" id="daily-desc">テストで落とした漢字＋わすれてそうな漢字を10語</div>
+        <div class="daily-desc" id="daily-desc">テストで落とした漢字＋そろそろわすれそうな漢字を10語</div>
       </div>
       <div class="daily-go">スタート</div>
     </div>
@@ -1557,6 +1558,24 @@ function loadState(){
   saveState();
 }
 function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+
+// ===== くりかえし出題（間隔をのばす）=====
+// 正解するたびに、次に出すまでを 1日→3日→1週間→3週間→2か月 とのばす。まちがえたら次の日にもう一度
+const INTERVAL_DAYS=[1,3,7,21,60];
+// 2026-09-30より前の記録には last/step/due がないので、今ある数字からだいたいで作る
+function ensureSched(rec){
+  if(!rec||rec.step!==undefined)return rec;
+  if(rec.total>0){
+    rec.last=rec.mastered||(rec.correct>0&&rec.correct>=rec.wrong);
+    rec.step=rec.mastered?3:(rec.last?Math.min(rec.correct,2):0);
+    rec.due=(rec.lastSeen||Date.now())+INTERVAL_DAYS[rec.step]*86400000;
+  }else{
+    rec.step=0;
+  }
+  return rec;
+}
+// 「書ける」＝最後に出たとき正解した語
+function canWrite(rec){return !!(rec&&ensureSched(rec).last);}
 function getLevel(xp){
   let lv=1,need=100;
   while(xp>=need){xp-=need;lv++;need=Math.floor(100+lv*20);}
@@ -1583,15 +1602,16 @@ function updateHeader(){
 // ===== STATS HELPERS =====
 function getRoundStats(kai){
   const words=ROUNDS[kai].words;
-  let mastered=0,learning=0,yet=0;
+  let mastered=0,learning=0,yet=0,ok=0;
   for(const w of words){
     const rec=state.records[kai+'_'+w.k];
     if(!rec){yet++;continue;}
+    if(canWrite(rec))ok++;
     if(rec.mastered)mastered++;
     else if(rec.total>0)learning++;
     else yet++;
   }
-  return{mastered,learning,yet,total:words.length};
+  return{mastered,learning,yet,ok,total:words.length};
 }
 function getTotalStats(){
   let mastered=0,total=0,roundsCleared=0,maxStreak=0,totalPractice=0;
@@ -1630,16 +1650,30 @@ function goTab(name){
 // ===== HOME =====
 function renderHome(){
   const ts=getTotalStats();
-  document.getElementById('ts-master').textContent=ts.totalMastered;
+  const now=Date.now(),WEEK=7*86400000;
+  let okAll=0,okWeek=0,dueCount=0;
+  for(const[kai,data]of Object.entries(ROUNDS)){
+    for(const w of data.words){
+      const rec=state.records[kai+'_'+w.k];
+      if(!rec)continue;
+      if(canWrite(rec)){okAll++;if(rec.okAt&&now-rec.okAt<WEEK)okWeek++;}
+      if(rec.total>0&&rec.due&&rec.due<=now)dueCount++;
+    }
+  }
+  document.getElementById('ts-master').textContent=okAll;
   document.getElementById('ts-total').textContent=ts.totalWords;
-  document.getElementById('ts-pct').textContent=Math.round(ts.totalMastered/ts.totalWords*100)+'%';
+  document.getElementById('ts-pct').textContent='+'+okWeek;
+  document.getElementById('ts-star').textContent='⭐マスター（何回も正解した漢字）：'+ts.totalMastered+'語';
+  document.getElementById('daily-desc').textContent=dueCount>0
+    ?'そろそろ出したい漢字が'+dueCount+'語あるよ。今日はその中から10語'
+    :'テストで落とした漢字＋そろそろわすれそうな漢字を10語';
 
   const list=document.getElementById('round-list');
   list.innerHTML='';
   for(const[kai,data]of Object.entries(ROUNDS)){
     const s=getRoundStats(kai);
-    const pct=Math.round(s.mastered/s.total*100);
-    const completed=s.mastered===s.total;
+    const pct=Math.round(s.ok/s.total*100);
+    const completed=s.ok===s.total;
     const card=document.createElement('div');
     card.className='round-card'+(completed?' completed':'');
     card.onclick=()=>{currentRound=parseInt(kai);goTab('write');};
@@ -1650,7 +1684,7 @@ function renderHome(){
         <div class="round-count">${s.total}語</div>
         <div class="round-progress"><div class="round-progress-bar${completed?' full':''}" style="width:${pct}%"></div></div>
       </div>
-      <div class="round-stars"><div class="num${completed?' done':''}">${s.mastered}</div>/${s.total}</div>
+      <div class="round-stars"><div class="num${completed?' done':''}">${s.ok}</div>/${s.total}</div>
     `;
     list.appendChild(card);
   }
@@ -1777,8 +1811,10 @@ function judge(correct){
   const q=pState.qs[pState.idx];
   const key=(q._kai!==undefined?q._kai:currentRound)+'_'+q.k;
   const rec=state.records[key]||(state.records[key]={correct:0,wrong:0,total:0,mastered:false});
+  ensureSched(rec);
+  const now=Date.now();
   rec.total++;
-  rec.lastSeen=Date.now();
+  rec.lastSeen=now;
 
   if(correct){
     pState.ok++;pState.streak++;
@@ -1786,12 +1822,22 @@ function judge(correct){
     if(!state.maxStreak||pState.maxStreak>state.maxStreak)state.maxStreak=pState.maxStreak;
     rec.correct++;
     if(rec.correct>=5)rec.mastered=true;
+    if(!rec.last)rec.okAt=now;   // 書けるようになった日（「この1週間で」に数える）
+    rec.last=true;
+    // 出す日が来ていた語だけ間隔をのばす（同じ日に何回も正解しても一気に2か月先にはしない）
+    if(!rec.due||now>=rec.due-12*3600*1000){
+      rec.due=now+INTERVAL_DAYS[rec.step]*86400000;
+      rec.step=Math.min(rec.step+1,INTERVAL_DAYS.length-1);
+    }
     addXP(10);
     pState.dotStatus[pState.idx]='ok';
   }else{
     pState.ng++;pState.streak=0;
     rec.wrong++;
     rec.mastered=false;
+    rec.last=false;
+    rec.step=0;
+    rec.due=now+INTERVAL_DAYS[0]*86400000;   // まちがえたら次の日にもう一度
     pState.wrongs.push(q);
     addXP(3);
     pState.dotStatus[pState.idx]='ng';
@@ -1863,15 +1909,15 @@ function startDailyReview(){
   const days=r=>r.lastSeen?(now-r.lastSeen)/DAY:999;
   const doneRecently=r=>r.lastSeen&&(now-r.lastSeen)<20*3600*1000; // 今日もうやった語は出さない
 
-  // ①🔥テストで落とした漢字（まだマスターしてない or 久しぶり）— 最大3語、ランダム
-  const fire=shuffle(all.filter(x=>DROPPED.has(x.w.k)&&!doneRecently(x.rec)&&(!x.rec.mastered||days(x.rec)>=3)));
-  // ②間違いの多い漢字
-  const wrongs=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.wrong>0&&!x.rec.mastered&&!doneRecently(x.rec)));
-  // ③マスター済みだが3日以上見てない（忘却チェック）
-  const stale=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.mastered&&days(x.rec)>=3));
-  // ④正解の途中の語（1〜4回正解・まだマスターしてない）。ここを再訪しないと永遠に卒業できない
-  const inProgress=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&!x.rec.mastered&&x.rec.wrong===0&&x.rec.correct>0&&!doneRecently(x.rec)));
-  // ⑤まだ一度もやってない
+  all.forEach(x=>ensureSched(x.rec));
+  const isDue=r=>r.total>0&&(r.due||0)<=now;
+  // ①🔥テストで落とした漢字（まだ書けない or 出す日が来た）— 最大3語、ランダム
+  const fire=shuffle(all.filter(x=>DROPPED.has(x.w.k)&&!doneRecently(x.rec)&&(!x.rec.last||isDue(x.rec))));
+  // ②出す日が来た「まだ書けない」漢字（前にまちがえた）
+  const dueWrong=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&isDue(x.rec)&&!x.rec.last&&!doneRecently(x.rec)));
+  // ③出す日が来た「書ける」漢字（3日後・1週間後・3週間後・2か月後の見直し）。待たせている順
+  const dueOk=all.filter(x=>!DROPPED.has(x.w.k)&&isDue(x.rec)&&x.rec.last&&!doneRecently(x.rec)).sort((a,b)=>a.rec.due-b.rec.due);
+  // ④まだ一度もやってない
   const unseen=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.total===0));
 
   const picked=[];
@@ -1886,7 +1932,8 @@ function startDailyReview(){
       seen.add(key);picked.push(x);added++;
     }
   };
-  take(fire,3);take(wrongs,3);take(inProgress,2);take(stale,1);take(unseen);
+  // 出す日が来た語を先に。10語に足りなければ、まだやってない語で埋める
+  take(fire,3);take(dueWrong,4);take(dueOk,3);take(dueWrong);take(dueOk);take(unseen);
 
   if(picked.length===0){alert('今日の分はぜんぶ終わってるよ！すごい！');return;}
 
@@ -1905,12 +1952,13 @@ function startDailyReview(){
 // ぜんぶ合わせた到達ぐあい（あゆみが「どこまで書けるようになったか」を見るためのパネル）
 function renderOverall(){
   const now=Date.now(), DAY=86400000;
-  let all=0, mastered=0, learning=0, unseen=0, todayCount=0, weak=[];
+  let all=0, mastered=0, learning=0, unseen=0, todayCount=0, weak=[], okN=0;
   let lastSeenMax=0;
   for(const[kai,data]of Object.entries(ROUNDS)){
     for(const w of data.words){
       const r=state.records[kai+'_'+w.k]||{correct:0,wrong:0,total:0,mastered:false};
       all++;
+      if(r.total>0&&canWrite(r))okN++;
       if(r.mastered)mastered++;
       else if(r.total>0)learning++;
       else unseen++;
@@ -1933,6 +1981,7 @@ function renderOverall(){
     <div style="font-size:1.35em;font-weight:800;color:${color}">${num}</div>
     <div style="font-size:0.62em;color:#8fa8bc;line-height:1.3">${label}</div></div>`;
   document.getElementById('ov-nums').innerHTML=
+    box(okN,'書ける<br>(さいごに正解)','#e08a2e')+
     box(mastered,'マスター<br>(5回正解)','#f5a623')+
     box(learning,'れんしゅう中','#3fa96a')+
     box(unseen,'まだ一度も<br>出てない','#8fa8bc')+
@@ -2196,10 +2245,12 @@ const SYNC_URL = (window.HUB_CONFIG && window.HUB_CONFIG.syncUrl) || "";
 const KP = "kM_";
 let syncQueue = {}, syncTimer = null, syncedAt = null;
 
+// 同期で送る中身：[正解, まちがい, 回数, 最後にやった時刻, 書ける(1/0), 間隔の段, 次に出す日, 書けるようになった日]
+function packV(r){ ensureSched(r); return [r.correct||0, r.wrong||0, r.total||0, r.lastSeen||0, r.last?1:0, r.step||0, r.due||0, r.okAt||0]; }
 function syncQueueWord(key){
   if(!SYNC_URL) return;
   const r = state.records[key]; if(!r) return;
-  syncQueue[KP+key] = {v:[r.correct||0, r.wrong||0, r.total||0, r.lastSeen||0], t:Date.now()};
+  syncQueue[KP+key] = {v:packV(r), t:Date.now()};
   clearTimeout(syncTimer);
   syncTimer = setTimeout(syncFlush, 1500);
 }
@@ -2232,15 +2283,18 @@ async function syncPull(){
         // lastSeen＝実際に学習した時刻（v[3]）。同期した時刻(t)を入れると
         // 「今日やったばかり」扱いになり、翌日まで出題されなくなるので使わない
         if(v[3]) cur.lastSeen = v[3];
+        // 5番目以降＝くりかえし出題の予定（2026-09-30から）。古い端末の記録には無いので作り直す
+        if(v.length>=7){ cur.last=!!v[4]; cur.step=v[5]||0; cur.due=v[6]||0; if(v[7]) cur.okAt=v[7]; }
+        else { delete cur.step; ensureSched(cur); }
         changed = true;
       }else if(ct>rt){
-        back[rk] = {v:[cur.correct||0,cur.wrong||0,ct,cur.lastSeen||0], t:Date.now()};
+        back[rk] = {v:packV(cur), t:Date.now()};
       }
     }
     // 相手が持っていないこちらの記録を送る（初回の引っこしもこれで済む）
     for(const key in state.records){
       const c = state.records[key];
-      if((c.total||0)>0 && !(KP+key in remote)) back[KP+key]={v:[c.correct||0,c.wrong||0,c.total||0,c.lastSeen||0], t:Date.now()};
+      if((c.total||0)>0 && !(KP+key in remote)) back[KP+key]={v:packV(c), t:Date.now()};
     }
     if(Object.keys(back).length){ Object.assign(syncQueue, back); syncFlush(); }
     syncedAt = new Date(); syncBadge();
