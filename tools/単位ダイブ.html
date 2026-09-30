@@ -126,7 +126,7 @@ body{font-family:"Hiragino Sans","ヒラギノ角ゴ ProN",sans-serif;color:#eaf
     <button class="m-menseki" onclick="startRoute('menseki')">🟩 面積トンネル<small>1m² → 1km²　×100の旅</small></button>
     <button class="m-kasa" onclick="startRoute('kasa')">🥛 かさトンネル<small>サイコロ1こ → お風呂5杯</small></button>
     <button class="m-omosa" onclick="startRoute('omosa')">⚖️ 重さトンネル<small>アリ1匹 → 軽自動車</small></button>
-    <button class="m-quiz" onclick="startQuiz()">🚀 ゲートくぐりクイズ<small>正解のゲートに突っこめ！全10問</small></button>
+    <button class="m-quiz" onclick="startQuiz()">🚀 ゲートくぐりクイズ<small>正解のゲートに突っこめ！全16問</small></button>
   </div>
 </div>
 
@@ -175,11 +175,12 @@ const ROUTES={
  kasa:{name:'かさトンネル',color:'#ffd24f',
   gates:[
    {unit:'1mL',emoji:'🎲',anchor:'サイコロ1こ（1cm³）',eq:'スタート地点：1cm³ ＝ 1mL'},
-   {unit:'1L',emoji:'🥛',anchor:'牛乳パック1本',mult:'×1000',eq:'1L ＝ 1000mL ＝ サイコロ1000こ'},
-   {unit:'1m³',emoji:'🛁',anchor:'お風呂5杯分（1kL）',mult:'×1000',eq:'1m³ ＝ 1000L ＝ 牛乳パック1000本'},
+   {unit:'1dL',emoji:'🥤',anchor:'コップ1ぱい',mult:'×100',eq:'1dL ＝ 100mL ＝ 100cm³',warn:'⚠️ dLは仲間はずれ。mL→dLは×100、dL→Lは×10'},
+   {unit:'1L',emoji:'🥛',anchor:'牛乳パック1本',mult:'×10',eq:'1L ＝ 10dL ＝ 1000mL ＝ サイコロ1000こ'},
+   {unit:'1kL',emoji:'🛁',anchor:'お風呂5杯分 ＝ 1m³ の箱',mult:'×1000',eq:'1kL ＝ 1000L ＝ 1m³（名前がちがうだけで同じ量！）'},
   ],
-  ladder:'mL(cm³) <span class="x">×1000</span> L <span class="x">×1000</span> m³(kL)',
-  outro:'かさは1段 ×1000（0が3こ）。<br>仲間はずれのdLだけ注意：1L ＝ 10dL、1dL ＝ 100mL。'},
+  ladder:'mL(cm³) <span class="x">×100</span> dL <span class="x">×10</span> L <span class="x">×1000</span> kL(＝m³)',
+  outro:'<b>大きい単位へ行くと、数は小さくなる</b>（1dLの中に100cm³が入るから、300cm³＝3dL）。<br>小さい単位へ行くと、数は大きくなる。<b>1kLと1m³は同じ量</b>。'},
  omosa:{name:'重さトンネル',color:'#ff8fb3',
   gates:[
    {unit:'1mg',emoji:'🐜',anchor:'アリ1匹くらい',eq:'スタート地点：超かるい世界'},
@@ -203,6 +204,12 @@ const QUIZ=[
  {q:'7dL ＝ ？',choices:['70mL','700mL','7000mL'],correct:1,hint:'1dL=100mL（コップ1ぱい）'},
  {q:'1km² ＝ ？',choices:['10ha','1000ha','100ha'],correct:2,hint:'km²→haも×100'},
  {q:'0.3時間 ＝ ？',choices:['18分','30分','3分'],correct:0,hint:'60分×0.3。時間は60進法'},
+ {q:'cm³をdLになおすと、数は？',choices:['小さくなる（÷100）','大きくなる（×100）','かわらない'],correct:0,hint:'大きい単位へ行くと数は小さくなる。1dLの中に100cm³が入る'},
+ {q:'300cm³ ＝ ？',choices:['30000dL','3dL','30dL'],correct:1,hint:'÷100。コップ3ぱい分'},
+ {q:'6kL ＝ ？',choices:['6000m³','6m³','60m³'],correct:1,hint:'1kL＝1m³。名前がちがうだけで同じ量'},
+ {q:'0.9L ＝ ？',choices:['90cm³','9000cm³','900cm³'],correct:2,hint:'小さい単位へ＝数は大きく。1L＝1000cm³で×1000'},
+ {q:'5L ＝ ？',choices:['500cm³','5000cm³','50cm³'],correct:1,hint:'1L＝1000cm³（サイコロ1000こ）。500にするのはdLとまちがえたとき'},
+ {q:'78000cm³ ＝ ？',choices:['78L','780L','7.8L'],correct:0,hint:'大きい単位へ＝数は小さく。÷1000'},
 ];
 
 /* ══════════════ エンジン ══════════════ */
