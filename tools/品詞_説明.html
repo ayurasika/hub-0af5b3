@@ -656,16 +656,19 @@ const slides = [
   `},
 
   // 29. ない
-  { t:"ない の3パターン", html:`
-    <h2><span class="num">34</span>「ない」 3つの見分け</h2>
+  { t:"ない の4つの見分け", html:`
+    <h2><span class="num">34</span>「ない」 4つの見分け</h2>
+    <p>入試では、傍線の「ない」と<b>同じ用法</b>のものを、4つの文から選ぶ形で出るよ。「ない」には4つの顔がある。</p>
     <table class="tbl">
       <tr><th>パターン</th><th>見分け方</th><th>例</th></tr>
-      <tr><td><b>助動詞</b>（打ち消し）</td><td>「ぬ」に置きかえられる</td><td>行か<b>ない</b>（→行か<b>ぬ</b> ○）</td></tr>
-      <tr><td><b>形容詞「ない」</b>（無い）</td><td>「ぬ」に置きかえられない／「は」を入れられる</td><td>お金が<b>ない</b>（→お金が<b>ぬ</b> ×／お金は<b>ない</b> ○）</td></tr>
-      <tr><td><b>形容詞の一部</b></td><td>「ない」を取ると意味が変／1語の形容詞の語尾</td><td>あぶ<b>ない</b>／きた<b>ない</b>／少<b>ない</b></td></tr>
+      <tr><td><b>① 形容詞の一部</b></td><td>「ない」をとると、残りが<b>言葉にならない</b></td><td>つまらない／心もとない／あぶない／きたない／少ない</td></tr>
+      <tr><td><b>② 助動詞</b>（打ち消し）</td><td>「<b>ぬ</b>」に変えられる／前が<b>動詞</b></td><td>行かない（行かぬ）／着ない（着ぬ）</td></tr>
+      <tr><td><b>③ 形容詞「ない」</b>（無い）</td><td>「<b>ある</b>」の反対（存在しない）</td><td>お金がない（⇔お金がある）</td></tr>
+      <tr><td><b>④ 補助形容詞</b></td><td>前が「<b>く</b>」「<b>で</b>」／「<b>は</b>」を入れても自然</td><td>赤くない（赤くはない）／静かでない／望ましくない</td></tr>
     </table>
-    <div class="tip"><b>合言葉：「ぬ」に変えてみる。</b><br>変えられる → 助動詞<br>変えられない → 形容詞（無い）か、形容詞の一部</div>
-    <div class="ex">「彼は来<b>ない</b>」→「彼は来<b>ぬ</b>」○ → <b>助動詞</b><br>「時間が<b>ない</b>」→「時間が<b>ぬ</b>」× → <b>形容詞</b><br>「危<b>ない</b>道」→「危<b>ぬ</b>道」× → <b>形容詞の一部</b></div>
+    <div class="tip"><b>順番：</b>①「ない」をとってみる（残りが言葉にならない→<b>一部</b>）→ ②「ぬ」に変える（変えられる→<b>助動詞</b>）→ ③「ある」の反対か（そうなら→<b>形容詞の無い</b>）→ ④それ以外で前が「く・で」→<b>補助形容詞</b></div>
+    <div class="ex">「つまらない」→「つまら」は言葉にならない → <b>①形容詞の一部</b><br>「着ないだろう」→「着ぬ」○ → <b>②助動詞</b><br>「机もいすもない」→「机もいすもある」の反対 → <b>③形容詞「ない」</b><br>「望ましくない」→前が「く」、「望ましくはない」○ → <b>④補助形容詞</b></div>
+    <div class="warn"><b>⚠️ ひっかけ：</b>「つまらない」は「つまらぬ」とも言えるので、「ぬ」に変える<b>前に</b>、先に「ない」をとってみる（①）。動詞の形（行か・着・食べ）は、とっても言葉として成り立つから②だよ。</div>
   `},
 
   // 30. ない 試し
@@ -674,14 +677,196 @@ const slides = [
     <div class="quiz">
       <h4>Q. 「宿題がまだ終わら<b>ない</b>。」の「ない」は？</h4>
       <div class="opts">
-        <button data-a="1">助動詞（打ち消し）</button>
-        <button data-a="0">形容詞「ない」</button>
         <button data-a="0">形容詞の一部</button>
+        <button data-a="1">助動詞（打ち消し）</button>
+        <button data-a="0">形容詞「ない」（無い）</button>
+        <button data-a="0">補助形容詞（〜くない）</button>
       </div>
       <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
       <div class="ans">
         <b>正解：助動詞（打ち消し）</b><br>
-        「終わらない」→「終わら<b>ぬ</b>」と言いかえられる ✓ だから打ち消しの助動詞だよ。
+        「終わらない」→「終わら<b>ぬ</b>」と言えるよ。前が動詞だから、<b>②助動詞</b>。
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 「そんな話は信じたく<b>ない</b>。」の「ない」は？</h4>
+      <div class="opts">
+        <button data-a="0">形容詞の一部</button>
+        <button data-a="0">助動詞（打ち消し）</button>
+        <button data-a="0">形容詞「ない」（無い）</button>
+        <button data-a="1">補助形容詞（〜くない）</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：補助形容詞（〜くない）</b><br>
+        前が「く」（信じたく）。「信じたく<b>は</b>ない」と言える。「ある」の反対でも、「ぬ」でもない → <b>④補助形容詞</b>。
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 「この教室には、机もいすも<b>ない</b>。」の「ない」は？</h4>
+      <div class="opts">
+        <button data-a="0">形容詞の一部</button>
+        <button data-a="0">助動詞（打ち消し）</button>
+        <button data-a="1">形容詞「ない」（無い）</button>
+        <button data-a="0">補助形容詞（〜くない）</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：形容詞「ない」（無い）</b><br>
+        「机もいすもある」の反対（存在しない）→ <b>③形容詞「ない」（無い）</b>。
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 「<b>あぶない</b>道には近づくな。」の「ない」は？</h4>
+      <div class="opts">
+        <button data-a="1">形容詞の一部</button>
+        <button data-a="0">助動詞（打ち消し）</button>
+        <button data-a="0">形容詞「ない」（無い）</button>
+        <button data-a="0">補助形容詞（〜くない）</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：形容詞の一部</b><br>
+        「ない」をとると「あぶ」は言葉にならない。1語の形容詞「あぶない」の一部 → <b>①形容詞の一部</b>。
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 「この問題は、思ったほどやさし<b>くない</b>。」の「ない」は？</h4>
+      <div class="opts">
+        <button data-a="0">形容詞の一部</button>
+        <button data-a="0">助動詞（打ち消し）</button>
+        <button data-a="0">形容詞「ない」（無い）</button>
+        <button data-a="1">補助形容詞（〜くない）</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：補助形容詞（〜くない）</b><br>
+        前が「く」で、「やさし<b>くは</b>ない」と言える → <b>④補助形容詞</b>。
+      </div>
+    </div>
+  `},
+
+  // 30b. だ の見分け
+  { t:"だ の4つの見分け", html:`
+    <h2><span class="num">36</span>「だ」 4つの見分け</h2>
+    <p>「だ」も、入試で<b>同じ用法</b>を選ばせるよ。見た目は同じ「だ」でも、4つのちがう顔がある。</p>
+    <table class="tbl">
+      <tr><th>パターン</th><th>見分け方</th><th>例</th></tr>
+      <tr><td><b>① 過去「た」の濁音</b></td><td>前が「<b>ん</b>」「<b>い</b>」（読<b>ん</b>だ・泳<b>い</b>だ）。「た」が「だ」に変わっただけ</td><td>読んだ／飛んだ／泳いだ</td></tr>
+      <tr><td><b>② 「そうだ」「ようだ」の一部</b></td><td>「〜だ<b>そうだ</b>」「〜の<b>ようだ</b>」で、ひとまとまり</td><td>雨だそうだ（最後の「だ」）／夢のようだ</td></tr>
+      <tr><td><b>③ 形容動詞の語尾</b></td><td>「<b>な</b>」＋名詞に言いかえられる</td><td>見事だ（見事<b>な</b>魚）／静かだ（静か<b>な</b>部屋）</td></tr>
+      <tr><td><b>④ 断定の助動詞</b></td><td>「な」にできず、「<b>の</b>」＋名詞になる</td><td>病気だ（病気<b>の</b>人）／先生だ（先生<b>の</b>話）</td></tr>
+    </table>
+    <div class="tip"><b>順番：</b>①前が「ん・い」か（→<b>過去</b>）→ ②「だそうだ」「ようだ」の中か（→<b>そうだ・ようだの一部</b>）→ ③「な＋名詞」にできるか（→<b>形容動詞</b>）→ ④できなければ「の＋名詞」（→<b>断定</b>）</div>
+    <div class="ex">「飛ん<b>だ</b>」→前が「ん」 → <b>①過去</b><br>「元気だそう<b>だ</b>」→最後の「だ」＝「そうだ」の一部 → <b>②</b><br>「見事<b>だ</b>」→「見事<b>な</b>魚」○ → <b>③形容動詞</b><br>「病気<b>だ</b>」→「病気<b>な</b>人」？ ふつうは「病気<b>の</b>人」 → <b>④断定</b></div>
+    <div class="warn"><b>⚠️ ひっかけ：</b>「元気だそうだ」には「だ」が2つ。最初の「元気<b>だ</b>」は形容動詞（元気な）、<b>最後の「だ」</b>は「そうだ」の一部。傍線がどっちの「だ」かを見る。</div>
+  `},
+
+  // 30c. だ 試し
+  { t:"だ ためしてみよう", html:`
+    <h2><span class="num">37</span>ためしてみよう（だ）</h2>
+    <div class="quiz">
+      <h4>Q. 「昨日は友だちと公園で遊ん<b>だ</b>。」の「だ」は？</h4>
+      <div class="opts">
+        <button data-a="1">過去「た」の濁音</button>
+        <button data-a="0">「そうだ」の一部</button>
+        <button data-a="0">形容動詞の語尾</button>
+        <button data-a="0">断定の助動詞</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：過去「た」の濁音</b><br>
+        前が「ん」（遊<b>ん</b>だ）。「遊ん<b>た</b>」＝「た」の濁音 → <b>①過去</b>。
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 「この景色は、本当にきれい<b>だ</b>。」の「だ」は？</h4>
+      <div class="opts">
+        <button data-a="0">過去「た」の濁音</button>
+        <button data-a="0">「そうだ」の一部</button>
+        <button data-a="1">形容動詞の語尾</button>
+        <button data-a="0">断定の助動詞</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：形容動詞の語尾</b><br>
+        「きれい<b>な</b>景色」と言える → <b>③形容動詞の語尾</b>。
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 「兄は高校の先生<b>だ</b>。」の「だ」は？</h4>
+      <div class="opts">
+        <button data-a="0">過去「た」の濁音</button>
+        <button data-a="0">「そうだ」の一部</button>
+        <button data-a="0">形容動詞の語尾</button>
+        <button data-a="1">断定の助動詞</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：断定の助動詞</b><br>
+        「先生<b>な</b>兄」とは言わない。「先生<b>の</b>兄」→ 名詞につく <b>④断定の助動詞</b>。
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 「明日は雨だそう<b>だ</b>。」の最後の「だ」は？</h4>
+      <div class="opts">
+        <button data-a="0">過去「た」の濁音</button>
+        <button data-a="1">「そうだ」の一部</button>
+        <button data-a="0">形容動詞の語尾</button>
+        <button data-a="0">断定の助動詞</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：「そうだ」の一部</b><br>
+        「そうだ」（伝聞）でひとまとまり。最後の「だ」は <b>②「そうだ」の一部</b>。
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 「彼の字は、とても立派<b>だ</b>。」の「だ」は？</h4>
+      <div class="opts">
+        <button data-a="0">過去「た」の濁音</button>
+        <button data-a="0">「そうだ」の一部</button>
+        <button data-a="1">形容動詞の語尾</button>
+        <button data-a="0">断定の助動詞</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：形容動詞の語尾</b><br>
+        「立派<b>な</b>字」と言える → <b>③形容動詞の語尾</b>。「とても」が入るのも形容動詞の特ちょう。
+      </div>
+    </div>
+  `},
+
+  // 30d. 入試の形
+  { t:"入試の形 ためしてみよう（ない・だ）", html:`
+    <h2><span class="num">38</span>入試の形：同じ用法はどれ？</h2>
+    <p>公開模試8（10/4）の大問二 問一と<b>同じ形</b>。文は新しく作ったよ。4つのうち、<b>型が同じ1つ</b>を選ぶ。</p>
+    <div class="quiz">
+      <h4>Q. 本文「その考えは望まし<b>くない</b>。」の「ない」と同じ用法は？</h4>
+      <div class="opts">
+        <button data-a="0">この部屋は、少しきたない。</button>
+        <button data-a="1">この問題は、思ったほど難しくない。</button>
+        <button data-a="0">もう二度と学校をさぼらないと決めた。</button>
+        <button data-a="0">机の上には、本もノートもない。</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：この問題は、思ったほど難しくない。</b><br>
+        「望ましくない」＝前が「く」の<b>④補助形容詞</b>（望ましくはない○）。<br>イ「難しくない」＝④補助形容詞 ← 正解／ア「きたない」＝①形容詞の一部／ウ「さぼらない」＝②助動詞（さぼらぬ○）／エ「本もノートもない」＝③形容詞「ない」（ある↔ない）
+      </div>
+    </div>
+    <div class="quiz">
+      <h4>Q. 本文「その作業は、とても面倒<b>だ</b>。」の「だ」と同じ用法は？</h4>
+      <div class="opts">
+        <button data-a="0">かばんの中身は、本だ。</button>
+        <button data-a="0">あしたは晴れだそうだ。</button>
+        <button data-a="0">昨日は夜おそくまで本を読んだ。</button>
+        <button data-a="1">彼は、いつもとてもていねいだ。</button>
+      </div>
+      <button class="check" onclick="checkQuiz(this)">こたえあわせ</button>
+      <div class="ans">
+        <b>正解：彼は、いつもとてもていねいだ。</b><br>
+        「面倒<b>な</b>作業」と言える＝<b>③形容動詞の語尾</b>。<br>エ「ていねい<b>な</b>人」○ ← 正解／ア「本<b>の</b>」＝④断定／イ「だそうだ」の最後の「だ」＝②そうだの一部／ウ「読ん<b>だ</b>」＝①過去（前が「ん」）
       </div>
     </div>
   `},
@@ -882,7 +1067,7 @@ function render(){
     const div=document.createElement('div');
     div.className='slide'+(i===cur?' active':'');
     div.innerHTML=`
-      <div class="card">${s.html}</div>
+      <div class="card">${s.html.replace(/(<span class="num">)\d+(<\/span>)/,'$1'+(i+1)+'$2')}</div>
       <div class="nav">
         <button class="prev" ${i===0?'disabled':''} onclick="go(${i-1})">← 前へ</button>
         <button class="next" ${i===slides.length-1?'disabled':''} onclick="go(${i+1})">次へ →</button>
