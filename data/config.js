@@ -5,8 +5,8 @@ window.HUB_CONFIG = {
   syncUrl: "https://script.google.com/macros/s/AKfycbzDqRXupanKHMZRrGSdX-VGAShS-tTTmBmkAsW5FTSaP5MW4jjZrFd9s9EHBmV6fmHa/exec",
   // 漢字2週ループ：[前回, 今回] ※回番号が違ったらあゆみ→Claudeに一言（config修正します）
   // 後期はステージⅤ。回番号は 80＋第N回（第2回＝82）。第1回は未収録（写真待ち）
-  kanjiWindow: [82, 82],
-  kanjiThemes: { 82: "後期 第2回（自然）" },
+  kanjiWindow: [86, 87],
+  kanjiThemes: { 86: "後期 第6回（情報・人とのかかわり）", 87: "後期 第7回（病院・からだ）" },
   toiletCard: "未指名（購入カード30枚の一覧をClaudeに教えてもらえたら毎週自動指名します）",
   // チェック表（こころ＝kokoro、ママ＝ayumi）。文言はここを書き換えれば変わる
   checklist: {
