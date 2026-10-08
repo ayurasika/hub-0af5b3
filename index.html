@@ -194,7 +194,14 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 <section id="study-room" aria-label="わたしの勉強部屋">
 <div class="sr-scene"><img src="room/assets/room-kokoa-wide-loft.jpg" width="960" height="640" alt="壁いっぱいのロフトベッドと机、ここあのいる勉強部屋"><div id="sr-furniture"></div></div>
 <div class="sr-content"><h2>わたしの勉強部屋</h2><p id="sr-progress" role="status"></p><p id="sr-message"></p><button id="sr-start">今日から部屋をはじめる</button><p id="sr-error" role="alert"></p>
-<details><summary>家具のバックアップ</summary><p>この端末だけに保存します。Safariのデータを消す前に、家具だけのバックアップを保存してください。</p><button id="sr-export">家具をファイルに保存</button><label>家具を復元 <input id="sr-import" type="file" accept="application/json,.json"></label><p>復元は同じ開始日の家具を合流します。学習記録は含みません。</p></details></div></section>
+<div id="sr-arrange" hidden>
+<p id="sr-arrange-note" role="status" aria-live="polite"></p>
+<div id="sr-choices" aria-label="配置する小物"></div>
+<div id="sr-places" aria-label="置き場所" hidden></div>
+<button id="sr-cancel" type="button" hidden>キャンセル</button><button id="sr-undo" type="button" disabled>ひとつ戻す</button>
+<p>最近の6個を飾ります。新しい小物が増えると一番古い小物が入れ替わり、獲得記録は残ります。「ひとつ戻す」は、この画面での直前の配置変更が対象です。</p>
+</div>
+<details><summary>家具と配置のバックアップ</summary><p>この端末だけに保存します。Safariのデータを消す前に、家具だけのバックアップを保存してください。</p><button id="sr-export">家具をファイルに保存</button><label>家具を復元 <input id="sr-import" type="file" accept="application/json,.json"></label><p>復元は同じ開始日の家具を合流し、バックアップの配置を優先します。学習記録は含みません。</p></details></div></section>
 
   <!-- のびしろレーダー -->
   <div class="card nobi">
@@ -1067,6 +1074,7 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
 })();
 </script>
 <script src="room/core.js"></script>
+<script src="room/layout.js"></script>
 <script src="room/device.js"></script>
 <script src="room/ui.js"></script>
 </body>

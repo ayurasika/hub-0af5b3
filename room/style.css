@@ -1,1 +1,12 @@
 #study-room{margin:16px 0;background:#fffaf4;border:1px solid #ded5c6;border-radius:14px;overflow:hidden;color:#554e43;font-family:-apple-system,BlinkMacSystemFont,'Hiragino Kaku Gothic ProN',sans-serif}#study-room .sr-scene{position:relative;line-height:0}#study-room .sr-scene>img{display:block;width:100%;height:auto}#study-room .sr-item{position:absolute;width:8%;height:13%;object-fit:contain;object-position:center bottom}#study-room .sr-content{padding:16px}#study-room p{margin:8px 0;font-size:14px;line-height:1.6}#study-room button,#study-room summary,#study-room input{font:inherit;min-height:44px}#study-room button{padding:10px 14px;border:1px solid #bfb09e;background:#f0e9de;border-radius:8px;color:#554e43;margin:6px 4px 6px 0}#study-room summary{padding:12px 0}#study-room input{max-width:100%;font-size:16px}#sr-error{color:#973b32}#study-room button:focus,#study-room summary:focus{outline:3px solid #536e80}
+
+#study-room [hidden]{display:none!important}
+#sr-choices,#sr-places{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+#study-room #sr-choices button{display:flex;align-items:center;flex:1 1 145px;min-width:0;min-height:60px;margin:0;text-align:left;font-size:14px}
+#sr-choices img{width:36px;height:36px;object-fit:contain;margin-right:8px}
+#study-room #sr-choices button[aria-pressed="true"]{outline:3px solid #536e80;background:#e2edf0}
+#study-room #sr-places button{flex:1 1 140px;min-height:48px;margin:0;font-size:14px;text-align:left}
+#study-room button:disabled{opacity:.6}
+#study-room .sr-selected{outline:2px dashed #536e80;outline-offset:2px}
+#sr-arrange{margin-top:16px;padding-top:8px;border-top:1px solid #ded5c6}
+#study-room button{touch-action:manipulation}
