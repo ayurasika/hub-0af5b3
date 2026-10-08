@@ -177,6 +177,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 .nobi .trow .miss .mtest{color:#aab;font-size:.64rem;margin-left:4px;}
 .nobi .nobinote{margin-top:6px;font-size:.66rem;color:#99a;line-height:1.6;}
 </style>
+<link rel="stylesheet" href="room/style.css">
 </head>
 <body>
 
@@ -190,6 +191,10 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 </div></div>
 
 <div class="wrap">
+<section id="study-room" aria-label="わたしの勉強部屋">
+<div class="sr-scene"><img src="room/assets/room-kokoa-wide-loft.jpg" width="960" height="640" alt="壁いっぱいのロフトベッドと机、ここあのいる勉強部屋"><div id="sr-furniture"></div></div>
+<div class="sr-content"><h2>わたしの勉強部屋</h2><p id="sr-progress" role="status"></p><p id="sr-message"></p><button id="sr-start">今日から部屋をはじめる</button><p id="sr-error" role="alert"></p>
+<details><summary>家具のバックアップ</summary><p>この端末だけに保存します。Safariのデータを消す前に、家具だけのバックアップを保存してください。</p><button id="sr-export">家具をファイルに保存</button><label>家具を復元 <input id="sr-import" type="file" accept="application/json,.json"></label><p>復元は同じ開始日の家具を合流します。学習記録は含みません。</p></details></div></section>
 
   <!-- のびしろレーダー -->
   <div class="card nobi">
@@ -1061,5 +1066,8 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
   }
 })();
 </script>
+<script src="room/core.js"></script>
+<script src="room/device.js"></script>
+<script src="room/ui.js"></script>
 </body>
 </html>
