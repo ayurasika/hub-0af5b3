@@ -18,7 +18,7 @@
 #study-room .sr-drag.sr-selected{outline:2px dashed #536e80}
 #study-room .sr-scene>img{pointer-events:none}
 
-/* Static layers: no idle animation, no filters, no per-frame storage writes. */
+/* Small image layers, no filters or per-frame storage writes. */
 #sr-season-layer{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none}
 #study-room .ss-object{position:absolute;transform:translate(-50%,-50%);padding:0;margin:0;border:0;background:transparent;touch-action:none;-webkit-user-select:none;user-select:none;pointer-events:auto;cursor:grab;line-height:0}
 #study-room .ss-object:active{cursor:grabbing}
@@ -70,3 +70,11 @@
 #ss-clothes .ss-dress-preview{width:100%;height:112px;margin-bottom:8px}
 #ss-clothes .ss-dress-preview img{margin:0}
 #ss-clothes .ss-dress-preview .ss-mystery{display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:0;border-radius:12px;background:#eee2d0;color:#a17c54;font-family:Georgia,serif;font-size:60px;line-height:1}
+
+#study-room .ss-walk-facing{display:block;width:100%;height:100%;transform-origin:50% 50%}
+#study-room .ss-character.ss-walking{will-change:transform}
+#study-room .ss-character.ss-walking img{animation:ss-steps .64s ease-in-out infinite;transform-origin:50% 92%}
+@keyframes ss-steps{0%,100%{transform:translateY(0) rotate(-1.4deg)}25%{transform:translateY(-2px) rotate(0deg)}50%{transform:translateY(0) rotate(1.4deg)}75%{transform:translateY(-2px) rotate(0deg)}}
+.ss-roam-controls{display:flex;align-items:center;flex-wrap:wrap;margin:4px 0 10px;line-height:1.6}
+.ss-roam-controls span{font-size:12px;color:#796853}
+@media(prefers-reduced-motion:reduce){#study-room .ss-character.ss-walking img{animation:none}}

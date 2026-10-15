@@ -54,7 +54,7 @@ function finishDrag(e){
 function render(){
  if(drag)return;
  state=device.refresh();var days=L.active(state.ledger.rewards),cfg=state.ledger.config;
- publishRewards({started:!!cfg,days:Object.keys(state.ledger.rewards).length,count:state.count,received:!!state.ledger.rewards[state.day]});
+ publishRewards({started:!!cfg,days:Object.keys(state.ledger.rewards).length,collectionDays:RoomSeason.eligibleDays(state.ledger.rewards,state.day),count:state.count,received:!!state.ledger.rewards[state.day]});
  el('start').hidden=!!cfg;
  el('progress').textContent='今日の判子 '+state.count+'個 ／ あつめた小物 '+Object.keys(state.ledger.rewards).length+'個';
  el('message').textContent=!cfg?'今日から開始すると、今日の判子を含めて3個以上の日に小物が1つ増えます。昨日以前は対象外です。':state.ledger.rewards[state.day]?'今日の小物を受け取りました。1日1つずつ増えます。':'開始日 '+cfg.startDate+' ／ あと'+Math.max(0,3-state.count)+'個で小物がひとつ。';

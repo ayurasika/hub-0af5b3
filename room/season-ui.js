@@ -1,20 +1,20 @@
 (function(){
 'use strict';
 var host=document.getElementById('study-room');if(!host)return;
-var scene=host.querySelector('.sr-scene'),panel=document.getElementById('sr-season'),layer=document.getElementById('sr-season-layer'),S=RoomSeason,store,snap,drag=null,frame=0,nodes={},selected=null;
+var scene=host.querySelector('.sr-scene'),panel=document.getElementById('sr-season'),layer=document.getElementById('sr-season-layer'),S=RoomSeason,store,snap,drag=null,frame=0,nodes={},selected=null,roam=null;
 var preview=host.getAttribute('data-room-preview')==='true',gifts,clothes;
 function el(id){return document.getElementById('ss-'+id);}
 function safe(fn){try{fn();el('error').textContent='';}catch(e){el('error').textContent=e.message;}}
 function bound(p,node){var r=scene.getBoundingClientRect(),w=node.offsetWidth/r.width*50,h=node.offsetHeight/r.height*50;return {x:Math.max(w,Math.min(100-w,p.x)),y:Math.max(h,Math.min(100-h,p.y))};}
 function place(node,p){p=bound(p,node);node.style.left=p.x+'%';node.style.top=p.y+'%';}
-function position(id){return id==='character'?snap.state.character:gifts.owned[id]&&snap.state.decor[id];}
+function position(id){return id==='character'?(roam?roam.position():snap.state.character):gifts.owned[id]&&snap.state.decor[id];}
 function select(id){selected=id;Object.keys(nodes).forEach(function(k){nodes[k].classList.toggle('ss-selected',k===id);nodes[k].style.zIndex=k===id?'4':k==='character'?'2':'1';});el('selected').textContent=id==='character'?'ここあ':S.decor.filter(function(d){return d.id===id;})[0].name;el('move').hidden=false;}
 function render(){
  snap=store.read();
  var status=window.RoomRewardStatus;gifts=S.collection(status);clothes=S.closet(status);
  el('rewards').textContent=!status?'ごほうびの記録を確認できません。部屋のエラー表示を確認してください。':!status.started?'「今日から部屋をはじめる」を押すと、1日にハンコ3個でごほうびが増えます。':gifts.next?'ハロウィンのごほうび '+gifts.total+' / 6。つぎは「'+gifts.next.name+'」'+(status.received?'。次にハンコ3個を集めた日にもらえます。':'。今日はあとハンコ'+Math.max(0,3-status.count)+'個！'):'ハロウィンのごほうびを6つ集めたよ！ 好きな飾りと服を選んでね。';
  S.gifts.forEach(function(g,i){var button=el(g.id==='hat'||g.id==='cape'?g.id:'toggle-'+g.id),owned=!!gifts.owned[g.id];button.disabled=!owned;button.setAttribute('aria-label',g.name+(owned?'（もらったよ）':'（ハンコ3個の日を'+(i+1)+'日で獲得）'));button.querySelector('.ss-earned').textContent=owned?'もらったよ':'3個の日 × '+(i+1)+'日';});
- Object.keys(nodes).forEach(function(id){var p=position(id);nodes[id].hidden=!p;if(p)place(nodes[id],p);});
+ Object.keys(nodes).forEach(function(id){var p=position(id);nodes[id].hidden=!p;if(p){if(id==='character'&&roam)roam.setAnchor(snap.state.character);else place(nodes[id],p);}});
  var wearing=S.appearance(snap.state,status);
  var sprite=el('character-image'),src='room/assets/character-'+wearing.asset+'.png';
  if(sprite.getAttribute('src')!==src)sprite.src=src;
@@ -35,15 +35,16 @@ function render(){
  el('undo').disabled=!snap.canUndo;
  if(selected&&!position(selected)){selected=null;el('move').hidden=true;}
 }
-function cancel(){if(!drag)return;var old=drag;drag=null;if(frame){cancelAnimationFrame(frame);frame=0;}if(old.node.hasPointerCapture&&old.node.hasPointerCapture(old.id))old.node.releasePointerCapture(old.id);safe(render);}
+function cancel(){if(!drag)return;var old=drag;drag=null;if(frame){cancelAnimationFrame(frame);frame=0;}if(old.node.hasPointerCapture&&old.node.hasPointerCapture(old.id))old.node.releasePointerCapture(old.id);if(old.day==='character'&&roam)roam.hold();safe(render);if(old.day==='character'&&roam)roam.release();}
 function start(e,id,node,touch){
  if(drag||e.isPrimary===false||(!touch&&e.button!==undefined&&e.button!==0))return;
+ if(id==='character'&&roam)roam.hold();
  var p=touch||e,r=scene.getBoundingClientRect();safe(function(){render();select(id);var actual=bound(position(id),node);drag={id:e.pointerId,day:id,node:node,token:snap.token,x:p.clientX,y:p.clientY,offsetX:(p.clientX-r.left)/r.width*100-actual.x,offsetY:(p.clientY-r.top)/r.height*100-actual.y,point:actual,moved:false};});
- if(drag){e.preventDefault();if(node.setPointerCapture&&e.pointerId!==undefined)node.setPointerCapture(e.pointerId);}
+ if(drag){e.preventDefault();if(node.setPointerCapture&&e.pointerId!==undefined)node.setPointerCapture(e.pointerId);}else if(id==='character'&&roam)roam.release();
 }
 function update(e,touch){if(!drag||(e.pointerId!==undefined&&e.pointerId!==drag.id))return;var p=touch||e,r=scene.getBoundingClientRect();e.preventDefault();if(Math.abs(p.clientX-drag.x)+Math.abs(p.clientY-drag.y)>3)drag.moved=true;drag.point=bound({x:(p.clientX-r.left)/r.width*100-drag.offsetX,y:(p.clientY-r.top)/r.height*100-drag.offsetY},drag.node);if(!frame)frame=requestAnimationFrame(function(){frame=0;if(drag)place(drag.node,drag.point);});}
-function finish(e,touch){if(!drag||(e.pointerId!==undefined&&e.pointerId!==drag.id))return;update(e,touch);var done=drag;drag=null;if(frame){cancelAnimationFrame(frame);frame=0;}if(done.node.hasPointerCapture&&done.node.hasPointerCapture(done.id))done.node.releasePointerCapture(done.id);safe(function(){if(done.moved){var next=snap.state;if(done.day==='character')next.character=done.point;else next.decor[done.day]=done.point;store.save(next,done.token);el('note').textContent='位置を保存しました。';}render();});if(position(done.day))place(done.node,position(done.day));}
-function move(dx,dy){cancel();safe(function(){render();if(!selected||!position(selected))return;var p=position(selected),next=bound({x:p.x+dx,y:p.y+dy},nodes[selected]);if(selected==='character')snap.state.character=next;else snap.state.decor[selected]=next;store.save(snap.state,snap.token);render();});}
+function finish(e,touch){if(!drag||(e.pointerId!==undefined&&e.pointerId!==drag.id))return;update(e,touch);var done=drag;drag=null;if(frame){cancelAnimationFrame(frame);frame=0;}if(done.node.hasPointerCapture&&done.node.hasPointerCapture(done.id))done.node.releasePointerCapture(done.id);safe(function(){if(done.moved){var next=snap.state;if(done.day==='character')next.character=done.point;else next.decor[done.day]=done.point;store.save(next,done.token);el('note').textContent='位置を保存しました。';}render();});if(position(done.day))place(done.node,position(done.day));if(done.day==='character'&&roam)roam.release();}
+function move(dx,dy){cancel();var held=selected==='character'&&roam;if(held)roam.hold();safe(function(){render();if(!selected||!position(selected))return;var p=position(selected),next=bound({x:p.x+dx,y:p.y+dy},nodes[selected]);if(selected==='character')snap.state.character=next;else snap.state.decor[selected]=next;store.save(snap.state,snap.token);render();});if(held)roam.release();}
 function wire(node,id){
  nodes[id]=node;node.ondragstart=function(e){e.preventDefault();};node.onclick=function(){select(id);};
  if(window.PointerEvent){node.onpointerdown=function(e){start(e,id,node);};node.onpointermove=update;node.onpointerup=finish;node.onpointercancel=cancel;node.onlostpointercapture=function(){if(drag)cancel();};}
@@ -58,7 +59,7 @@ safe(function(){
  var pick=document.createElement('button');pick.type='button';pick.id='ss-toggle-'+d.id;pick.setAttribute('aria-pressed','false');var icon=img.cloneNode();pick.appendChild(icon);pick.appendChild(document.createTextNode({pumpkin:'かぼちゃ',ghost:'おばけ',candy:'お菓子かご',stars:'月と星'}[d.id]));var badge=document.createElement('small');badge.className='ss-earned';pick.appendChild(badge);pick.setAttribute('aria-label',d.name);pick.onclick=function(){cancel();safe(function(){render();if(!gifts.owned[d.id])return;if(snap.state.decor[d.id])delete snap.state.decor[d.id];else snap.state.decor[d.id]={x:d.x,y:d.y};store.save(snap.state,snap.token);render();});};el('decor').appendChild(pick);});
  ['hat','cape'].forEach(function(id){var badge=document.createElement('small');badge.className='ss-earned';el(id).appendChild(badge);el(id).onclick=function(){cancel();safe(function(){render();if(!gifts.owned[id])return;snap.state.outfit='green-knit';snap.state[id]=!snap.state[id];store.save(snap.state,snap.token);render();});};});
  el('original').onclick=function(){cancel();safe(function(){render();store.save(S.dress(snap.state,'green-knit',window.RoomRewardStatus),snap.token);render();});};
- el('reset').onclick=function(){cancel();safe(function(){render();snap.state.character=S.initial().character;S.decor.forEach(function(d){if(snap.state.decor[d.id])snap.state.decor[d.id]={x:d.x,y:d.y};});store.save(snap.state,snap.token);render();});};
+ el('reset').onclick=function(){cancel();safe(function(){render();snap.state.character=S.initial().character;S.decor.forEach(function(d){if(snap.state.decor[d.id])snap.state.decor[d.id]={x:d.x,y:d.y};});store.save(snap.state,snap.token);render();if(roam)roam.setAnchor(snap.state.character,true);});};
  el('undo').onclick=function(){cancel();safe(function(){store.undo();render();});};
  [['left',-3,0],['right',3,0],['up',0,-3],['down',0,3]].forEach(function(d){el(d[0]).onclick=function(){move(d[1],d[2]);};});
  el('export').onclick=function(){safe(function(){var url=URL.createObjectURL(new Blob([store.exportJSON()],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='room-season.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);});};
@@ -68,5 +69,12 @@ safe(function(){
  window.addEventListener('resize',function(){cancel();safe(render);});window.addEventListener('blur',cancel);document.addEventListener('visibilitychange',function(){if(document.hidden)cancel();});
  if(!window.PointerEvent){window.addEventListener('mousemove',update);window.addEventListener('mouseup',finish);}
  panel.hidden=false;render();
+ var facing=document.createElement('span');facing.className='ss-walk-facing';facing.appendChild(el('character-image'));character.appendChild(facing);
+ var roamKey=preview?'kokoro-room-roam-preview-v1':'kokoro-room-roam-v1';
+ function roamPreference(){var saved=window.localStorage.getItem(roamKey);return saved==='on'||(saved!=='off'&&!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches));}
+ roam=RoomRoam.create({win:window,doc:document,node:character,scene:scene,facing:facing,anchor:snap.state.character,enabled:roamPreference(),onState:function(enabled){el('roam').setAttribute('aria-pressed',String(enabled));el('roam').textContent=enabled?'うろうろをとめる':'うろうろする';}});
+ el('roam').onclick=function(){cancel();safe(function(){var enabled=!roam.isEnabled();window.localStorage.setItem(roamKey,enabled?'on':'off');roam.setEnabled(enabled);});};
+ character.addEventListener('focus',function(){roam.hold('focus');});character.addEventListener('blur',function(){roam.release('focus');});
+ window.addEventListener('storage',function(e){if(e.key===null||e.key===roamKey)safe(function(){roam.setEnabled(roamPreference());});});
 });
 })();
