@@ -1,9 +1,10 @@
 (function(){
 'use strict';
-var R=RoomIntegration,L=RoomLayout,device,last='',selected=null,state,drag=null,frame=0;
+var R=RoomIntegration,L=RoomLayout,device,last='',rewardStatus='',selected=null,state,drag=null,frame=0;
 var names={'calm-books':'本','calm-plant':'観葉植物','calm-lamp':'ランプ','calm-clock':'時計','calm-pencils':'ペンスタンド','calm-box':'小物入れ'};
 function el(x){return document.getElementById('sr-'+x);}
-function safe(fn){try{fn();el('error').textContent='';}catch(e){el('error').textContent=e.message;}}
+function publishRewards(status){var signature=JSON.stringify(status);if(signature===rewardStatus)return;rewardStatus=signature;window.RoomRewardStatus=status;var event=document.createEvent('Event');event.initEvent('room-rewards-change',false,false);window.dispatchEvent(event);}
+function safe(fn){try{fn();el('error').textContent='';}catch(e){el('error').textContent=e.message;publishRewards(null);}}
 function scene(){return el('furniture').parentNode;}
 function label(day){return names[state.ledger.rewards[day].item]+'（'+day+'）';}
 function bounded(point,node){
@@ -53,6 +54,7 @@ function finishDrag(e){
 function render(){
  if(drag)return;
  state=device.refresh();var days=L.active(state.ledger.rewards),cfg=state.ledger.config;
+ publishRewards({started:!!cfg,days:Object.keys(state.ledger.rewards).length,count:state.count,received:!!state.ledger.rewards[state.day]});
  el('start').hidden=!!cfg;
  el('progress').textContent='今日の判子 '+state.count+'個 ／ あつめた小物 '+Object.keys(state.ledger.rewards).length+'個';
  el('message').textContent=!cfg?'今日から開始すると、今日の判子を含めて3個以上の日に小物が1つ増えます。昨日以前は対象外です。':state.ledger.rewards[state.day]?'今日の小物を受け取りました。1日1つずつ増えます。':'開始日 '+cfg.startDate+' ／ あと'+Math.max(0,3-state.count)+'個で小物がひとつ。';
