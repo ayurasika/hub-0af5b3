@@ -20,8 +20,16 @@ function render(){
  if(sprite.getAttribute('src')!==src)sprite.src=src;
  sprite.alt=wearing.name+'を着たここあ';
  el('wearing').textContent='いまは「'+wearing.name+'」';
- el('closet-progress').textContent=!status?'ごほうびの記録を確認しています。':clothes.next?'服 '+clothes.total+' / '+S.outfits.length+'着。つぎは「'+clothes.next.name+'」。ハンコ3個の日をあと'+(clothes.next.day-clothes.days)+'日で、もらえるよ。':'服をぜんぶ集めたよ！ 季節が変わっても、好きなときに着られます。';
- S.outfits.forEach(function(o){var b=el('dress-'+o.id),owned=!!clothes.owned[o.id],chosen=wearing.outfit===o.id&&!wearing.hat&&!wearing.cape;b.disabled=!owned;b.setAttribute('aria-pressed',String(chosen));b.setAttribute('aria-label',o.name+(chosen?'（着ているよ）':owned?'に着替える':'（ハンコ3個の日を'+o.day+'日で獲得）'));b.querySelector('.ss-earned').textContent=chosen?'着ているよ':owned?'もらったよ':'あと'+(o.day-clothes.days)+'日';});
+ el('closet-progress').textContent=!status?'ごほうびの記録を確認しています。':clothes.next?'服 '+clothes.total+' / '+S.outfits.length+'着。つぎの服は、ハンコ3個の日をあと'+(clothes.next.day-clothes.days)+'日で、もらえるよ。':'服をぜんぶ集めたよ！ 季節が変わっても、好きなときに着られます。';
+ S.outfits.forEach(function(o){
+  var b=el('dress-'+o.id),owned=!!clothes.owned[o.id],chosen=wearing.outfit===o.id&&!wearing.hat&&!wearing.cape,preview=b.querySelector('.ss-dress-preview');
+  b.disabled=!owned;b.classList.toggle('ss-locked',!owned);b.setAttribute('aria-pressed',String(chosen));
+  b.setAttribute('aria-label',owned?o.name+(chosen?'（着ているよ）':'に着替える'):'ひみつの服（ハンコ3個の日を'+o.day+'日で獲得）');
+  b.querySelector('.ss-dress-name').textContent=owned?o.name:'ひみつの服';
+  if(owned&&!preview.querySelector('img')){preview.textContent='';var img=document.createElement('img');img.src='room/assets/character-'+o.asset+'-thumb.png';img.alt='';img.width=112;img.height=112;img.draggable=false;preview.appendChild(img);}
+  if(!owned&&!preview.querySelector('.ss-mystery')){preview.textContent='';var question=document.createElement('span');question.className='ss-mystery';question.textContent='？';preview.appendChild(question);}
+  b.querySelector('.ss-earned').textContent=chosen?'着ているよ':owned?'もらったよ':'あと'+(o.day-clothes.days)+'日';
+ });
  ['hat','cape'].forEach(function(id){el(id).setAttribute('aria-pressed',String(wearing[id]));});
  S.decor.forEach(function(d){el('toggle-'+d.id).setAttribute('aria-pressed',String(!!position(d.id)));});
  el('undo').disabled=!snap.canUndo;
@@ -45,7 +53,7 @@ function wire(node,id){
 safe(function(){
  store=S.create(window.localStorage,preview);snap=store.read();
  var character=el('character');wire(character,'character');
- S.outfits.forEach(function(o){var b=document.createElement('button');b.id='ss-dress-'+o.id;b.type='button';b.className='ss-dress';b.setAttribute('aria-pressed','false');var img=document.createElement('img');img.src='room/assets/character-'+o.asset+'-thumb.png';img.alt='';img.width=112;img.height=112;img.draggable=false;b.appendChild(img);var name=document.createElement('span');name.textContent=o.name;b.appendChild(name);var badge=document.createElement('small');badge.className='ss-earned';b.appendChild(badge);b.onclick=function(){cancel();safe(function(){render();store.save(S.dress(snap.state,o.id,window.RoomRewardStatus),snap.token);render();el('note').textContent=o.name+'に着替えました。';});};el('clothes').appendChild(b);});
+ S.outfits.forEach(function(o){var b=document.createElement('button');b.id='ss-dress-'+o.id;b.type='button';b.className='ss-dress';b.setAttribute('aria-pressed','false');var preview=document.createElement('div');preview.className='ss-dress-preview';preview.setAttribute('aria-hidden','true');b.appendChild(preview);var name=document.createElement('span');name.className='ss-dress-name';b.appendChild(name);var badge=document.createElement('small');badge.className='ss-earned';b.appendChild(badge);b.onclick=function(){cancel();safe(function(){render();store.save(S.dress(snap.state,o.id,window.RoomRewardStatus),snap.token);render();el('note').textContent=o.name+'に着替えました。';});};el('clothes').appendChild(b);});
  S.decor.forEach(function(d){var node=document.createElement('button');node.type='button';node.className='ss-object ss-decor ss-'+d.id;node.setAttribute('aria-label',d.name+'を動かす');var img=document.createElement('img');img.src='room/assets/halloween-'+d.id+'.png';img.alt='';img.draggable=false;node.appendChild(img);layer.appendChild(node);wire(node,d.id);
  var pick=document.createElement('button');pick.type='button';pick.id='ss-toggle-'+d.id;pick.setAttribute('aria-pressed','false');var icon=img.cloneNode();pick.appendChild(icon);pick.appendChild(document.createTextNode({pumpkin:'かぼちゃ',ghost:'おばけ',candy:'お菓子かご',stars:'月と星'}[d.id]));var badge=document.createElement('small');badge.className='ss-earned';pick.appendChild(badge);pick.setAttribute('aria-label',d.name);pick.onclick=function(){cancel();safe(function(){render();if(!gifts.owned[d.id])return;if(snap.state.decor[d.id])delete snap.state.decor[d.id];else snap.state.decor[d.id]={x:d.x,y:d.y};store.save(snap.state,snap.token);render();});};el('decor').appendChild(pick);});
  ['hat','cape'].forEach(function(id){var badge=document.createElement('small');badge.className='ss-earned';el(id).appendChild(badge);el(id).onclick=function(){cancel();safe(function(){render();if(!gifts.owned[id])return;snap.state.outfit='green-knit';snap.state[id]=!snap.state[id];store.save(snap.state,snap.token);render();});};});
