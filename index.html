@@ -177,7 +177,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 .nobi .trow .miss .mtest{color:#aab;font-size:.64rem;margin-left:4px;}
 .nobi .nobinote{margin-top:6px;font-size:.66rem;color:#99a;line-height:1.6;}
 </style>
-<link rel="stylesheet" href="room/style.css?v=20261015-rewards1">
+<link rel="stylesheet" href="room/style.css?v=20261015-closet1">
 </head>
 <body>
 
@@ -209,7 +209,14 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 <p id="ss-note" role="status">ここあや飾りをつかんで動かせます。選んでから矢印ボタンでも動かせます。</p>
 <p>もらった飾りは、ボタンで出したり片づけたりできます。</p>
 <div id="ss-decor" aria-label="ハロウィンの飾り"></div>
-<div id="ss-outfit" aria-label="ここあの着せ替え"><button type="button" id="ss-hat" aria-pressed="false">魔女の帽子</button><button type="button" id="ss-cape" aria-pressed="false">星の刺繍のマント</button><button type="button" id="ss-original">もとの服に戻す</button></div>
+<section id="ss-closet" aria-labelledby="ss-closet-title">
+<h3 id="ss-closet-title">ここあのクローゼット</h3>
+<p id="ss-closet-progress" role="status" aria-live="polite"></p>
+<p>もらった服を選んでね。服はずっと使えます。</p>
+<p id="ss-wearing" role="status" aria-live="polite"></p>
+<div id="ss-clothes" aria-label="ごほうびの服"></div>
+<details id="ss-seasonal-outfit"><summary>ハロウィンの帽子とマント</summary><p>帽子とマントは、緑のニットに合わせます。</p><div id="ss-outfit" aria-label="ハロウィンの帽子とマント"><button type="button" id="ss-hat" aria-pressed="false">魔女の帽子</button><button type="button" id="ss-cape" aria-pressed="false">星の刺繍のマント</button><button type="button" id="ss-original">もとの服に戻す</button></div></details>
+</section>
 <div id="ss-move" hidden><span id="ss-selected"></span>を動かす<br><button type="button" id="ss-left" aria-label="左へ">←</button><button type="button" id="ss-up" aria-label="上へ">↑</button><button type="button" id="ss-down" aria-label="下へ">↓</button><button type="button" id="ss-right" aria-label="右へ">→</button></div>
 <button type="button" id="ss-reset">ここあと飾りを元の位置へ</button><button type="button" id="ss-undo" disabled>飾り・着せ替えをひとつ戻す</button>
 <p id="ss-error" role="alert"></p>
@@ -1087,11 +1094,11 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
   }
 })();
 </script>
-<script src="room/core.js?v=20261015-rewards1"></script>
-<script src="room/layout.js?v=20261015-rewards1"></script>
-<script src="room/device.js?v=20261015-rewards1"></script>
-<script src="room/ui.js?v=20261015-rewards1"></script>
-<script src="room/season.js?v=20261015-rewards1"></script>
-<script src="room/season-ui.js?v=20261015-rewards1"></script>
+<script src="room/core.js?v=20261015-closet1"></script>
+<script src="room/layout.js?v=20261015-closet1"></script>
+<script src="room/device.js?v=20261015-closet1"></script>
+<script src="room/ui.js?v=20261015-closet1"></script>
+<script src="room/season.js?v=20261015-closet1"></script>
+<script src="room/season-ui.js?v=20261015-closet1"></script>
 </body>
 </html>
