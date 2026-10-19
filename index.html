@@ -86,6 +86,10 @@ body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;backgr
 .km-mark small{font-weight:700;font-size:.68rem;margin-left:3px;}
 .km-msg{margin-top:8px;font-size:.85rem;line-height:1.7;background:#fff3e9;border-radius:10px;padding:8px 11px;color:#444;}
 .km-msg b{color:#e8611a;}
+.km-keikou{margin-top:10px;border:2px dashed #f5c99f;border-radius:12px;padding:9px 12px;background:#fffdf9;font-size:.85rem;line-height:1.7;color:#444;}
+.km-keikou .ktitle{font-size:.75rem;font-weight:900;color:#e8611a;}
+.km-keikou ul{margin:4px 0 0;padding-left:1.2em;}
+.km-keikou .kgood{margin-top:4px;color:#1f9d52;font-weight:700;}
 .btn.indigo{background:#3a5fd9;color:#fff;}
 .btn.dark{background:#1a1a2e;color:#fff;}
 
@@ -259,6 +263,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
     <input type="file" accept="image/*" multiple id="km-alb" hidden>
     <div class="km-status" id="km-status"></div>
     <div id="km-result"></div>
+    <div id="km-keikou"></div>
   </div>
 
   <!-- 塾から帰ったら -->
@@ -897,6 +902,7 @@ async function kmRefreshInbox(){
 function kmRenderResult(){
   const mount = document.getElementById("km-result");
   const res = store.get("km-result", null);
+  kmRenderKeikou();
   if(!res || !res.date){ mount.innerHTML = ""; return; }
   const [y, m, d] = res.date.split("-").map(Number);
   const marks = (res.marks || []).map(mk =>
@@ -906,6 +912,20 @@ function kmRenderResult(){
     <span class="rdate">✅ ${m}月${d}日のまるつけ</span>${res.sheet ? `<span class="rsheet">${res.sheet}</span>` : ""}
     <div class="km-marks">${marks}</div>
     ${res.message ? `<div class="km-msg"><b>💬 ひとこと：</b>${res.message}</div>` : ""}
+  </div>`;
+}
+
+// 間違える傾向（Claudeが km-keikou を書き込むと出る。丸つけ結果とちがって毎回上書きされず、傾向が変わったときだけ更新）
+function kmRenderKeikou(){
+  const mount = document.getElementById("km-keikou");
+  const k = store.get("km-keikou", null);
+  if(!k || !k.message){ mount.innerHTML = ""; return; }
+  const items = (k.items || []).map(t => `<li>${t}</li>`).join("");
+  mount.innerHTML = `<div class="km-keikou">
+    <div class="ktitle">🔍 こころの間違え方のくせ${k.span ? `（${k.span}）` : ""}</div>
+    <div>${k.message}</div>
+    ${items ? `<ul>${items}</ul>` : ""}
+    ${k.good ? `<div class="kgood">${k.good}</div>` : ""}
   </div>`;
 }
 
