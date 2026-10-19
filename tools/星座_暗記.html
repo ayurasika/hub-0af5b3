@@ -210,14 +210,149 @@
   }
   .quiz-score { font-size: 1.4rem; font-weight: bold; text-align: center; margin: 14px 0; }
   .quiz-score small { display: block; font-size: 0.9rem; color: #aab2e8; font-weight: normal; margin-top: 6px; }
+
+:root{--night:#101f36;--panel:#182d49;--ink:#eef5fa;--muted:#afc4d6;--mint:#a6e5d1;--gold:#ffe3a0;--pink:#efacb5}
+body{background:var(--night);color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;padding:0 0 48px;background-image:radial-gradient(circle at 15% 12%,#264261 0,transparent 36%)}
+header{max-width:1120px;margin:auto;padding:30px 28px 23px;display:flex;align-items:center;justify-content:space-between;text-align:left;gap:24px}
+header h1{font-size:clamp(28px,4vw,43px);letter-spacing:.04em;line-height:1.35;font-weight:800}header p{color:var(--muted);font-size:14px;line-height:1.8;margin-top:9px}.brand{font-size:13px;color:var(--mint);margin-bottom:13px;display:flex;align-items:center;gap:9px}.brand:before{content:'✦';font-size:23px}.hero-art{width:140px;flex:none}.hero-art svg{overflow:visible}
+.tabs{max-width:1064px;margin:0 auto;background:#101f36ed;border-top:1px solid #41546a;border-bottom:1px solid #41546a;padding:12px 0;justify-content:flex-start;gap:8px;backdrop-filter:blur(16px)}
+.tab-btn{border:1px solid transparent;border-radius:13px;background:transparent;color:#c4d6e5;font-size:14px;padding:11px 17px;min-height:46px}.tab-btn.active{background:var(--mint);border-color:var(--mint);color:#152b3c;box-shadow:0 3px 0 #608f89}.tab-btn:hover:not(.active){background:#263d58}.tab-btn[data-tab=quiz]{margin-left:auto;color:var(--gold);border-color:#655e49}.tab-btn[data-tab=quiz].active{color:#182738;background:var(--gold)}
+main{max-width:1120px;padding:25px 28px;margin:auto}.panel.active{animation:none}.observatory-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px}.observatory-heading h2{font-size:23px;line-height:1.5}.observatory-heading p{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.7}.discovery{font-size:13px;white-space:nowrap;color:var(--gold);padding:9px 14px;border:1px solid #5b604f;border-radius:30px}.sky-wrap{background:radial-gradient(ellipse at 48% 95%,#243f61 0,#10223d 53%,#091a2e 100%);border:1px solid #48617a;border-radius:24px 24px 5px 5px;box-shadow:0 15px 45px #050e1c50}.sky-wrap svg{max-height:570px}.ground{fill:#162a43}.const-line{stroke:#849fc3;opacity:.7}.star-label rect.qbox{fill:#284765;stroke:#83b6c8;stroke-width:1;opacity:1}.star-label text.qmark{fill:#dcf6ff}.star-label.revealed text{fill:#fff0bc}.sky-wrap.hiding .star-label:hover rect.qbox{fill:#3e6688}.star-label:focus{outline:none}.star-label:focus-visible rect.qbox{stroke:var(--gold);stroke-width:3}.controls{margin:0;padding:14px 18px;justify-content:space-between;align-items:center;background:#203752;border:1px solid #48617a;border-top:0;border-radius:0 0 20px 20px;gap:12px}.control-hint{font-size:13px;color:#c1d4e4;line-height:1.6}.hide-btn,.hide-btn.hiding{border:1px solid #829bad;background:transparent;color:#eef5fa;border-radius:10px;padding:10px 14px;font-size:13px;min-height:44px}.hide-btn:hover{background:#34516d}.info-card{background:#eaf0ed;color:#273d46;border:0;border-radius:7px 7px 20px 20px;margin-top:25px;padding:24px 28px;font-size:14px;line-height:1.9;box-shadow:inset 0 4px 0 #a6e5d1}.info-card h3{color:#254b52;font-size:17px;margin-bottom:12px}.info-card li{margin:7px 0}.info-card b.st{color:#235b65}.info-card .warn{color:#9f354b}.info-card .plus{color:#3f5259;background:#dae7e2;border-color:#568e86}.info-card [style*="color:#ffaa55"]{color:#925014!important}.info-card [style*="color:#aaccff"]{color:#286585!important}.info-card [style*="color:#ff6655"]{color:#b33d38!important}.color-table th{background:#d8e5e0;color:#244f56}.color-table td,.color-table th{border-color:#bccdc6}.quiz-box{background:#1c324f;border:1px solid #4e6580;padding:30px;border-radius:24px;margin:0}.quiz-q{font-size:clamp(20px,3vw,27px);min-height:70px}.quiz-progress{color:var(--mint);margin-bottom:20px}.quiz-opt{background:#263f5f;border-color:#627c9b;min-height:70px;line-height:1.6;border-radius:15px}.quiz-opt:not(:disabled):hover{background:#355675}.quiz-next,.quiz-restart{background:var(--gold);min-height:48px}.quiz-fb{padding-top:10px}.quiz-opt.correct{background:#23604e}.quiz-opt.wrong{background:#753e4b}.quiz-score small{color:#c6d8e6}.quiz-callout{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:24px 0 8px}.quiz-callout p{font-size:14px;line-height:1.8;color:var(--muted)}.quiz-callout strong{color:var(--ink);font-size:17px}.go-quiz{background:var(--gold);color:#223342;border:0;border-radius:12px;padding:13px 20px;font:700 14px inherit;cursor:pointer;min-height:48px;white-space:nowrap}button:focus-visible,a:focus-visible{outline:3px solid #ffe3a0;outline-offset:4px}.bottom-note{font-size:12px;color:#a5bbce;text-align:center;margin-top:30px}
+@media(max-width:650px){header{padding:24px 18px 18px;gap:10px}.hero-art{width:76px}header p{font-size:12px}.brand{margin-bottom:7px}.tabs{margin:0 14px;padding:10px 0;gap:5px;justify-content:center}.tab-btn{font-size:13px;padding:9px 12px;flex:1 0 auto}.tab-btn[data-tab=quiz]{margin:0}.observatory-heading{align-items:flex-start;gap:8px}.observatory-heading h2{font-size:20px}.observatory-heading p{font-size:12px}.discovery{font-size:11px;padding:7px 9px}main{padding:20px 12px}.sky-wrap{overflow-x:auto}.sky-wrap svg{min-width:650px;max-height:none}.controls{padding:12px;gap:10px}.control-hint{font-size:12px}.hide-btn{width:100%}.info-card{padding:20px 18px}.quiz-box{padding:22px 17px}.quiz-callout{align-items:flex-start}.go-quiz{padding:12px}.color-table{font-size:12px}.temp-seg{font-size:10px}.bottom-note{font-size:11px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+section.panel.active{animation:none}
+@media(max-width:650px){header{position:relative;display:block}header h1{font-size:26px;white-space:nowrap}header p{max-width:265px}.hero-art{position:absolute;right:18px;bottom:24px;width:60px}}
+
+body{background:#10222c;background-image:none;color:#f7ecd8}.room-header{max-width:1440px;display:flex;padding:18px 32px;align-items:center;gap:24px;font-size:12px;color:#b9ccc8}.room-brand{text-decoration:none;color:#f1d6a1;font-size:16px;font-weight:700}.room-header>span{flex:1}.room-header button{color:#e8dbc3;border:1px solid #738379;border-radius:24px;background:transparent;padding:9px 17px;font:inherit;cursor:pointer;min-height:40px}.observatory{position:relative;width:calc(100% - 40px);max-width:1400px;aspect-ratio:3/2;margin:0 auto;isolation:isolate;overflow:hidden;border-radius:26px;border:1px solid #73837955;background:#10222c}.room-art{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:-2}.observatory:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#07162266 0,transparent 42%,transparent 85%,#0a1b28bb 100%);z-index:-1;pointer-events:none}.room-title{position:absolute;left:5.5%;top:6%;text-shadow:0 2px 20px #04121b}.room-title>p:first-child{font-size:16px;color:#f1d6a1;letter-spacing:.15em;margin-bottom:14px}.room-title h1{font-size:clamp(30px,4vw,58px);line-height:1.45;letter-spacing:.06em;font-weight:800}.room-title .room-intro{font-size:14px;line-height:1.9;color:#f0e9dc;margin-top:15px}.hotspot{position:absolute;background:none;border:0;color:#fff4d8;cursor:pointer;display:flex;align-items:center;gap:9px;transform:translate(-50%,-50%);font-family:inherit;text-align:left;filter:drop-shadow(0 3px 10px #09172188)}.hotspot-spark{width:44px;height:44px;display:grid;place-items:center;border:1px solid #ffedbd;background:#314a48ed;border-radius:50%;font-size:24px;box-shadow:0 0 0 5px #ffe5a025;transition:transform .2s,background .2s}.hotspot:hover .hotspot-spark{transform:scale(1.15);background:#546e59}.hotspot-label{background:#182f32ed;border:1px solid #e7cf9e99;border-radius:13px;padding:11px 15px;font-size:15px;font-weight:700;white-space:nowrap;line-height:1.5}.hotspot small{display:block;color:#d4d9c9;font-size:11px;font-weight:400;margin-top:3px}.telescope{left:76%;top:48%}.atlas{left:27%;top:72%}.treasure{left:69%;top:86%}.room-caption{position:absolute;bottom:18px;width:100%;text-align:center;font-size:12px;color:#f6e5ca}.atlas-shelf{max-width:1180px;margin:0 auto;padding:45px 30px 32px;scroll-margin-top:20px}.shelf-heading{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:25px}.shelf-kicker{color:#c8af7d;font-size:12px;margin-bottom:9px}.shelf-heading h2{font-size:25px;letter-spacing:.03em}.shelf-heading>p{font-size:12px;line-height:1.8;color:#b7c8c5}.season-books{display:grid;grid-template-columns:repeat(5,1fr);gap:17px}.season-book{position:relative;border:1px solid #8ba49955;border-left:6px solid #668c83;padding:18px 12px 13px;border-radius:3px 12px 12px 3px;background:#233f43;cursor:pointer;color:#f5ebd9;text-align:left;box-shadow:4px 6px 0 #07151c;font-family:inherit;transition:transform .18s}.season-book:nth-child(2){border-left-color:#c998ad;background:#433e50}.season-book:nth-child(3){border-left-color:#8fbdac;background:#244b50}.season-book:nth-child(4){border-left-color:#bd9a63;background:#474638}.season-book:nth-child(5){border-left-color:#90abc9;background:#2b4056}.season-book:hover{transform:translateY(-6px)}.book-art{width:100%;height:105px;overflow:hidden}.book-art svg{width:100%;height:100%;filter:drop-shadow(0 0 5px #ffe6a144)}.book-art .star-label,.book-art .annot,.book-art .dir-label,.book-art .ground{display:none}.season-book strong{font-size:18px;display:block;margin-top:8px}.season-book small{display:block;font-size:11px;color:#e1decd;margin-top:7px;line-height:1.5}.color-link{display:block;margin:23px auto 0;padding:14px;color:#e6d5b1;background:none;border:0;font:inherit;font-size:13px;cursor:pointer}.color-link span{color:#b9d8d2;border-bottom:1px solid #789c92;margin-left:15px;padding-bottom:3px}body:not(.studying)>.tabs,body:not(.studying)>main{display:none}.tabs{background:#10222cf5;border-color:#58746f;scroll-margin-top:12px}main{padding-top:28px}.tab-btn.active{background:#d6c292;border-color:#d6c292;box-shadow:0 3px 0 #8a7857}.tab-btn[data-tab=quiz].active{background:#ead7a6}.sky-wrap{border:7px solid #876c45;border-bottom:1px solid #876c45;border-radius:35px 35px 0 0;box-shadow:0 0 0 1px #c7a76d,0 15px 35px #05151e55}.controls{background:#394c48;border-color:#876c45;border-width:1px 7px 7px;border-radius:0 0 22px 22px}.info-card{background:#eee4ce;box-shadow:inset 0 4px 0 #b99d64}.observatory-heading h2{color:#f5e9d2}.discovery{border-color:#b4a377;color:#ffe3a0}.quiz-box{background:#243d40;border-color:#79978b}.quiz-opt{background:#314e50;border-color:#6c958e}.quiz-opt:not(:disabled):hover{background:#3c6662}.quiz-opt.correct{background:#23604e}.quiz-opt.wrong{background:#753e4b}.go-quiz,.quiz-next,.quiz-restart{background:#eed9a5}.study-intro{font-size:12px;color:#b9cfc8;text-align:center;margin-bottom:20px}
+@media(min-width:1500px){.observatory{max-height:860px}.room-art{object-position:center}}
+@media(max-width:650px){.room-header{padding:13px 16px;gap:10px}.room-header>span{display:none}.room-header .room-brand{flex:1;font-size:14px}.room-header button{padding:7px 12px;font-size:11px}.observatory{width:calc(100% - 20px);aspect-ratio:3/4;border-radius:20px}.room-art{object-position:54% center}.room-title{left:6%;top:6%}.room-title>p:first-child{font-size:12px;margin-bottom:9px}.room-title h1{font-size:29px;line-height:1.4}.room-title .room-intro{font-size:11px;max-width:240px;line-height:1.7}.hotspot{gap:5px}.hotspot-spark{width:32px;height:32px;font-size:18px;flex:none}.hotspot-label{padding:8px 10px;font-size:12px;border-radius:9px}.hotspot small{font-size:9px}.telescope{left:69%;top:48%}.atlas{left:30%;top:71%}.treasure{left:65%;top:85%}.room-caption{font-size:10px;bottom:13px}.atlas-shelf{padding:28px 16px 24px}.shelf-heading{display:block;margin-bottom:20px}.shelf-heading h2{font-size:21px}.shelf-heading>p{margin-top:12px}.season-books{display:flex;overflow-x:auto;padding:0 5px 14px;gap:13px;scroll-snap-type:x mandatory}.season-book{flex:0 0 145px;scroll-snap-align:start}.book-art{height:85px}.season-book strong{font-size:16px}.color-link{font-size:12px;margin:12px auto 0;line-height:2}.color-link span{display:block;margin:0 auto;width:fit-content}.sky-wrap{border-width:4px}.controls{border-width:1px 4px 4px}.room-title h1{white-space:normal}.room-header{position:static}.room-header svg{width:20px}}
+
+@media(max-width:650px){.room-art{height:auto;top:auto;bottom:0;object-fit:contain}.observatory{background:linear-gradient(#102438,#132c39)}.room-title{top:5%;left:7%}.room-title h1{font-size:28px}.room-title .room-intro{font-size:12px;margin-top:9px}.hotspot-label{font-size:10px;padding:7px 8px}.hotspot small{display:none}.hotspot-spark{width:25px;height:25px;font-size:15px;box-shadow:0 0 0 3px #ffe5a025}.telescope{left:74%;top:72%}.atlas{left:24%;top:86%}.treasure{left:73%;top:92%}.room-caption{display:none}}
+
+/* 星の中心は静止したまま、光芒だけがゆっくり呼吸する */
+.sky-wrap {background:#071322;box-shadow:0 0 0 1px #d8b978,0 14px 45px #0006,inset 0 0 40px #0009;scrollbar-color:#8c7950 #0b1a29;scrollbar-width:thin}
+.sky-wrap .const-line{stroke:#9bbad5;stroke-width:1;opacity:.48}
+.sky-wrap .qbox{fill:#11273b;stroke:#a18b58;stroke-width:.7}
+.sky-wrap .qmark{fill:#f1dfb6}
+.star-rays{animation:starlight 5s ease-in-out infinite alternate}
+@keyframes starlight{from{opacity:.5}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.star-rays{animation:none}}
+
+/* 真鍮の観測窓と、星空に浮かぶ小さなしるし */
+body.studying{background:radial-gradient(ellipse at 50% 35%,#243a41,#0b1b25 75%)}
+body.studying .room-header{position:relative;z-index:12;background:#0c202b}
+body.studying>.observatory,body.studying>.atlas-shelf{display:none}
+main{max-width:1220px}
+.tabs{max-width:1140px;scroll-margin-top:70px;background:transparent;border:0;padding:20px 0 6px}
+.observatory-heading{margin-bottom:22px;align-items:center}
+.observatory-heading h2{font-size:28px;letter-spacing:.09em}
+.observatory-heading p{color:#bbc9cc}
+.sky-wrap{position:relative;border:1px solid #c1a36a66;border-radius:24px;overflow:hidden;background:#071322;box-shadow:0 24px 75px #0009,0 0 0 5px #101b23,0 0 0 6px #89714d77}
+.sky-wrap svg{display:block;width:100%;height:auto;max-height:none}
+.sky-wrap .star-label rect.qbox{fill:#102332;stroke:#e4c991;stroke-width:1;opacity:.94;filter:drop-shadow(0 1px 5px #0009)}
+.sky-wrap .star-label text.qmark{fill:#ffe5aa;font-size:15px}
+.sky-wrap.hiding .star-label:hover rect.qbox{fill:#526c6b;stroke:#fff4cf;filter:drop-shadow(0 0 7px #ffe6a088)}
+.sky-wrap .star-label.revealed text{fill:#fff1cf;stroke:#061321;stroke-width:5px}
+.sky-wrap .const-line{stroke:#c4dbe7;opacity:.52;stroke-width:.85}
+.sky-wrap .tri-line{stroke:#f4d58d;opacity:.75;stroke-width:1.4;stroke-dasharray:5 5;fill:#ffe5a008}
+.sky-wrap .guide-line{stroke:#a7e5da;stroke-width:1.3;opacity:.85}
+.sky-wrap .ground{fill:#06132199}
+.sky-wrap .dir-label{fill:#dbcaa5;font-size:11px;letter-spacing:3px}
+.view-controls{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:0 0 17px}
+.lens-caption{font-size:11px;color:#d6c39b;letter-spacing:.13em}
+.view-switch{display:flex;padding:4px;background:#081923;border:1px solid #82704d;border-radius:30px;gap:3px}
+.view-switch button{padding:9px 17px;min-height:40px;border:0;border-radius:25px;background:transparent;color:#b7c9cb;font:inherit;font-size:12px;cursor:pointer}
+.view-switch button[aria-pressed=true]{background:linear-gradient(135deg,#ecd7a6,#c6a76d);color:#1d3036;font-weight:700;box-shadow:0 2px 9px #0004}
+.sky-wrap.sky-only :is(.star-label,.const-line,.tri-line,.guide-line,.curve-line,.annot){display:none!important}
+.sky-wrap.sky-only .luminous-star{filter:brightness(1.15)}
+.controls{border:0;background:transparent;border-radius:0;padding:23px 5px 10px;gap:16px}
+.controls .hide-btn{border:1px solid #a79165;color:#f4e1b9;background:#183039;border-radius:30px;padding:12px 20px;white-space:nowrap}
+.controls .control-hint{font-size:12px;color:#becfcf}
+.info-card{position:relative;background:linear-gradient(100deg,#e2d4b5,#f4ecd9 48%,#e7dac0);border-radius:3px 13px 13px 3px;border-left:5px solid #9b7a46;box-shadow:3px 5px 0 #aa936622,0 12px 30px #0003;padding:27px 32px;margin-top:24px}
+.info-card:before{content:'星の観察ノート';display:block;font-size:10px;letter-spacing:.2em;color:#8a724c;border-bottom:1px solid #bda77d66;margin-bottom:16px;padding-bottom:10px}
+.info-card h3{letter-spacing:.05em}
+@media(max-width:650px){.room-header{z-index:12}.tabs{scroll-margin-top:65px}.observatory-heading h2{font-size:21px}.view-controls{gap:8px}.lens-caption{font-size:10px;letter-spacing:0}.view-switch button{padding:8px 12px;font-size:11px}.sky-wrap{overflow-x:auto;border-radius:18px}.sky-wrap svg{min-width:650px}.controls{padding:18px 3px 8px}.info-card{padding:22px 20px}.observatory-heading{margin-bottom:16px}.control-hint{width:100%}}
+
+
+/* 絵の奥行きを残し、学習用の星を手前へ */
+.deep-sky-art{filter:brightness(.72) saturate(.9)}
+
+/* 天文台の小さな観測道具：刻印、真鍮の縁、深い緑の革 */
+.room-header{max-width:none;padding:20px max(28px,calc((100vw - 1160px)/2));gap:26px;border-bottom:1px solid #b99c622b;background:linear-gradient(100deg,#102833,#0a1b25);box-shadow:0 4px 24px #0002}
+.room-brand{display:flex;align-items:center;gap:12px;font-size:18px;letter-spacing:.11em;white-space:nowrap;color:#ead3a1}
+.brand-seal{width:43px;height:43px;flex:none;border:1px solid #a58d5a;border-radius:50%;padding:4px;background:radial-gradient(circle at 35% 25%,#47615f,#172f36 70%);box-shadow:inset 0 0 0 3px #102631,0 2px 5px #0005}
+.brand-seal svg{width:100%;height:100%;color:#eed7a2}
+.room-header>span{font-size:11px;color:#a0b4b6;letter-spacing:.08em}
+.room-header #room-return{display:flex;align-items:center;gap:9px;border-radius:7px;border-color:#a68d5a70;padding:10px 15px;color:#e1cfaa;background:linear-gradient(#24404777,#112b32);box-shadow:inset 0 1px 0 #e7d5a518,0 3px 8px #0002}
+.ui-engraving{width:23px;height:23px;flex:none;vertical-align:middle;color:inherit;overflow:visible}
+.tabs{gap:8px;padding:19px 0 17px;border-bottom:1px solid #c4a76b33;align-items:stretch;justify-content:flex-start}
+.tab-btn{position:relative;display:flex;align-items:center;justify-content:center;gap:9px;padding:12px 16px;min-height:57px;border:1px solid transparent;border-radius:7px;background:transparent;color:#a8bec0;font-size:14px;transition:background .18s,color .18s,border-color .18s}
+.tab-btn .ui-engraving{width:29px;height:29px;color:#a99571;opacity:.9}
+.tab-btn:hover{background:#34504e55;color:#f4e4bd;border-color:#a28c5544}
+.tabs .tab-btn.active,.tabs .tab-btn[data-tab=quiz].active{background:linear-gradient(130deg,#385451,#1c363d 75%);color:#f8e4b3;border:1px solid #bfa069;box-shadow:inset 0 0 0 3px #102730,0 4px 12px #0003}
+.tabs .tab-btn.active:after{content:'';position:absolute;bottom:-19px;left:calc(50% - 3px);width:6px;height:6px;background:#dcc08a;transform:rotate(45deg);box-shadow:0 0 10px #ebd29477}
+.tab-btn.active .ui-engraving{color:#ffe1a0;opacity:1;filter:drop-shadow(0 0 4px #efd09244)}
+.tabs .tab-btn[data-tab=quiz]{border-color:#a28c5555;margin-left:auto;color:#e3cea0;border-radius:7px}
+main{padding-top:30px}
+.observatory-heading{min-height:88px;margin-bottom:24px;gap:20px}
+.observatory-heading h2{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-weight:600;font-size:30px;letter-spacing:.08em;color:#f1e3c6;text-shadow:0 2px 12px #0003}
+.observatory-heading p{font-size:12px;letter-spacing:.04em;color:#adbfbe;margin-top:9px}
+.discovery{display:flex;align-items:center;gap:12px;border:0;border-left:1px solid #b49b6344;border-radius:0;padding:2px 5px 2px 24px;background:none;color:#f2dfb5;min-width:153px}
+.discovery-seal{display:grid;place-items:center;position:relative;width:47px;height:47px;border-radius:50%;background:conic-gradient(#eed499 calc(var(--found)*360deg),#78908333 0);padding:2px;box-shadow:0 0 0 4px #c5a56c09}
+.discovery-seal>span{display:grid;place-items:center;background:radial-gradient(#334d4d,#142b35);width:100%;height:100%;border-radius:50%;font-size:29px;color:#eed59b}
+.discovery-copy{display:flex;flex-direction:column;gap:3px}.discovery-copy small{font-size:10px;letter-spacing:.07em;color:#b5b9a7}.discovery-copy strong{font-size:23px;line-height:1.2;font-weight:500;font-family:Georgia,serif}.discovery-copy em{font-size:14px;font-style:normal;color:#8ea7a7;margin-left:3px}
+.view-controls{padding:0 0 13px;margin-bottom:0;gap:12px}
+.lens-caption{display:flex;align-items:center;gap:9px;color:#c8b788;font-size:11px;letter-spacing:.12em}
+.lens-caption .ui-engraving{width:23px;height:23px}
+.view-switch{padding:4px;border-radius:9px;border-color:#ad945953;background:linear-gradient(#081820,#142a31);box-shadow:inset 0 2px 6px #0005;gap:4px}
+.view-switch button{display:flex;gap:7px;align-items:center;justify-content:center;border-radius:5px;border:1px solid transparent;padding:8px 13px;font-size:11px;color:#94acaf}
+.view-switch .ui-engraving{width:18px;height:18px}
+.view-switch button[aria-pressed=true]{border:1px solid #c5aa6e;background:linear-gradient(115deg,#e3cc96,#b99a5e);color:#263831;box-shadow:inset 0 1px 0 #fff3ca99,0 2px 4px #0005}
+@media(max-width:650px){.room-header{padding:13px 16px;gap:12px}.brand-seal{width:32px;height:32px}.room-header .room-brand{font-size:13px;gap:8px;letter-spacing:.05em}.room-header #room-return{padding:8px 10px;gap:6px;font-size:10px}.room-header #room-return .ui-engraving{width:17px;height:17px}.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:15px 0 13px;margin:0 14px}.tab-btn{min-height:49px;padding:8px 10px;gap:5px;font-size:12px;flex:1 0 auto}.tab-btn .ui-engraving{width:23px;height:23px}.tabs .tab-btn.active:after{display:none}.tabs .tab-btn[data-tab=quiz]{margin:0}.observatory-heading{gap:10px;min-height:75px;margin-bottom:17px}.observatory-heading h2{font-size:21px;letter-spacing:.04em}.observatory-heading p{font-size:10px;letter-spacing:0;max-width:215px}.discovery{min-width:0;gap:8px;padding-left:10px}.discovery-seal{width:34px;height:34px}.discovery-seal>span{font-size:23px}.discovery-copy small{font-size:8px;letter-spacing:0}.discovery-copy strong{font-size:19px}.discovery-copy em{font-size:11px}.lens-caption{font-size:9px;letter-spacing:0;gap:5px}.lens-caption .ui-engraving{width:18px;height:18px}.view-switch button{padding:7px 8px;font-size:10px;gap:4px}.view-switch .ui-engraving{width:14px;height:14px}.view-controls{gap:7px}.view-switch{gap:2px;padding:3px}}
+
+
+/* 天文台の蔵書：布張り・箔押し・小口 */
+.atlas-shelf{padding-top:48px;padding-bottom:38px}
+.shelf-kicker{font-size:11px;letter-spacing:.2em;color:#b7a175}
+.shelf-heading{align-items:center;margin-bottom:33px}
+.shelf-heading h2{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:27px;font-weight:600;letter-spacing:.06em;color:#f0e1c2;line-height:1.65}
+.shelf-heading>p{font-size:12px;line-height:2;color:#9bb0b0;font-weight:400}
+.season-books{gap:23px;padding:0 8px 24px;position:relative;align-items:stretch}
+.season-book{--cloth:#23433e;--edge:#567269;--foil:#d9c18a;position:relative;isolation:isolate;min-height:310px;padding:27px 19px 26px 27px;border:1px solid #d8bd7944;border-left:0;border-radius:3px 6px 7px 3px;background:repeating-linear-gradient(0deg,#ffffff05 0px,#ffffff05 1px,transparent 1px,transparent 3px),repeating-linear-gradient(90deg,#0000000a 0px,#0000000a 1px,transparent 1px,transparent 3px),linear-gradient(100deg,#0007 0%,transparent 12%,#fff1 16%,transparent 21%,#0002 100%),var(--cloth);box-shadow:inset 5px 0 5px #0005,inset 0 1px 0 #fff2,3px 4px 0 #a89b7d,5px 6px 0 #d8cfb8,7px 9px 0 #32413c,10px 16px 20px #0005;color:var(--foil);text-align:center;transform:perspective(900px) rotateY(-5deg);transition:transform .22s,box-shadow .22s}
+.season-book:nth-child(2){--cloth:#473545;--edge:#806276;--foil:#e3c6a1;border-left:0;background-color:var(--cloth)}
+.season-book:nth-child(3){--cloth:#1e434c;--edge:#577d80;--foil:#d6d3a4;border-left:0;background-color:var(--cloth)}
+.season-book:nth-child(4){--cloth:#493b2a;--edge:#8c7250;--foil:#e0bd80;border-left:0;background-color:var(--cloth)}
+.season-book:nth-child(5){--cloth:#293c57;--edge:#667f9e;--foil:#d6d4bb;border-left:0;background-color:var(--cloth)}
+.season-book:nth-child(n){background-image:repeating-linear-gradient(0deg,#ffffff05 0px,#ffffff05 1px,transparent 1px,transparent 3px),repeating-linear-gradient(90deg,#0000000a 0px,#0000000a 1px,transparent 1px,transparent 3px),linear-gradient(100deg,#0007 0%,transparent 12%,#fff1 16%,transparent 21%,#0002 100%)}
+.season-book:before{content:'';position:absolute;inset:12px 10px 12px 18px;border:1px solid #d9c18a50;border-radius:1px;pointer-events:none;box-shadow:inset 0 0 0 3px #0001}
+.season-book:after{content:'';position:absolute;left:7px;top:0;bottom:0;width:6px;border-left:1px solid #d9c18a25;border-right:1px solid #0006;background:linear-gradient(0deg,transparent 7%,var(--edge) 7%,var(--edge) 8%,transparent 8%,transparent 90%,var(--edge) 90%,var(--edge) 91%,transparent 91%);pointer-events:none}
+.season-book:hover{transform:perspective(900px) rotateY(-4deg) translateY(-8px);box-shadow:inset 5px 0 5px #0005,inset 0 1px 0 #fff2,3px 4px 0 #a89b7d,5px 6px 0 #d8cfb8,7px 9px 0 #32413c,12px 23px 24px #0007}
+.book-edition{display:block;font-size:8px;letter-spacing:.2em;font-weight:400;color:var(--foil);opacity:.8;margin:0 0 20px}
+.book-art{width:100%;height:103px;position:relative;border-radius:50% 50% 3px 3px;overflow:hidden;border:1px solid #dec38a88;box-shadow:0 0 0 3px #07182255,0 0 0 4px #c2a66a33,inset 0 0 12px #0009;margin:0 auto 22px;background:#081823}
+.book-art svg{width:100%;height:100%;filter:none;transform:scale(1.13)}
+.book-art .deep-sky-art{filter:brightness(.58) saturate(.7)}
+.season-book strong{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-weight:600;font-size:22px;letter-spacing:.16em;line-height:1.5;margin:0;text-shadow:0 1px 0 #0008,0 -1px 0 #fff1}
+.season-book small{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-weight:400;font-size:10px;line-height:1.9;color:#e7dcc5;opacity:.85;letter-spacing:.03em;margin:9px auto 0;min-height:38px;max-width:132px;text-wrap:balance}
+.book-ornament{display:block;font-family:serif;letter-spacing:7px;font-size:11px;color:var(--foil);opacity:.7;margin-top:13px;padding-left:7px}
+.color-link{display:flex;justify-content:center;align-items:center;gap:17px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:13px;letter-spacing:.04em;margin-top:15px;color:#d7c6a2}
+.color-link span{font-family:inherit;margin:0;color:#b5cac5;border-color:#a68d5a88}
+@media(max-width:650px){.atlas-shelf{padding-top:31px}.shelf-heading h2{font-size:22px;line-height:1.65}.shelf-heading>p{font-size:11px;line-height:1.9}.shelf-heading{margin-bottom:26px}.season-books{gap:23px;padding:8px 12px 27px 3px}.season-book{flex:0 0 175px;min-height:294px;padding:24px 17px 22px 25px}.book-art{height:97px;margin-bottom:18px}.book-edition{font-size:8px;margin-bottom:18px}.season-book strong{font-size:21px}.season-book small{font-size:10px}.color-link{display:block;font-size:12px;line-height:2}.color-link span{width:fit-content;display:block;margin:3px auto 0}.book-ornament{margin-top:10px}}
+
 </style>
 </head>
 <body>
 
-<header>
-  <h1>🌟 星座マスター</h1>
-  <p>名前は最初からかくしてあるよ。？をタップで答え合わせ → クイズで仕上げ！</p>
-</header>
+<header class="room-header"><a class="room-brand" href="#observatory">✦ 星座マスター</a><span>小さな天文台へ、ようこそ。</span><button id="room-return">天文台にもどる</button></header>
+<section class="observatory" id="observatory" aria-label="動物たちの天文台">
+<img class="room-art" src="星空アトリエ_assets/observatory.png" alt="ランタンが灯る木の天文台。うさぎと猫とリスが、望遠鏡や星の本を囲んでいる。">
+<div class="room-title"><p>星空のアトリエ</p><h1>今夜、どの星に<br>会いにいこう。</h1><p class="room-intro">望遠鏡をのぞいたり、星の本をひらいたり。<br>気になるものを、押してみてね。</p></div>
+<button class="hotspot telescope" data-open="kita"><span class="hotspot-spark">✦</span><span class="hotspot-label">望遠鏡をのぞく<small>北の空を探検</small></span></button>
+<button class="hotspot atlas" id="atlas-open"><span class="hotspot-spark">✦</span><span class="hotspot-label">星の本をひらく<small>季節の星座を選ぶ</small></span></button>
+<button class="hotspot treasure" data-open="quiz"><span class="hotspot-spark">✦</span><span class="hotspot-label">星のクイズに挑戦<small>10問のひみつを解こう</small></span></button>
+<p class="room-caption">今夜の冒険は、きみの気になるところから。</p>
+</section>
+<section class="atlas-shelf" id="atlas-shelf"><div class="shelf-heading"><div><p class="shelf-kicker">天文台の星の本</p><h2>ページをめくって、空の旅へ。</h2></div><p>春も、夏も、秋も、冬も。<br>空にはちがう景色が待っている。</p></div><div class="season-books" id="season-books"></div><button class="color-link" data-open="iro">✦ 赤い星と青い星、なにがちがう？ <span>星の色をくらべる</span></button></section>
+
 
 <nav class="tabs" id="tabs">
   <button class="tab-btn active" data-tab="kita">🧭 北の空</button>
@@ -401,7 +536,7 @@ const SKIES = {
       {
         cname: "",
         clabel: null,
-        stars: [ {x:405,y:200,mag:1,color:"ki"} ],
+        stars: [ {x:405,y:200,mag:1,color:"ki",polaris:true} ],
         lines: [],
         labels: [ {si:0, name:"北極星", sub:"（こぐま座）", dx:0, dy:-28} ]
       }
@@ -674,20 +809,31 @@ function renderSky(id) {
   const wrap = document.getElementById(id);
   const svg = el("svg", {viewBox: "0 0 800 510"}, wrap);
 
-  // 背景の小さな星をランダムにちりばめる
-  for (let i = 0; i < 70; i++) {
-    el("circle", {
-      cx: Math.random()*800, cy: Math.random()*460,
-      r: Math.random()*1.1 + 0.3,
-      fill: "#ffffff", opacity: (Math.random()*0.5+0.15).toFixed(2)
-    }, svg);
+  const defs = el('defs', {}, svg);
+  const uid = id.replace(/[^a-z0-9]/g,'');
+  const radial = (key, stops) => {
+    const grad = el('radialGradient', {id:uid+key}, defs);
+    stops.forEach(([offset,color,opacity])=>el('stop', {offset,'stop-color':color,'stop-opacity':opacity},grad));
+    return 'url(#'+uid+key+')';
+  };
+  const nebula = radial('nebula', [['0%','#7594ca',.23],['45%','#555d9c',.12],['100%','#15223d',0]]);
+  el('rect',{width:800,height:510,fill:'#071322'},svg);
+  el('image',{href:'星空アトリエ_assets/observatory-sky.png',x:0,y:0,width:800,height:510,preserveAspectRatio:'none',class:'deep-sky-art'},svg);
+  el('rect',{x:18,y:18,width:764,height:474,rx:25,fill:'#04101c',opacity:.13,'pointer-events':'none'},svg);
+  el('ellipse',{cx:470,cy:260,rx:490,ry:155,fill:nebula,transform:'rotate(-32 470 260)'},svg);
+  el('ellipse',{cx:200,cy:380,rx:350,ry:160,fill:nebula,transform:'rotate(-32 200 380)'},svg);
+  // 細かな遠い星。教材の星よりずっと暗く、小さく。
+  let seed=431;
+  const random=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
+  for(let i=0;i<100;i++){
+    el('circle',{cx:random()*800,cy:random()*480,r:.18+random()*.65,fill:i%4?'#c6d9f5':'#ffe7be',opacity:.12+random()*.42},svg);
   }
-
-  // 天の川
-  if (data.milkyway) {
-    el("path", {d: data.milkyway, fill: "#8fa3ff", opacity: 0.13}, svg);
+  if(data.milkyway){
+    const blur=el('filter',{id:uid+'mist',x:'-50%',y:'-50%',width:'200%',height:'200%'},defs);
+    el('feGaussianBlur',{stdDeviation:16},blur);
+    el('path',{d:data.milkyway,fill:'#9ea6d9',opacity:.18,filter:'url(#'+uid+'mist)'},svg);
   }
-
+  let starIndex=0;
   // 大三角・補助線など（星より下のレイヤー）
   (data.extras||[]).forEach(x => {
     if (x.type === "tri") {
@@ -712,14 +858,31 @@ function renderSky(id) {
     });
     // 星
     c.stars.forEach(s => {
-      const r = starRadius(s.mag);
-      if (s.mag === 1) {
-        // 一等星は光のにじみ＋十字のきらめき
-        el("circle", {cx:s.x, cy:s.y, r:r*2.4, fill:COLORS[s.color], opacity:0.18}, svg);
-        el("line", {x1:s.x-r*2.6, y1:s.y, x2:s.x+r*2.6, y2:s.y, stroke:COLORS[s.color], "stroke-width":1, opacity:0.6}, svg);
-        el("line", {x1:s.x, y1:s.y-r*2.6, x2:s.x, y2:s.y+r*2.6, stroke:COLORS[s.color], "stroke-width":1, opacity:0.6}, svg);
+      if(s.polaris){
+        const g=el('g',{class:'luminous-star polaris-star','pointer-events':'none'},svg);
+        const glow=radial('polarisGlow',[['0%','#fffdf3',.95],['8%','#fff4d6',.65],['22%','#eadbb4',.23],['50%','#d8d6c5',.06],['100%','#d8d6c5',0]]);
+        const flare=radial('polarisFlare',[['0%','#fffef5',1],['16%','#fff9e7',.8],['55%','#eae5d6',.22],['100%','#eae5d6',0]]);
+        el('circle',{cx:s.x,cy:s.y,r:44,fill:glow},g);
+        el('ellipse',{cx:s.x,cy:s.y,rx:23,ry:.9,fill:flare},g);
+        el('ellipse',{cx:s.x,cy:s.y,rx:.75,ry:28,fill:flare},g);
+        el('circle',{cx:s.x,cy:s.y,r:8,fill:flare},g);
+        el('circle',{cx:s.x,cy:s.y,r:2.3,fill:'#fffdf7'},g);
+        return;
       }
-      el("circle", {cx:s.x, cy:s.y, r:r, fill:COLORS[s.color]}, svg);
+      const r = s.mag===1 ? 4.2 : s.mag===2 ? 2.5 : 1.8;
+      const color=COLORS[s.color] || '#cedbff';
+      const key='shine'+starIndex++;
+      const halo=radial(key,[['0%',color,.85],['12%',color,.45],['35%',color,.13],['100%',color,0]]);
+      const size=s.mag===1?65:s.mag===2?36:21;
+      const g=el('g',{class:'luminous-star','pointer-events':'none'},svg);
+      el('circle',{cx:s.x,cy:s.y,r:size,fill:halo},g);
+      const rays=el('g',{class:'star-rays',style:'transform-origin:'+s.x+'px '+s.y+'px;animation-delay:-'+(starIndex%7)+'s'},g);
+      const arm=s.mag===1?30:s.mag===2?16:8;
+      el('path',{d:`M ${s.x} ${s.y-arm} Q ${s.x+1} ${s.y-1} ${s.x+arm*.7} ${s.y} Q ${s.x+1} ${s.y+1} ${s.x} ${s.y+arm} Q ${s.x-1} ${s.y+1} ${s.x-arm*.7} ${s.y} Q ${s.x-1} ${s.y-1} ${s.x} ${s.y-arm}`,fill:color,opacity:.8},rays);
+      if(s.mag===1) el('path',{d:`M ${s.x-9} ${s.y-9} L ${s.x+9} ${s.y+9} M ${s.x+9} ${s.y-9} L ${s.x-9} ${s.y+9}`,stroke:color,'stroke-width':.6,opacity:.5},rays);
+      el('circle',{cx:s.x,cy:s.y,r:r*1.8,fill:halo},g);
+      el('circle',{cx:s.x,cy:s.y,r:r,fill:color},g);
+      el('circle',{cx:s.x,cy:s.y,r:r*.57,fill:'#fffdf3'},g);
     });
     // 星の名前ラベル（かくせる）
     c.labels.forEach(lb => {
@@ -758,8 +921,8 @@ function addLabel(svg, x, y, name, sub, isCname, textCls) {
     t2.textContent = sub;
   }
   // かくすとき用の「？」ボックス
-  const w = Math.max(name.length*15+16, 40);
-  el("rect", {x:x-w/2, y:y-16, width:w, height:22, rx:11, fill:"#e8608a", opacity:0.9, class:"qbox"}, g);
+  const w = 34;
+  el("rect", {x:x-w/2, y:y-19, width:w, height:29, rx:14.5, fill:"#e8608a", opacity:0.9, class:"qbox"}, g);
   const q = el("text", {x:x, y:y, "text-anchor":"middle", class:"qmark"}, g);
   q.textContent = "？";
   g.addEventListener("click", () => {
@@ -776,7 +939,7 @@ document.querySelectorAll(".hide-btn").forEach(btn => {
   const wrap = document.getElementById(btn.dataset.sky);
   const sync = (hiding) => {
     btn.classList.toggle("hiding", hiding);
-    btn.textContent = hiding ? "👀 名前をぜんぶ見る（？はタップで1つずつ）" : "🙈 名前をかくしてテスト";
+    btn.textContent = hiding ? "名前をぜんぶ見る" : "名前をかくして挑戦";
     if (!hiding) wrap.querySelectorAll(".star-label.revealed").forEach(g=>g.classList.remove("revealed"));
   };
   wrap.classList.add("hiding");
@@ -880,7 +1043,7 @@ function answer(btn, oi, item) {
     });
   }
   $("quiz-fb").innerHTML =
-    `<span class="mark">${correct ? "⭕ 正解！" : "❌ ざんねん…"}</span><br>${item.ex}`;
+    `<span class="mark">${correct ? "⭕ 正解！" : "✦ 答えを見つけよう"}</span><br>${item.ex}`;
   if (quizIdx < 9) {
     $("quiz-next").style.display = "inline-block";
   } else {
@@ -903,6 +1066,92 @@ function finishQuiz() {
 $("quiz-next").addEventListener("click", () => { quizIdx++; showQuestion(); });
 $("quiz-restart").addEventListener("click", startQuiz);
 startQuiz();
+</script>
+
+<script>
+(()=>{
+const chapters={kita:['北の空を探検','動かない星を、見つけられる？'],haru:['春の空を探検','大きな三角と、長いカーブをたどろう。'],natsu:['夏の空を探検','織姫と彦星は、どこにいる？'],aki:['秋の空を探検','夜空にかくれた、大きな四角を探そう。'],fuyu:['冬の空を探検','三つ星を目印に、明るい星を見つけよう。'],iro:['星の色をくらべよう','青い星と赤い星。熱いのはどっち？'],quiz:['星空クイズに挑戦','10問の小さな冒険。まちがえても、また覚えれば大丈夫。']};
+const seen=new Set();
+Object.entries(chapters).forEach(([key,words])=>{
+ const panel=document.getElementById('panel-'+key);const heading=document.createElement('div');heading.className='observatory-heading';
+ const copy=document.createElement('div');const h=document.createElement('h2');h.textContent=words[0];const p=document.createElement('p');p.textContent=words[1];copy.append(h,p);heading.append(copy);panel.prepend(heading);
+ const sky=panel.querySelector('.sky-wrap');if(!sky)return;
+ const tally=document.createElement('span');tally.className='discovery';tally.setAttribute('aria-live','polite');heading.append(tally);
+ const labels=[...sky.querySelectorAll('.star-label')];const update=()=>{const n=labels.filter(el=>seen.has(el)).length;tally.innerHTML='<span class="discovery-seal" aria-hidden="true" style="--found:'+n/labels.length+'"><span>✧</span></span><span class="discovery-copy"><small>見つけた星の名前</small><strong>'+n+' <em>/ '+labels.length+'</em></strong></span>';tally.setAttribute('aria-label','発見 '+n+' / '+labels.length);};
+ labels.forEach(label=>{label.tabIndex=0;label.setAttribute('role','button');label.setAttribute('aria-label','名前をめくる');label.setAttribute('aria-pressed','false');
+ label.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();label.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+ label.addEventListener('click',()=>{if(sky.classList.contains('hiding')&&label.classList.contains('revealed'))seen.add(label);label.setAttribute('aria-pressed',String(label.classList.contains('revealed')));label.setAttribute('aria-label',label.classList.contains('revealed')?label.querySelector('text').textContent+'、もう一度かくす':'名前をめくる');update();});});update();
+ sky.setAttribute('aria-label',words[0]+'の星図');sky.setAttribute('tabindex','0');
+ const controls=panel.querySelector('.controls');sky.after(controls);const hint=document.createElement('p');hint.className='control-hint';hint.textContent='光る星のそばの「？」を押して、名前を見つけよう。';controls.prepend(hint);
+ const callout=document.createElement('div');callout.className='quiz-callout';callout.innerHTML='<p><strong>いくつ覚えたかな？</strong><br>星空クイズでためしてみよう。</p><button class="go-quiz">クイズに挑戦</button>';panel.append(callout);callout.querySelector('button').addEventListener('click',()=>{document.querySelector('[data-tab="quiz"]').click();document.getElementById('tabs').scrollIntoView({block:'start'});});
+});
+const tabs=[...document.querySelectorAll('.tab-btn')];tabs.forEach(btn=>{btn.setAttribute('aria-pressed',String(btn.classList.contains('active')));btn.addEventListener('click',()=>tabs.forEach(b=>b.setAttribute('aria-pressed',String(b===btn))));});
+document.getElementById('quiz-fb').setAttribute('aria-live','polite');
+const foot=document.createElement('p');foot.className='bottom-note';foot.textContent='星の並びを覚えるための図です。背景の星雲と光はイメージ表現です。実際の見え方は時刻や場所で変わります。';document.querySelector('main').append(foot);
+})();
+</script>
+<script>
+(()=>{
+function openStudy(key){document.body.classList.add('studying');document.querySelector('.tab-btn[data-tab="'+key+'"]').click();requestAnimationFrame(()=>document.getElementById('tabs').scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'}));}
+document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openStudy(b.dataset.open)));
+document.getElementById('atlas-open').addEventListener('click',()=>document.getElementById('atlas-shelf').scrollIntoView({block:'start',behavior:'smooth'}));
+document.getElementById('room-return').addEventListener('click',()=>{document.body.classList.remove('studying');window.scrollTo({top:0,behavior:'smooth'});});
+const books=[['kita','北の空','北極星への道しるべ'],['haru','春の空','大きな三角と星のカーブ'],['natsu','夏の空','織姫と彦星をさがして'],['aki','秋の空','夜空にうかぶ四角形'],['fuyu','冬の空','三つ星からはじまる旅']];
+books.forEach(([key,title,sub])=>{const book=document.createElement('button');book.className='season-book';book.innerHTML='<div class="book-art" aria-hidden="true"></div><strong>'+title+'</strong><small>'+sub+'</small>';const svg=document.querySelector('#sky-'+key+' svg').cloneNode(true);svg.querySelectorAll('[tabindex]').forEach(e=>e.removeAttribute('tabindex'));book.querySelector('.book-art').append(svg);book.addEventListener('click',()=>openStudy(key));document.getElementById('season-books').append(book);});
+})();</script>
+<script>
+(()=>{
+ document.querySelectorAll('main .sky-wrap').forEach(sky=>{
+  const toolbar=document.createElement('div');toolbar.className='view-controls';
+  toolbar.innerHTML='<span class="lens-caption">✦ 望遠鏡のむこう</span><div class="view-switch" role="group" aria-label="星図の見かた"><button aria-pressed="true">星座をたどる</button><button aria-pressed="false">空をながめる</button></div>';
+  sky.before(toolbar);
+  const buttons=[...toolbar.querySelectorAll('button')];
+  buttons.forEach((b,i)=>b.addEventListener('click',()=>{
+   sky.classList.toggle('sky-only',i===1);
+   buttons.forEach((other,j)=>other.setAttribute('aria-pressed',String(i===j)));
+   const controls=sky.nextElementSibling;
+   controls.querySelector('.hide-btn').hidden=i===1;
+   controls.querySelector('.control-hint').textContent=i===1?'星の色や輝きを、ゆっくり眺めてみよう。':'光る星のそばの「？」を押して、名前を見つけよう。';
+  }));
+ });
+ // 本の縮小図は装飾。SVG IDの重複を避け、クリック対象には含めない。
+ document.querySelectorAll('.book-art svg').forEach((svg,i)=>{
+  const map=new Map();svg.querySelectorAll('[id]').forEach(e=>{const old=e.id;map.set(old,'book'+i+'-'+old);e.id=map.get(old)});
+  svg.querySelectorAll('*').forEach(e=>{for(const a of [...e.attributes]){let v=a.value;map.forEach((n,o)=>v=v.replaceAll('url(#'+o+')','url(#'+n+')'));if(v!==a.value)e.setAttribute(a.name,v)}e.removeAttribute('role');e.removeAttribute('aria-label');e.removeAttribute('aria-pressed')});
+ });
+})();
+</script>
+
+<script>
+(()=>{
+ const motifs={
+  compass:'<circle cx="16" cy="16" r="12"/><circle cx="16" cy="16" r="9" opacity=".35"/><path d="M16 1v4m0 22v4M1 16h4m22 0h4M20 10l-3 8-5 4 3-8z"/><path d="M16 5v3m0 16v3M5 16h3m16 0h3" opacity=".5"/>',
+  haru:'<path d="M5 23L15 6l12 17zM5 23Q10 13 15 6"/><circle cx="5" cy="23" r="2"/><circle cx="15" cy="6" r="2"/><circle cx="27" cy="23" r="2"/>',
+  natsu:'<path d="M6 6L26 12 15 27z"/><path d="M18 2Q10 14 23 30" opacity=".35" stroke-dasharray="1 3"/><circle cx="6" cy="6" r="2"/><circle cx="26" cy="12" r="2"/><circle cx="15" cy="27" r="2"/>',
+  aki:'<path d="M7 8L25 5 27 24 5 26z"/><circle cx="7" cy="8" r="2"/><circle cx="25" cy="5" r="2"/><circle cx="27" cy="24" r="2"/><circle cx="5" cy="26" r="2"/>',
+  fuyu:'<path d="M7 5L25 7 21 25 8 27zM11 15l10 2"/><circle cx="7" cy="5" r="2"/><circle cx="25" cy="7" r="2"/><circle cx="21" cy="25" r="2"/><circle cx="8" cy="27" r="2"/><path d="M11 15h.1m5 1h.1m5 1h.1" stroke-width="3"/>',
+  iro:'<path d="M16 4L29 27H3zM1 13l10 5m10 0l10-4m-10 8l10 2"/><path d="M12 19l8 1" opacity=".5"/>',
+  quiz:'<path d="M5 13h22v14H5zM4 13l4-7h16l4 7M16 6v21M5 18h22"/><path d="M14 17h4v5h-4z" fill="currentColor"/>',
+  home:'<path d="M4 15h24v13H4zM6 15a10 10 0 0120 0M16 4v11M3 28h26M13 28v-7h6v7"/><path d="M25 4v5m-2-2h4"/>',
+  scope:'<path d="M4 12l18-7 4 10-18 7zM3 11l5 12m13-19l5 12M16 19v4m0 0l-6 7m6-7l6 7"/>',
+  stars:'<path d="M5 24L12 9l14 9"/><circle cx="5" cy="24" r="2"/><circle cx="12" cy="9" r="2"/><circle cx="26" cy="18" r="2"/>',
+  moon:'<path d="M22 4a12 12 0 11-16 16A12 12 0 0022 4z"/><path d="M10 4v6M7 7h6m12 14v4m-2-2h4"/>'
+ };
+ const icon=key=>'<svg class="ui-engraving" aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">'+motifs[key]+'</svg>';
+ const brand=document.querySelector('.room-brand');brand.innerHTML='<span class="brand-seal">'+icon('compass')+'</span><span>星座マスター</span>';
+ brand.addEventListener('click',e=>{e.preventDefault();document.getElementById('room-return').click()});
+ document.getElementById('room-return').innerHTML=icon('home')+'<span>天文台にもどる</span>';
+ const tabs={kita:['compass','北の空'],haru:['haru','春'],natsu:['natsu','夏'],aki:['aki','秋'],fuyu:['fuyu','冬'],iro:['iro','色と温度'],quiz:['quiz','クイズ']};
+ document.querySelectorAll('.tab-btn').forEach(b=>{const [key,label]=tabs[b.dataset.tab];b.innerHTML=icon(key)+'<span>'+label+'</span>'});
+ document.querySelectorAll('.lens-caption').forEach(e=>e.innerHTML=icon('scope')+'<span>望遠鏡のむこう</span>');
+ document.querySelectorAll('.view-switch').forEach(e=>{const bs=e.querySelectorAll('button');bs[0].innerHTML=icon('stars')+'<span>星座をたどる</span>';bs[1].innerHTML=icon('moon')+'<span>空をながめる</span>'});
+})();
+</script>
+<script>
+document.querySelectorAll('.season-book').forEach(book=>{
+ const edition=document.createElement('span');edition.className='book-edition';edition.textContent='天文台の星図集';book.prepend(edition);
+ const ornament=document.createElement('span');ornament.className='book-ornament';ornament.setAttribute('aria-hidden','true');ornament.textContent='— ✧ —';book.append(ornament);
+});
 </script>
 </body>
 </html>
