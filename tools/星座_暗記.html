@@ -338,6 +338,31 @@ main{padding-top:30px}
 .color-link span{font-family:inherit;margin:0;color:#b5cac5;border-color:#a68d5a88}
 @media(max-width:650px){.atlas-shelf{padding-top:31px}.shelf-heading h2{font-size:22px;line-height:1.65}.shelf-heading>p{font-size:11px;line-height:1.9}.shelf-heading{margin-bottom:26px}.season-books{gap:23px;padding:8px 12px 27px 3px}.season-book{flex:0 0 175px;min-height:294px;padding:24px 17px 22px 25px}.book-art{height:97px;margin-bottom:18px}.book-edition{font-size:8px;margin-bottom:18px}.season-book strong{font-size:21px}.season-book small{font-size:10px}.color-link{display:block;font-size:12px;line-height:2}.color-link span{width:fit-content;display:block;margin:3px auto 0}.book-ornament{margin-top:10px}}
 
+
+/* 観察ノート：綴じ穴、紙の繊維、赤鉛筆の注意書き */
+.info-card{position:relative;isolation:isolate;margin:32px 3px 0 7px;padding:30px 37px 32px 64px;border:1px solid #bca87a;border-left:0;border-radius:3px 9px 9px 3px;color:#314547;background:radial-gradient(ellipse at 10% 0,#c2a26c18,transparent 60%),repeating-linear-gradient(0deg,#7d643904 0px,#7d643904 1px,transparent 1px,transparent 3px),linear-gradient(90deg,#d1c1a0 0,#ede3cd 30px,#f5eedc 60%,#eee4ce);box-shadow:inset 4px 0 8px #5a3c3026,2px 4px 0 #c8b994,4px 7px 0 #e3d8bf,0 15px 28px #0004;font-size:14px;line-height:1.9}
+.info-card:before{content:'星の観察ノート';display:block;padding:0 0 16px;margin:0 0 22px;border-bottom:1px solid #a68f593f;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:11px;font-weight:600;letter-spacing:.24em;color:#8d7550}
+.info-card:after{content:'';position:absolute;left:17px;top:0;bottom:0;width:18px;background:radial-gradient(ellipse at 6px 20px,#574b3b 0 2px,#a18c6b 2.5px,#d5c6a8 4px,transparent 4.5px) 0 10px/15px 49px repeat-y;border-right:1px solid #b9997040;pointer-events:none}
+.info-card h3{display:flex;align-items:center;gap:12px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:23px;letter-spacing:.09em;font-weight:600;line-height:1.6;margin:0 0 20px;color:#294848}
+.note-insignia{display:grid;place-items:center;flex:none;width:38px;height:38px;border:1px solid #9c8657;border-radius:50%;color:#7b6c47;box-shadow:inset 0 0 0 3px #eee3cb}
+.note-insignia svg{width:24px;height:24px}
+.info-card ul{list-style:none;padding:0;margin:0}
+.info-card li{position:relative;margin:0;padding:12px 3px 12px 20px;border-bottom:1px solid #ab926325;line-height:1.95;font-weight:400}
+.info-card li:last-child{border-bottom:0}
+.info-card li:before{content:'✧';position:absolute;left:0;top:13px;color:#9a8250;font-size:12px}
+.info-card b.st{color:#2e5957;font-weight:700;background:linear-gradient(transparent 75%,#8aab8d30 75%,#8aab8d30 96%,transparent 96%)}
+.info-card li.warn{padding:13px 17px;margin:13px 0;border:1px solid #a65e4930;border-left:3px solid #a45f49;border-radius:1px;background:#bd806812;color:#8a493a;font-size:13px;font-weight:500;line-height:1.9}
+.info-card li.warn:before{content:'まちがえやすいところ';position:static;display:block;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:11px;font-weight:600;letter-spacing:.13em;color:#9b5948;margin-bottom:4px}
+.info-card li.plus,.info-card .plus{padding:14px 18px;margin-top:16px;border:1px dashed #8a997866;border-left:2px solid #8d9d82;border-radius:2px;background:#79917a0a;color:#4b6053;font-size:12px}
+.info-card li.plus:before{display:none}
+.quiz-callout{padding:25px 5px 8px;gap:20px;align-items:center}
+.quiz-callout strong{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:20px;letter-spacing:.06em;font-weight:600;color:#e8d7b4}
+.quiz-callout p{font-size:12px;line-height:2;color:#aabcb9}
+.go-quiz{display:flex;align-items:center;justify-content:center;gap:10px;min-height:49px;padding:12px 21px;border:1px solid #bca06a;border-radius:5px;color:#ebd5a3;background:linear-gradient(135deg,#35504c,#19333a);box-shadow:inset 0 0 0 3px #183139,0 4px 10px #0003;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:13px;font-weight:600;letter-spacing:.06em}
+.go-quiz:hover{background:linear-gradient(135deg,#48645a,#29434a)}
+.go-quiz svg{width:23px;height:23px}
+@media(max-width:650px){.info-card{margin:26px 3px 0 3px;padding:23px 18px 24px 39px;font-size:13px}.info-card:after{left:9px;width:15px}.info-card:before{font-size:9px;margin-bottom:17px;padding-bottom:13px}.info-card h3{font-size:19px;gap:9px;letter-spacing:.03em;margin-bottom:13px}.note-insignia{width:30px;height:30px}.note-insignia svg{width:21px;height:21px}.info-card li{padding:11px 0 11px 15px;line-height:2}.info-card li.warn{font-size:12px;padding:12px}.info-card li.warn:before{font-size:10px}.quiz-callout{flex-wrap:wrap;padding:24px 3px 8px;gap:15px}.quiz-callout strong{font-size:18px}.go-quiz{font-size:12px}.info-card li.plus{font-size:11px;padding:12px}.color-table{font-size:10px;overflow-wrap:anywhere}.color-table td,.color-table th{padding:7px 3px}}
+
 </style>
 </head>
 <body>
@@ -1152,6 +1177,17 @@ document.querySelectorAll('.season-book').forEach(book=>{
  const edition=document.createElement('span');edition.className='book-edition';edition.textContent='天文台の星図集';book.prepend(edition);
  const ornament=document.createElement('span');ornament.className='book-ornament';ornament.setAttribute('aria-hidden','true');ornament.textContent='— ✧ —';book.append(ornament);
 });
+</script>
+<script>
+document.querySelectorAll('.info-card').forEach(card=>{
+ const heading=card.querySelector('h3');if(!heading)return;
+ const key=card.closest('.panel').id.replace('panel-','');
+ heading.textContent=heading.textContent.replace(/^\S+\s+/,'');
+ const icon=document.querySelector('.tab-btn[data-tab="'+key+'"] svg');
+ if(icon){const badge=document.createElement('span');badge.className='note-insignia';badge.setAttribute('aria-hidden','true');badge.append(icon.cloneNode(true));heading.prepend(badge)}
+ card.querySelectorAll('li.warn').forEach(li=>{if(li.firstChild.nodeType===3)li.firstChild.textContent=li.firstChild.textContent.replace(/^⚠\s*/,'')});
+});
+document.querySelectorAll('.go-quiz').forEach(button=>{const icon=document.querySelector('.tab-btn[data-tab="quiz"] svg');if(icon)button.prepend(icon.cloneNode(true))});
 </script>
 </body>
 </html>
