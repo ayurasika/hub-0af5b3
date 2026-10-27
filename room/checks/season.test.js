@@ -90,3 +90,73 @@ test('existing furniture before launch does not unlock the whole new collection'
  assert.equal(S.appearance(season.read().state,progress).asset,'kokoa-cafe');assert.deepEqual(season.read().state.decor,decorated.decor);
  assert.equal(data.kanji_master_v2,JSON.stringify({stamps}));
 });
+test('autumn unlocks days 11–19 while all original rewards and ledger item IDs remain unchanged',()=>{
+ const status=days=>({started:true,collectionDays:days});
+ const ids=['autumn-rabbit','autumn-bear','autumn-cat','autumn-mug','autumn-notebook','autumn-frame','autumn-wreath','autumn-acorn','autumn-mushroom'];
+ assert.deepEqual(S.autumnGifts.map(g=>g.id),ids);
+ assert.deepEqual(S.autumnGifts.map(g=>g.day),[11,12,13,14,15,16,17,18,19]);
+ assert.deepEqual(R.items,['calm-books','calm-plant','calm-lamp','calm-clock','calm-pencils','calm-box']);
+ assert.deepEqual(S.gifts.map(g=>g.id),['pumpkin','ghost','candy','hat','stars','cape']);
+ for(let day=0;day<=30;day++){
+  const autumn=S.autumnCollection(status(day)),count=Math.min(9,Math.max(0,day-10));
+  assert.equal(autumn.total,count);assert.deepEqual(Object.keys(autumn.owned),ids.slice(0,count));
+  assert.equal(autumn.next&&autumn.next.id,ids[count]||null);
+  assert.equal(S.collection(status(day)).total,Math.min(6,day));
+  assert.equal(S.closet(status(day)).total,Math.min(5,1+Math.max(0,day-6)));
+ }
+ assert.deepEqual(S.autumnCollection(status(10)).owned,{});
+ assert.deepEqual(S.autumnCollection(status(11)).owned,{'autumn-rabbit':true});
+ assert.equal(S.autumnCollection(status(19)).next,null);
+ for(const status of [null,{}, {started:false,collectionDays:19},{started:true,days:19},{started:true,collectionDays:NaN},{started:true,collectionDays:Infinity},{started:true,collectionDays:-1},{started:true,collectionDays:1.5},{started:true,collectionDays:'19'}])assert.equal(S.autumnCollection(status).total,0);
+});
+test('existing validated achievement days grant autumn retrospectively without rewriting or duplicating the ledger',()=>{
+ const {storage,data}=fixture();let now=new Date(2026,9,15,12);
+ const d=D.create(R,storage,{origin:D.origin,pathname:D.path},()=>now.getTime());d.begin('2026-10-15');
+ const stamps={};for(let i=0;i<19;i++)stamps[R.day(new Date(2026,9,15+i,12).getTime())]=3;
+ data.kanji_master_v2=JSON.stringify({stamps});now=new Date(2026,10,2,12);
+ const ledger=d.refresh(),original=data.kanji_master_v2,backup=d.exportJSON();
+ assert.equal(Object.keys(ledger.ledger.rewards).length,19);
+ const rawBefore=JSON.stringify(data),progress={started:true,collectionDays:S.eligibleDays(ledger.ledger.rewards,ledger.day)};
+ assert.equal(S.autumnCollection(progress).total,9);assert.equal(JSON.stringify(data),rawBefore);
+ for(let i=0;i<3;i++){
+  d.restore(backup);const again=d.refresh();assert.deepEqual(again.ledger.rewards,ledger.ledger.rewards);
+  assert.equal(S.autumnCollection({started:true,collectionDays:S.eligibleDays(again.ledger.rewards,again.day)}).total,9);
+ }
+ assert.equal(d.exportJSON(),backup);assert.equal(JSON.stringify(data),rawBefore);assert.equal(data.kanji_master_v2,original);
+ const replacement=fixture(),restored=D.create(R,replacement.storage,{origin:D.origin,pathname:D.path},()=>now.getTime());
+ restored.restore(backup);const loaded=restored.refresh();assert.deepEqual(loaded.ledger.rewards,ledger.ledger.rewards);
+ assert.equal(S.autumnCollection({started:true,collectionDays:S.eligibleDays(loaded.ledger.rewards,loaded.day)}).total,9);
+ assert.equal(S.autumnCollection({started:true,collectionDays:S.eligibleDays(loaded.ledger.rewards,'2026-10-24')}).total,0);
+ assert.equal(S.autumnCollection({started:true,collectionDays:S.eligibleDays(loaded.ledger.rewards,'2026-10-25')}).total,1);
+});
+test('legacy schema 2 state remains byte-for-byte until an autumn placement is saved; all placements and outfit survive reload, undo and backup',()=>{
+ const {storage,data}=fixture(),old={schema:2,character:{x:29,y:73},outfit:'wine-apron',hat:false,cape:false,decor:{pumpkin:{x:71,y:82},ghost:{x:79,y:41},candy:{x:54,y:42},stars:{x:66,y:27}}};
+ const raw=JSON.stringify(old);storage.setItem(S.key,raw);
+ const d=D.create(R,storage,{origin:D.origin,pathname:D.path},()=>new Date(2026,9,15,12).getTime());d.begin('2026-10-15');
+ const furniture=d.refresh();d.move('2026-10-15',{x:59,y:82},furniture.layoutToken);
+ const otherData=Object.fromEntries(Object.entries(data).filter(([key])=>key!==S.key));
+ const store=S.create(storage,false);let snap=store.read();assert.deepEqual(snap.state,old);assert.equal(storage.getItem(S.key),raw);
+ const oldBackup=store.exportJSON();assert.equal(storage.getItem(S.key),raw);
+ S.autumnGifts.forEach((g,i)=>{snap.state.decor[g.id]={x:11+i*8,y:34+i*5};});store.save(snap.state,snap.token);
+ const decorated=S.create(storage,false).read().state;assert.equal(decorated.outfit,'wine-apron');assert.deepEqual(decorated.character,old.character);
+ Object.keys(old.decor).forEach(id=>assert.deepEqual(decorated.decor[id],old.decor[id]));
+ assert.equal(Object.keys(decorated.decor).length,13);
+ const autumnBackup=store.exportJSON();snap=store.read();delete snap.state.decor['autumn-rabbit'];store.save(snap.state,snap.token);
+ assert.equal(store.read().state.decor['autumn-rabbit'],undefined);store.undo();assert.deepEqual(store.read().state,decorated);
+ store.restore(oldBackup);assert.deepEqual(store.read().state,old);store.undo();assert.deepEqual(store.read().state,decorated);
+ const target=fixture(),restored=S.create(target.storage,false);restored.restore(autumnBackup);restored.restore(autumnBackup);
+ assert.deepEqual(restored.read().state,decorated);assert.equal(Object.keys(restored.read().state.decor).length,13);
+ const red=S.dress(decorated,'red-plaid',{started:true,collectionDays:19});assert.deepEqual(red.decor,decorated.decor);assert.deepEqual(red.character,decorated.character);
+ assert.equal(S.appearance(restored.read().state,{started:true,collectionDays:19}).outfit,'wine-apron');
+ assert.equal(S.autumnCollection({started:true,collectionDays:10}).total,0);assert.deepEqual(restored.read().state.decor,decorated.decor);
+ assert.deepEqual(Object.fromEntries(Object.entries(data).filter(([key])=>key!==S.key)),otherData);
+});
+test('autumn stale writes and invalid positions preserve every saved item',()=>{
+ const {storage}=fixture(),a=S.create(storage,false),b=S.create(storage,false);let initial=a.read();
+ initial.state.decor['autumn-rabbit']={x:15,y:82};a.save(initial.state,initial.token);
+ const stale=a.read(),fresh=b.read();fresh.state.decor['autumn-bear']={x:48,y:84};b.save(fresh.state,fresh.token);
+ const before=storage.getItem(S.key);stale.state.decor['autumn-cat']={x:85,y:84};assert.throws(()=>a.save(stale.state,stale.token));assert.equal(storage.getItem(S.key),before);
+ const invalid=JSON.parse(before);invalid.decor['autumn-mug']={x:Infinity,y:44};assert.throws(()=>a.save(invalid,before));assert.equal(storage.getItem(S.key),before);
+ const limited={getItem:storage.getItem,setItem:()=>{throw Error('QuotaExceededError');}},store=S.create(limited,false),snap=store.read();snap.state.decor['autumn-cat']={x:85,y:84};
+ assert.throws(()=>store.save(snap.state,snap.token));assert.equal(storage.getItem(S.key),before);
+});

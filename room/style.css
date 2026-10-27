@@ -78,3 +78,25 @@
 .ss-roam-controls{display:flex;align-items:center;flex-wrap:wrap;margin:4px 0 10px;line-height:1.6}
 .ss-roam-controls span{font-size:12px;color:#796853}
 @media(prefers-reduced-motion:reduce){#study-room .ss-character.ss-walking img{animation:none}}
+
+/* Autumn pieces keep their silhouettes legible on the small room stage. */
+#study-room .ss-autumn-object{width:8%;height:12%;min-width:44px;min-height:44px}
+#study-room .ss-autumn-rabbit,#study-room .ss-autumn-bear,#study-room .ss-autumn-cat{width:13%;height:19.5%}
+#study-room .ss-autumn-notebook{width:10%;height:12%}
+#study-room .ss-autumn-wreath{width:11%;height:16.5%}
+#ss-autumn{margin:0 0 20px;padding:16px 12px;border:1px solid #bdc7ad;border-radius:14px;background:#f1f3e9}
+#ss-autumn h3{color:#4b6041}
+#ss-autumn-progress{font-weight:bold}
+#ss-autumn-decor{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:8px;margin:12px 0}
+#study-room #ss-autumn-decor .ss-autumn-card{display:flex;flex-direction:column;align-items:center;margin:0;padding:10px 6px;min-width:0;border:1px solid #c9c6b4;background:#fffdf7;font-size:13px;line-height:1.5;text-align:center;white-space:normal}
+#ss-autumn-decor .ss-autumn-preview{width:100%;height:96px;margin-bottom:8px}
+#ss-autumn-decor img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+#ss-autumn-decor .ss-autumn-name{min-height:39px}
+#ss-autumn-decor .ss-mystery{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:8px;background:#e9eddd;color:#7b8666;font-family:Georgia,serif;font-size:48px;line-height:1}
+#ss-autumn-decor .ss-autumn-action{display:block;margin-top:6px;min-height:20px;font-size:12px;color:#4b6041}
+#study-room #ss-autumn-decor .ss-autumn-card[aria-pressed=true]{background:#e4ebd8;border-color:#71845f;box-shadow:inset 0 0 0 1px #71845f}
+#study-room #ss-autumn-decor .ss-autumn-card:disabled{background:#f4f4ed;border-color:#c5cab9}
+#study-room #ss-autumn .ss-autumn-hint{font-size:12px;color:#5f6b53}
+@media(max-width:480px){#ss-autumn{padding:14px 8px}#ss-autumn-decor{grid-gap:6px}#ss-autumn-decor .ss-autumn-preview{height:76px}#study-room #ss-autumn-decor .ss-autumn-card{padding:8px 4px;font-size:12px}#ss-autumn-decor .ss-autumn-name{min-height:36px}#ss-autumn-decor .ss-autumn-action{font-size:11px}}
+@media(max-width:350px){#ss-autumn-decor{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){#study-room .ss-autumn-rabbit,#study-room .ss-autumn-bear,#study-room .ss-autumn-cat{width:18%;height:27%}}

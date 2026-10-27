@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>こころのへや・クローゼット見本</title><link rel="stylesheet" href="room/style.css?v=20261015-walk3"><style>body{margin:16px;background:#f8f5ed;font-family:sans-serif;color:#554e43}main{max-width:900px;margin:auto}h1{font-size:20px}</style><main><h1>こころのへや・クローゼット見本</h1><p>見本用の架空の判子です。学習記録には触れません。 <a href="?days=1&past=10">以前の家具が10個ある初日</a> ／ <a href="?days=6">6日達成</a> ／ <a href="?days=7">7日達成</a> ／ <a href="?days=10">10日達成</a></p><section id="study-room" data-room-preview="true" aria-label="わたしの勉強部屋">
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>こころのへや・秋のごほうび見本</title><link rel="stylesheet" href="room/style.css?v=20261027-autumn2"><style>body{margin:16px;background:#f8f5ed;font-family:sans-serif;color:#554e43}main{max-width:900px;margin:auto}h1{font-size:20px}</style><main><h1>こころのへや・秋のごほうび見本</h1><p>見本用の架空の判子です。学習記録には触れません。 <a href="?days=1&past=10">以前の家具が10個ある初日</a> ／ <a href="?days=6">6日達成</a> ／ <a href="?days=7">7日達成</a> ／ <a href="?days=10">10日達成</a> ／ <a href="?days=11">11日達成</a> ／ <a href="?days=19">19日達成</a> ／ <a href="?days=25">25日達成</a></p><section id="study-room" data-room-preview="true" aria-label="わたしの勉強部屋">
 <div class="sr-scene"><img src="room/assets/room-empty-loft.jpg" width="960" height="640" alt="木のロフトベッドと机のある勉強部屋"><div id="sr-furniture"></div>
 <div id="sr-season-layer"><button id="ss-character" class="ss-object ss-character" type="button" aria-label="ここあを動かす"><img id="ss-character-image" src="room/assets/character-kokoa-cafe.png" alt="緑のニットを着たここあ" draggable="false"></button></div></div>
 <div class="sr-content"><h2>わたしの勉強部屋</h2><div class="ss-roam-controls"><button id="ss-roam" type="button" aria-pressed="true">うろうろをとめる</button><span>歩いたり、ひと休みしたり。つかむと止まります。</span></div><p id="sr-progress" role="status"></p><p id="sr-message"></p><button id="sr-start">今日から部屋をはじめる</button><p id="sr-error" role="alert"></p>
@@ -10,6 +10,14 @@
 <p>最近の6個を飾ります。新しい小物が増えると一番古い小物が入れ替わり、獲得記録は残ります。「ひとつ戻す」は、この画面での直前の配置変更が対象です。</p>
 </div>
 <div id="sr-season">
+<section id="ss-autumn" aria-labelledby="ss-autumn-title">
+<h3 id="ss-autumn-title">秋のごほうび</h3>
+<p id="ss-autumn-progress" role="status" aria-live="polite"></p>
+<p>服のつぎは、おへやに秋を。ハンコ3個の日の11〜19日目に、ひとつずつもらえます。これまでのがんばりも数えるよ。</p>
+<div id="ss-autumn-decor" aria-label="秋の飾り"></div>
+<p class="ss-autumn-hint">もらったら「飾る」を押してね。片づけても、またいつでも飾れます。</p>
+</section>
+
 <h3>ハロウィンのごほうび</h3>
 <p id="ss-rewards" role="status" aria-live="polite"></p>
 <p>1日にハンコ3個で、ごほうびをひとつ。連続でなくても大丈夫。10/15以降、部屋でハンコ3個を集めた日を数えます。</p>
@@ -29,4 +37,4 @@
 <p id="ss-error" role="alert"></p>
 <details><summary>飾りと着せ替えのバックアップ</summary><p>位置と衣装はこの端末に自動で保存します。ごほうびの獲得記録は「家具と配置のバックアップ」に含まれます。端末を変えるときは両方保存してください。</p><button type="button" id="ss-export">飾りと着せ替えを保存</button><label>復元 <input id="ss-import" type="file" accept="application/json,.json"></label></details>
 </div>
-<details><summary>家具と配置のバックアップ</summary><p>この端末だけに保存します。Safariのデータを消す前に、家具だけのバックアップを保存してください。</p><button id="sr-export">家具をファイルに保存</button><label>家具を復元 <input id="sr-import" type="file" accept="application/json,.json"></label><p>復元は同じ開始日の家具を合流し、バックアップの配置を優先します。学習記録は含みません。</p></details></div></section></main><script src="room/core.js?v=20261015-walk3"></script><script src="room/layout.js?v=20261015-walk3"></script><script src="room/device.js?v=20261015-walk3"></script><script src="room/preview.js?v=20261015-walk3"></script><script src="room/season.js?v=20261015-walk3"></script><script src="room/ui.js?v=20261015-walk3"></script><script src="room/roam.js?v=20261015-walk3"></script><script src="room/season-ui.js?v=20261015-walk3"></script></html>
+<details><summary>家具と配置のバックアップ</summary><p>この端末だけに保存します。Safariのデータを消す前に、家具だけのバックアップを保存してください。</p><button id="sr-export">家具をファイルに保存</button><label>家具を復元 <input id="sr-import" type="file" accept="application/json,.json"></label><p>復元は同じ開始日の家具を合流し、バックアップの配置を優先します。学習記録は含みません。</p></details></div></section></main><script src="room/core.js?v=20261027-autumn2"></script><script src="room/layout.js?v=20261027-autumn2"></script><script src="room/device.js?v=20261027-autumn2"></script><script src="room/preview.js?v=20261027-autumn2"></script><script src="room/season.js?v=20261027-autumn2"></script><script src="room/ui.js?v=20261027-autumn2"></script><script src="room/roam.js?v=20261027-autumn2"></script><script src="room/season-ui.js?v=20261027-autumn2"></script></html>

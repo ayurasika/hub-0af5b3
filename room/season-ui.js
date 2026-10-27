@@ -2,19 +2,31 @@
 'use strict';
 var host=document.getElementById('study-room');if(!host)return;
 var scene=host.querySelector('.sr-scene'),panel=document.getElementById('sr-season'),layer=document.getElementById('sr-season-layer'),S=RoomSeason,store,snap,drag=null,frame=0,nodes={},selected=null,roam=null;
-var preview=host.getAttribute('data-room-preview')==='true',gifts,clothes;
+var preview=host.getAttribute('data-room-preview')==='true',gifts,clothes,autumn,decorOwned={};
 function el(id){return document.getElementById('ss-'+id);}
 function safe(fn){try{fn();el('error').textContent='';}catch(e){el('error').textContent=e.message;}}
 function bound(p,node){var r=scene.getBoundingClientRect(),w=node.offsetWidth/r.width*50,h=node.offsetHeight/r.height*50;return {x:Math.max(w,Math.min(100-w,p.x)),y:Math.max(h,Math.min(100-h,p.y))};}
 function place(node,p){p=bound(p,node);node.style.left=p.x+'%';node.style.top=p.y+'%';}
-function position(id){return id==='character'?(roam?roam.position():snap.state.character):gifts.owned[id]&&snap.state.decor[id];}
+function position(id){return id==='character'?(roam?roam.position():snap.state.character):decorOwned[id]&&snap.state.decor[id];}
 function select(id){selected=id;Object.keys(nodes).forEach(function(k){nodes[k].classList.toggle('ss-selected',k===id);nodes[k].style.zIndex=k===id?'4':k==='character'?'2':'1';});el('selected').textContent=id==='character'?'ここあ':S.decor.filter(function(d){return d.id===id;})[0].name;el('move').hidden=false;}
 function render(){
  snap=store.read();
- var status=window.RoomRewardStatus;gifts=S.collection(status);clothes=S.closet(status);
+ var status=window.RoomRewardStatus;gifts=S.collection(status);clothes=S.closet(status);autumn=S.autumnCollection(status);
+ decorOwned={};Object.keys(gifts.owned).concat(Object.keys(autumn.owned)).forEach(function(id){decorOwned[id]=true;});
  el('rewards').textContent=!status?'ごほうびの記録を確認できません。部屋のエラー表示を確認してください。':!status.started?'「今日から部屋をはじめる」を押すと、1日にハンコ3個でごほうびが増えます。':gifts.next?'ハロウィンのごほうび '+gifts.total+' / 6。つぎは「'+gifts.next.name+'」'+(status.received?'。次にハンコ3個を集めた日にもらえます。':'。今日はあとハンコ'+Math.max(0,3-status.count)+'個！'):'ハロウィンのごほうびを6つ集めたよ！ 好きな飾りと服を選んでね。';
  S.gifts.forEach(function(g,i){var button=el(g.id==='hat'||g.id==='cape'?g.id:'toggle-'+g.id),owned=!!gifts.owned[g.id];button.disabled=!owned;button.setAttribute('aria-label',g.name+(owned?'（もらったよ）':'（ハンコ3個の日を'+(i+1)+'日で獲得）'));button.querySelector('.ss-earned').textContent=owned?'もらったよ':'3個の日 × '+(i+1)+'日';});
- Object.keys(nodes).forEach(function(id){var p=position(id);nodes[id].hidden=!p;if(p){if(id==='character'&&roam)roam.setAnchor(snap.state.character);else place(nodes[id],p);}});
+ el('autumn-progress').textContent=!status?'ごほうびの記録を確認できません。部屋のエラー表示を確認してください。':!status.started?'部屋をはじめると、秋のごほうびも集められます。':autumn.next?'秋のごほうび '+autumn.total+' / '+S.autumnGifts.length+'。つぎは、ハンコ3個の日をあと'+(autumn.next.day-autumn.days)+'日で、もらえるよ。':'秋のごほうびを9つ集めたよ！ 好きな場所に飾ってね。';
+ S.autumnGifts.forEach(function(g){
+  var b=el('toggle-'+g.id),owned=!!autumn.owned[g.id],placed=!!position(g.id),preview=b.querySelector('.ss-autumn-preview');
+  b.disabled=!owned;b.classList.toggle('ss-locked',!owned);
+  b.setAttribute('aria-label',owned?g.name+(placed?'を片づける':'を飾る'):'ひみつのごほうび（ハンコ3個の日をあと'+(g.day-autumn.days)+'日で獲得）');
+  b.querySelector('.ss-autumn-name').textContent=owned?g.name:'ひみつのごほうび';
+  if(owned&&!preview.querySelector('img')){preview.textContent='';var img=document.createElement('img');img.src='room/assets/'+g.asset+'-thumb.png';img.alt='';img.width=96;img.height=96;img.draggable=false;preview.appendChild(img);}
+  if(!owned&&!preview.querySelector('.ss-mystery')){preview.textContent='';var question=document.createElement('span');question.className='ss-mystery';question.textContent='？';preview.appendChild(question);}
+  b.querySelector('.ss-earned').textContent=owned?g.day+'日目にもらったよ':'あと'+(g.day-autumn.days)+'日';
+  b.querySelector('.ss-autumn-action').textContent=owned?(placed?'飾っているよ · 片づける':'飾る'):'';
+ });
+ Object.keys(nodes).forEach(function(id){var p=position(id);nodes[id].hidden=!p;if(p){var img=nodes[id].querySelector('img'),src=img.getAttribute('data-src');if(src&&img.getAttribute('src')!==src)img.src=src;if(id==='character'&&roam)roam.setAnchor(snap.state.character);else place(nodes[id],p);}});
  var wearing=S.appearance(snap.state,status);
  var sprite=el('character-image'),src='room/assets/character-'+wearing.asset+'.png';
  if(sprite.getAttribute('src')!==src)sprite.src=src;
@@ -55,8 +67,16 @@ safe(function(){
  store=S.create(window.localStorage,preview);snap=store.read();
  var character=el('character');wire(character,'character');
  S.outfits.forEach(function(o){var b=document.createElement('button');b.id='ss-dress-'+o.id;b.type='button';b.className='ss-dress';b.setAttribute('aria-pressed','false');var preview=document.createElement('div');preview.className='ss-dress-preview';preview.setAttribute('aria-hidden','true');b.appendChild(preview);var name=document.createElement('span');name.className='ss-dress-name';b.appendChild(name);var badge=document.createElement('small');badge.className='ss-earned';b.appendChild(badge);b.onclick=function(){cancel();safe(function(){render();store.save(S.dress(snap.state,o.id,window.RoomRewardStatus),snap.token);render();el('note').textContent=o.name+'に着替えました。';});};el('clothes').appendChild(b);});
- S.decor.forEach(function(d){var node=document.createElement('button');node.type='button';node.className='ss-object ss-decor ss-'+d.id;node.setAttribute('aria-label',d.name+'を動かす');var img=document.createElement('img');img.src='room/assets/halloween-'+d.id+'.png';img.alt='';img.draggable=false;node.appendChild(img);layer.appendChild(node);wire(node,d.id);
- var pick=document.createElement('button');pick.type='button';pick.id='ss-toggle-'+d.id;pick.setAttribute('aria-pressed','false');var icon=img.cloneNode();pick.appendChild(icon);pick.appendChild(document.createTextNode({pumpkin:'かぼちゃ',ghost:'おばけ',candy:'お菓子かご',stars:'月と星'}[d.id]));var badge=document.createElement('small');badge.className='ss-earned';pick.appendChild(badge);pick.setAttribute('aria-label',d.name);pick.onclick=function(){cancel();safe(function(){render();if(!gifts.owned[d.id])return;if(snap.state.decor[d.id])delete snap.state.decor[d.id];else snap.state.decor[d.id]={x:d.x,y:d.y};store.save(snap.state,snap.token);render();});};el('decor').appendChild(pick);});
+ S.decor.forEach(function(d){
+  var isAutumn=!!d.asset,node=document.createElement('button');node.type='button';node.className='ss-object ss-decor ss-'+d.id+(isAutumn?' ss-autumn-object':'');node.hidden=true;node.setAttribute('aria-label',d.name+'を動かす');
+  var img=document.createElement('img'),src='room/assets/'+(d.asset||'halloween-'+d.id)+'.png';img.setAttribute('data-src',src);if(!isAutumn)img.src=src;img.alt='';img.draggable=false;node.appendChild(img);layer.appendChild(node);wire(node,d.id);
+  var pick=document.createElement('button');pick.type='button';pick.id='ss-toggle-'+d.id;pick.setAttribute('aria-pressed','false');
+  if(isAutumn){pick.className='ss-autumn-card';var picture=document.createElement('div');picture.className='ss-autumn-preview';picture.setAttribute('aria-hidden','true');pick.appendChild(picture);var name=document.createElement('span');name.className='ss-autumn-name';pick.appendChild(name);}
+  else{var icon=img.cloneNode();pick.appendChild(icon);pick.appendChild(document.createTextNode({pumpkin:'かぼちゃ',ghost:'おばけ',candy:'お菓子かご',stars:'月と星'}[d.id]));}
+  var badge=document.createElement('small');badge.className='ss-earned';pick.appendChild(badge);
+  if(isAutumn){var action=document.createElement('span');action.className='ss-autumn-action';pick.appendChild(action);}
+  pick.setAttribute('aria-label',d.name);pick.onclick=function(){cancel();safe(function(){render();if(!decorOwned[d.id])return;var placed=!!snap.state.decor[d.id];if(placed)delete snap.state.decor[d.id];else snap.state.decor[d.id]={x:d.x,y:d.y};store.save(snap.state,snap.token);render();el('note').textContent=d.name+(placed?'を片づけました。':'を飾りました。つかんで動かせます。');});};el(isAutumn?'autumn-decor':'decor').appendChild(pick);
+ });
  ['hat','cape'].forEach(function(id){var badge=document.createElement('small');badge.className='ss-earned';el(id).appendChild(badge);el(id).onclick=function(){cancel();safe(function(){render();if(!gifts.owned[id])return;snap.state.outfit='green-knit';snap.state[id]=!snap.state[id];store.save(snap.state,snap.token);render();});};});
  el('original').onclick=function(){cancel();safe(function(){render();store.save(S.dress(snap.state,'green-knit',window.RoomRewardStatus),snap.token);render();});};
  el('reset').onclick=function(){cancel();safe(function(){render();snap.state.character=S.initial().character;S.decor.forEach(function(d){if(snap.state.decor[d.id])snap.state.decor[d.id]={x:d.x,y:d.y};});store.save(snap.state,snap.token);render();if(roam)roam.setAnchor(snap.state.character,true);});};
