@@ -445,7 +445,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
   });
   // まちがい直し・のびしろレーダーは同じ日に更新することがあるので、日付では足りない。
   // 毎回必ず取りに行く（どちらも数KBなので軽い）
-  ["data/naoshi.js","data/tests.js"].forEach(function(src){
+  ["data/naoshi.js","data/tests.js","data/radar.js"].forEach(function(src){
     document.write('<script src="'+src+'?t='+Date.now()+'"><\/script>');
   });
 })();
@@ -1024,120 +1024,7 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
   });
 })();
 </script>
-<script>
-// ===== のびしろレーダー =====
-(function(){
-  var TD = window.TESTDATA || {};
-  var LABEL = {sansu:"算数", kokugo:"国語", rika:"理科"};
-  // タブ：データが無い教科は「じゅんび中」表示のまま押せない
-  var tabs = document.querySelectorAll('.tabs [data-nobi]');
-  tabs.forEach(function(b){
-    var key = b.getAttribute('data-nobi');
-    if(!TD[key]){ b.innerHTML = LABEL[key]+' <small>じゅんび中</small>'; return; }
-    b.onclick = function(){
-      tabs.forEach(function(x){ x.className = 'tab off'; });
-      b.className = 'tab on';
-      render(key);
-    };
-  });
-  render('sansu');
-
-  function render(key){
-  var D = TD[key];
-  if(!D) return;
-  // 全国正答率→のびしろ点：70%以上=2（みんな取れてる）、50〜69=1、50未満=0（今は深追いしない）
-  function band(r){ return r>=70 ? 2 : (r>=50 ? 1 : 0); }
-  var score = {}, cnt = {}, detail = {};
-  D.axes.forEach(function(a){ score[a]=0; cnt[a]=0; detail[a]=[]; });
-  D.tests.forEach(function(t){
-    t.miss.forEach(function(m){
-      if(!(m.u in score)) return;
-      var b = band(m.rate);
-      score[m.u] += b * t.weight;
-      if(b>0){ cnt[m.u]++; detail[m.u].push({n:m.n, rate:m.rate, k:m.k, test:t.label}); }
-    });
-  });
-  var max = 1; D.axes.forEach(function(a){ if(score[a]>max) max=score[a]; });
-
-  // レーダーSVG
-  var n = D.axes.length, cx=170, cy=128, R=82;
-  function pt(i, f){
-    var ang = -Math.PI/2 + i*2*Math.PI/n;
-    return [cx+Math.cos(ang)*R*f, cy+Math.sin(ang)*R*f];
-  }
-  function poly(f){ var s=[]; for(var i=0;i<n;i++){ var p=pt(i,f); s.push(p[0].toFixed(1)+","+p[1].toFixed(1)); } return s.join(" "); }
-  var svg = '<svg viewBox="0 0 340 256" style="width:100%;max-width:340px;" role="img" aria-label="のびしろレーダー">';
-  [0.25,0.5,0.75,1].forEach(function(f){
-    svg += '<polygon points="'+poly(f)+'" fill="none" stroke="#d8ecf1" stroke-width="1.2"/>';
-  });
-  for(var i=0;i<n;i++){
-    var p = pt(i,1);
-    svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="#d8ecf1" stroke-width="1.2"/>';
-  }
-  var dp=[];
-  for(var i=0;i<n;i++){
-    var f = Math.max(score[D.axes[i]]/max, 0.04);
-    dp.push(pt(i,f));
-  }
-  svg += '<polygon points="'+dp.map(function(p){return p[0].toFixed(1)+","+p[1].toFixed(1);}).join(" ")+'" fill="rgba(13,122,143,.22)" stroke="#0d7a8f" stroke-width="2.5" stroke-linejoin="round"/>';
-  dp.forEach(function(p){ svg += '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="#0d7a8f"/>'; });
-  for(var i=0;i<n;i++){
-    var ang = -Math.PI/2 + i*2*Math.PI/n, c = Math.cos(ang);
-    var p = pt(i,1.13);
-    var anchor = c>0.3 ? "start" : (c<-0.3 ? "end" : "middle");
-    var dy = Math.sin(ang)<-0.5 ? -3 : (Math.sin(ang)>0.5 ? 10 : 4);
-    svg += '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+dy).toFixed(1)+'" text-anchor="'+anchor+'" font-size="11.5" font-weight="700" fill="#456" font-family="inherit">'+D.axes[i]+'</text>';
-  }
-  svg += '</svg>';
-  document.getElementById("nobi-chart").innerHTML = svg;
-
-  // トップ3（＝いま拾うところ）
-  var ranked = D.axes.slice().sort(function(a,b){ return score[b]-score[a]; }).filter(function(a){ return score[a]>0; }).slice(0,3);
-  function actBtn(a){
-    var ac = D.actions && D.actions[a]; if(!ac) return "";
-    if(ac.href) return '<a class="actbtn" href="'+ac.href+'" onclick="event.stopPropagation()">👉 '+ac.label+'</a>';
-    return '<div class="actbtn plain">👉 '+ac.label+'</div>';
-  }
-  var html = "";
-  // きょうはこれ（1位の分野のアクションを一番上に）
-  // 「待つ分野」（wait:true）は飛ばして、いま動ける分野から選ぶ（skipWait）
-  var todayAxis = ranked.filter(function(a){ var ac=D.actions&&D.actions[a]; return ac && !ac.wait; })[0];
-  if(todayAxis){
-    var top = todayAxis, ta = D.actions[top];
-    {
-      html += '<div class="todaydo">きょうはこれ：<b>'+top+'</b> → '
-        + (ta.href ? '<a href="'+ta.href+'">'+ta.label+'</a>' : ta.label) + '</div>';
-    }
-  }
-  ranked.forEach(function(a, idx){
-    var ms = detail[a].sort(function(x,y){ return y.rate-x.rate; }).slice(0,6);
-    html += '<div class="trow" onclick="this.classList.toggle(\'open\')">'
-      + '<div class="thead"><span class="rankb">'+(idx+1)+'</span>'+a
-      + '<span class="pts">みんなが取れた問題 '+cnt[a]+'問ぶん ▾</span></div>'
-      + '<div class="hint">'+(D.hints[a]||"")+'</div>'
-      + actBtn(a)
-      + '<div class="misses">'
-      + ms.map(function(m){
-          return '<div class="miss">'+m.n+'（<b>'+m.rate+'%</b>の子が正解'+(m.k==="レ"?"・無答":"")+'）<span class="mtest">'+m.test+'</span></div>';
-        }).join("")
-      + (detail[a].length>6 ? '<div class="miss" style="color:#aab;">…ほか'+(detail[a].length-6)+'問</div>' : '')
-      + '</div></div>';
-  });
-  // いまの強み：データに strength があればそれを使う（自動判定は「落としてない＝強い」とズレることがある）
-  if(D.strength && D.strength.axis){
-    html += '<div class="hint" style="padding-left:4px;margin-top:2px;font-size:.76rem;color:#1f9d52;font-weight:700;">💪 いまの強み：'+D.strength.axis+'（'+(D.strength.text||"")+'）</div>';
-  } else {
-    var weakest = D.axes.slice().sort(function(a,b){ return score[a]-score[b]; })[0];
-    if(score[weakest] < max*0.1){
-      html += '<div class="hint" style="padding-left:4px;margin-top:2px;font-size:.76rem;color:#1f9d52;font-weight:700;">💪 いまの強み：'+weakest+'（'+(D.hints[weakest]||"")+'）</div>';
-    }
-  }
-  document.getElementById("nobi-top3").innerHTML = html;
-  document.getElementById("nobi-note").textContent =
-    LABEL[key] + "の集計もと：" + D.tests.map(function(t){ return t.label; }).join("・") + "（新しいテストほど重く数えてるよ）｜更新 " + TD.updated;
-  }
-})();
-</script>
+<script src="radar.js?v=20261029"></script>
 <script src="room/core.js?v=20261027-autumn2"></script>
 <script src="room/layout.js?v=20261027-autumn2"></script>
 <script src="room/device.js?v=20261027-autumn2"></script>
