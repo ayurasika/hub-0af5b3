@@ -182,6 +182,17 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 .nobi .nobinote{margin-top:6px;font-size:.66rem;color:#99a;line-height:1.6;}
 </style>
 <link rel="stylesheet" href="room/style.css?v=20261027-autumn2"><link rel="stylesheet" href="room/pets.css?v=20261029-pets3">
+<style>
+/* 勉強部屋をたたむ（2026-10-30） */
+#study-room #sr-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;margin:0;padding:10px 16px;border:0;border-bottom:1px solid #ded5c6;border-radius:0;background:#f4ece0;font-weight:bold;font-size:15px;cursor:pointer}
+#study-room .sr-toggle-label{font-weight:normal;font-size:13px;color:#7a6a58}
+#study-room.sr-closed .sr-clip{height:96px;overflow:hidden;position:relative;cursor:pointer}
+#study-room.sr-closed .sr-scene{transform:translateY(-42%);pointer-events:none}
+#study-room.sr-closed .sr-clip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:36px;background:linear-gradient(rgba(255,250,244,0),#fffaf4)}
+#study-room.sr-closed .sp-dock,#study-room.sr-closed .sr-content{display:none}
+#study-room.sr-closed #sr-toggle{border-bottom:0}
+</style>
+
 </head>
 <body>
 
@@ -195,9 +206,10 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 </div></div>
 
 <div class="wrap">
-<section id="study-room" aria-label="わたしの勉強部屋">
-<div class="sr-scene"><img src="room/assets/room-empty-loft.jpg" width="960" height="640" alt="木のロフトベッドと机のある勉強部屋"><div id="sr-furniture"></div><div id="sr-pets-layer"><canvas id="sp-canvas" aria-hidden="true"></canvas><button id="sp-hit-daifuku" type="button" class="sp-hit" aria-label="大福にぱたぱたしてもらう" hidden></button><button id="sp-hit-little-man" type="button" class="sp-hit" aria-label="ちっこいおっさんにぴょーんしてもらう" hidden></button></div>
-<div id="sr-season-layer"><button id="ss-character" class="ss-object ss-character" type="button" aria-label="ここあを動かす"><img id="ss-character-image" src="room/assets/character-kokoa-cafe.png" alt="緑のニットを着たここあ" draggable="false"></button></div></div>
+<section id="study-room" class="sr-closed" aria-label="わたしの勉強部屋">
+<button id="sr-toggle" type="button" aria-expanded="false"><span>🏠 わたしの勉強部屋</span><span class="sr-toggle-label">ひらく ▾</span></button>
+<div class="sr-clip"><div class="sr-scene"><img src="room/assets/room-empty-loft.jpg" width="960" height="640" alt="木のロフトベッドと机のある勉強部屋"><div id="sr-furniture"></div><div id="sr-pets-layer"><canvas id="sp-canvas" aria-hidden="true"></canvas><button id="sp-hit-daifuku" type="button" class="sp-hit" aria-label="大福にぱたぱたしてもらう" hidden></button><button id="sp-hit-little-man" type="button" class="sp-hit" aria-label="ちっこいおっさんにぴょーんしてもらう" hidden></button></div>
+<div id="sr-season-layer"><button id="ss-character" class="ss-object ss-character" type="button" aria-label="ここあを動かす"><img id="ss-character-image" src="room/assets/character-kokoa-cafe.png" alt="緑のニットを着たここあ" draggable="false"></button></div></div></div>
 <div class="sp-controls sp-dock"><button id="sp-pause" type="button" disabled>動きをとめる</button><label><input id="sp-quiet" type="checkbox"> 動きをひかえめに</label><a href="#sr-pets">なかまを選ぶ</a></div><div class="sr-content"><h2>わたしの勉強部屋</h2><div class="ss-roam-controls"><button id="ss-roam" type="button" aria-pressed="true">うろうろをとめる</button><span>歩いたり、ひと休みしたり。つかむと止まります。</span></div><p id="sr-progress" role="status"></p><p id="sr-message"></p><button id="sr-start">今日から部屋をはじめる</button><p id="sr-error" role="alert"></p>
 <div id="sr-arrange" hidden>
 <p id="sr-arrange-note" role="status" aria-live="polite">部屋の小物をつかんで、好きな場所へ動かせます。重なった小物は下のボタンで手前に出せます。</p>
@@ -1025,6 +1037,15 @@ function toggle(id){ document.getElementById(id).classList.toggle("open"); }
 })();
 </script>
 <script src="radar.js?v=20261029"></script>
+<script>
+(function(){var s=document.getElementById('study-room'),b=document.getElementById('sr-toggle'),c=s.querySelector('.sr-clip'),l=b.querySelector('.sr-toggle-label');
+function set(o){s.classList.toggle('sr-closed',!o);b.setAttribute('aria-expanded',o?'true':'false');l.textContent=o?'たたむ ▴':'ひらく ▾';try{localStorage.setItem('room-open',o?'1':'0')}catch(e){}if(o)window.dispatchEvent(new Event('resize'))}
+var o=false;try{o=localStorage.getItem('room-open')==='1'}catch(e){}set(o);
+b.addEventListener('click',function(){set(s.classList.contains('sr-closed'))});
+c.addEventListener('click',function(e){if(s.classList.contains('sr-closed')){e.preventDefault();e.stopPropagation();set(true)}},true);
+if(location.hash&&location.hash.indexOf('#s')===0&&s.querySelector(location.hash))set(true);
+})();
+</script>
 <script src="room/core.js?v=20261027-autumn2"></script>
 <script src="room/layout.js?v=20261027-autumn2"></script>
 <script src="room/device.js?v=20261027-autumn2"></script>
