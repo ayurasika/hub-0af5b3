@@ -288,6 +288,11 @@ body::before{
       </div>
       <div class="daily-go">スタート</div>
     </div>
+    <!-- 入試までにぜんぶマスターになれるか（いまのペースでの目安） -->
+    <div id="master-panel" style="background:linear-gradient(135deg,#f3f9ff,#fff);border:2px solid #b9dcf5;border-radius:16px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-weight:800;color:#2f7fc1;font-size:0.95em;margin-bottom:8px;">🏆 マスターになれるか？！</div>
+      <div id="mp-body" style="font-size:0.8em;color:#555;line-height:1.7;"></div>
+    </div>
     <div class="section-title"><h2>回をえらぼう</h2><div class="line"></div></div>
     <div id="round-list"></div>
   </div>
@@ -331,11 +336,6 @@ body::before{
       <div id="ov-weak" style="margin-top:10px;"></div>
     </div>
 
-    <!-- 入試までにぜんぶマスターになれるか（いまのペースでの目安） -->
-    <div id="master-panel" style="background:linear-gradient(135deg,#f3f9ff,#fff);border:2px solid #b9dcf5;border-radius:16px;padding:14px 16px;margin-bottom:16px;">
-      <div style="font-weight:800;color:#2f7fc1;font-size:0.95em;margin-bottom:8px;">🏆 マスターになれるか？！</div>
-      <div id="mp-body" style="font-size:0.8em;color:#555;line-height:1.7;"></div>
-    </div>
 
     <div class="section-title"><h2 id="map-title">第19回 — 自然</h2><div class="line"></div></div>
     <div class="stats-bar">
@@ -2077,6 +2077,7 @@ function renderHome(){
     pile(dayset.size,'日','練習した日','#e08a2e')+
     pile(today,'回','今日<br>書いた','#d4a017');
   renderStampCard();
+  renderMasterForecast();
   const stToday=(state.stamps||{})[ymd(now)]||0;
   document.getElementById('daily-title').textContent=stToday>=MINI_FROM-1?'ちょこっと'+MINI_N+'語':stToday>=1?'おかわり10語':'今日の復習';
   if(stToday>=1){document.getElementById('daily-desc').textContent=stToday>=MINI_FROM-1?'すき間に'+MINI_N+'語だけ。何かやる前にサッと！':stToday===2?'3回目は順番の15問：'+seqLabel()+'。できたら王冠ハンコ👑':'あと10語でキラキラハンコ';}
