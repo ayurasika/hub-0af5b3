@@ -2493,21 +2493,45 @@ function renderMasterForecast(){
   let wrote=0;for(let i=1;i<=7;i++)wrote+=(state.days||{})[dk(t0.getTime()-i*DAY+DAY/2)]||0;
   const pace=Math.round(wrote/7);
   const md=ms=>{const d=new Date(ms);return (d.getMonth()+1)+'/'+d.getDate();};
-  const lastStart=exam-(1+3+7+21)*DAY;   // まだ出てない語は、この日までに1回目を書かないと間に合わない
+  const lastStart=exam-(1+3+7+21)*DAY;   // まだ出てない語は、この日までに1回目を書けば間に合う
+  // 先週（8〜14日前）のペースと、今日書いた数
+  let wrotePrev=0;for(let i=8;i<=14;i++)wrotePrev+=(state.days||{})[dk(t0.getTime()-i*DAY+DAY/2)]||0;
+  const pacePrev=Math.round(wrotePrev/7), todayN=(state.days||{})[dk(now)]||0;
+  // マスター数の記録（この端末・1日1つ）。1週間前と比べる
+  state.mpHist=state.mpHist||{};
+  if(state.mpHist[ymd(now)]!==mastered){state.mpHist[ymd(now)]=mastered;saveState();}
+  const wk=Object.keys(state.mpHist).filter(k=>k<=ymd(now-7*DAY)).sort().pop();
+  const gainWeek=wk!==undefined?mastered-state.mpHist[wk]:null;
 
-  let h=`入試（${md(exam)}）まで あと<b>${daysLeft}日</b>。マスター（5回正解）<b>${mastered}</b> / ${all}語<br>`;
-  if(mastered>=all){box.innerHTML=h+'<b style="color:#3fa96a">🎉 ぜんぶマスター！あとは忘れないように「今日の復習」を続けよう</b>';return;}
-  h+=`のこり${all-mastered}語をマスターにするには、あと<b>約${needOk}回</b>の正解が必要`+
-     `（正解率${Math.round(acc*100)}%なら 約${needWrite}回書く）<br>`;
-  h+=`→ 1日に <b>${perDay}語</b> 書けば間に合う<br>`;
-  h+=`いまのペース：1日 <b>${pace}語</b>（きのうまでの7日間の平均・この端末）<br>`;
-  const verdict = pace>=perDay
-    ? `<div style="margin-top:6px;padding:8px 10px;border-radius:10px;background:#eafaf0;color:#2d8a52;font-weight:800">✅ このペースなら、なれる！（1日あたり ${pace-perDay}語 よゆう）</div>`
-    : `<div style="margin-top:6px;padding:8px 10px;border-radius:10px;background:#fff3e8;color:#c76a12;font-weight:800">⚠ このペースだと、まだ足りない。1日 あと<b>${perDay-pace}語</b>`+
-      (perDay-pace<=MINI_N*2?`（「ちょこっと${MINI_N}語」あと約${Math.ceil((perDay-pace)/MINI_N)}回）`:`（10語の復習 あと約${Math.ceil((perDay-pace)/10)}回）`)+`</div>`;
-  h+=verdict;
-  if(unseen>0) h+=`<div style="margin-top:6px;font-size:0.92em">まだ一度も出てない漢字が${unseen}語。1・3・7・21日の間隔をあけて5回正解するので、<b>${md(lastStart)}までに1回目</b>を書かないと入試に間に合わない</div>`;
-  if(late>0) h+=`<div style="margin-top:4px;font-size:0.92em;color:#c0392b">ぜんぶ正解しても間隔が足りず、入試までにマスターにならない漢字：${late}語</div>`;
+  if(mastered>=all){box.innerHTML='<b style="color:#3fa96a">🎉 ぜんぶマスター！あとは忘れないように「今日の復習」を続けよう</b>';return;}
+  // 今日の目標：いつものペース＋「ちょこっと」1回分（必要数より多くはしない）。毎日すこしずつ上げて追いつく
+  const goal=Math.min(perDay,Math.max(pace,10)+MINI_N);
+  const ok=todayN>=goal;
+  let h = ok
+    ? `<div style="text-align:center;padding:10px;border-radius:12px;background:#eafaf0">
+         <div style="font-size:1.5em;font-weight:900;color:#2d8a52">🎉 今日はOK！</div>
+         <div style="color:#2d8a52;font-weight:700">今日 ${todayN}語 書いたよ（目標 ${goal}語）</div></div>`
+    : `<div style="text-align:center;padding:10px;border-radius:12px;background:#eef6fd">
+         <div style="font-size:1.15em;font-weight:900;color:#2f7fc1">今日の目標 ${goal}語</div>
+         <div style="color:#2f7fc1;font-weight:700">いま ${todayN}語。あと <b>${goal-todayN}語</b> で今日はOK！</div>
+         <div style="height:8px;border-radius:4px;background:#d6e9f8;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.round(todayN/goal*100)}%;background:#4a9bd9"></div></div></div>`;
+  // のびたところ（あるときだけ）
+  const up=[];
+  if(gainWeek>0)up.push(`この1週間で <b>+${gainWeek}語</b> マスター`);
+  if(pacePrev>0&&pace>pacePrev)up.push(`先週より1日 <b>+${pace-pacePrev}語</b> 多く書けてる`);
+  if(up.length)h+=`<div style="margin-top:6px;color:#3fa96a;font-weight:700">🌱 ${up.join('・')}</div>`;
+  // 現在地（いつも見える1行）
+  h+=`<div style="margin-top:6px">📍 いまの位置：マスター <b>${mastered}</b> / ${all}語・入試（${md(exam)}）まで ${daysLeft}日</div>`;
+  // くわしく（タップで開く）
+  const catchUp=perDay-pace;
+  h+=`<details style="margin-top:4px"><summary style="cursor:pointer;color:#8fa8bc">くわしく見る</summary><div style="margin-top:4px">
+    ぜんぶマスター（5回正解）にするには、あと約${needOk}回の正解（正解率${Math.round(acc*100)}%なら 約${needWrite}回書く）。<br>
+    入試までに間に合うペース：1日 <b>${perDay}語</b><br>
+    いまのペース：1日 <b>${pace}語</b>（きのうまでの7日間・この端末）${pacePrev?`／先週 ${pacePrev}語`:''}<br>
+    ${catchUp>0?`あと1日 <b>${catchUp}語</b> ふやせば追いつく。今日の目標を毎日クリアすると、少しずつ近づくよ`:`このペースなら間に合う！（1日 ${-catchUp}語 よゆう）`}
+    ${unseen>0?`<br>まだ出てない漢字 ${unseen}語は、<b>${md(lastStart)}までに1回目</b>を書けば間に合う（1・3・7・21日の間隔で5回正解するため）`:''}
+    ${late>0?`<br>ぜんぶ正解しても間隔が足りない漢字：${late}語（入試のあとも続けよう）`:''}
+  </div></details>`;
   box.innerHTML=h;
 }
 
