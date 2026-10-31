@@ -1918,6 +1918,12 @@ function stampHTML(n,size){
   if(img)return `<img src="${img}" alt="${kira?'キラキラハンコ':'花のハンコ'}" style="width:${size}px;height:${size}px;object-fit:contain">`;
   return `<span role="img" aria-label="${kira?'キラキラハンコ':'花のハンコ'}" style="font-size:${Math.round(size*0.8)}px;line-height:1">${kira?'🌟':'🌸'}</span>`;
 }
+// ===== 今日の復習の語数 =====
+// 1日の1・2回目は DAILY_N 語（3回目は下の「順番の15問」）。4回目（MINI_FROM）以降は MINI_N 語だけにして、すき間時間にサッと回せるようにする。
+// 3問にしたいときは MINI_N を 3 に変える。
+const DAILY_N=10, MINI_N=5, MINI_FROM=4;
+function todayStamps(){return (state.stamps||{})[ymd(Date.now())]||0;}
+function dailySize(done){return (done==null?todayStamps():done)+1>=MINI_FROM?MINI_N:DAILY_N;}
 function pressStamp(){
   const k=ymd(Date.now());
   state.stamps=state.stamps||{};
@@ -1952,7 +1958,7 @@ function renderStampCard(){
     past+=`<div style="display:flex;align-items:center;gap:6px;font-size:0.68em;color:#b0a79a"><span style="width:46px">${m.getMonth()+1}/${m.getDate()}〜</span>${row}</div>`;
   }
   const n=st[todayK]||0;
-  const msg=n>=3?'王冠ハンコ！今日の復習を3回できたね👑':n===2?'キラキラハンコ！3回目は「順番の15問」で王冠ハンコ👑':n===1?'ハンコ押せたよ！おかわり10語でキラキラになるよ':'今日の10語でハンコがもらえるよ';
+  const msg=n>=3?'王冠ハンコ！今日の復習を3回できたね👑 ここからは'+MINI_N+'語ずつ':n===2?'キラキラハンコ！3回目は「順番の15問」で王冠ハンコ👑':n===1?'ハンコ押せたよ！おかわり10語でキラキラになるよ':'今日の10語でハンコがもらえるよ';
   box.innerHTML=`<div style="font-weight:800;color:#e08a2e;font-size:0.9em;margin-bottom:6px">📮 今週のハンコ</div>
     <div style="display:flex;gap:6px">${cells}</div>
     <div style="font-size:0.72em;color:#8a7a66;margin-top:8px;text-align:center">${msg}</div>
@@ -2066,8 +2072,8 @@ function renderHome(){
     pile(today,'回','今日<br>書いた','#d4a017');
   renderStampCard();
   const stToday=(state.stamps||{})[ymd(now)]||0;
-  document.getElementById('daily-title').textContent=stToday>=1?'おかわり10語':'今日の復習';
-  if(stToday>=1){document.getElementById('daily-desc').textContent=stToday>=3?'王冠ハンコをゲット！もう10語もできるよ':stToday===2?'3回目は順番の15問：'+seqLabel()+'。できたら王冠ハンコ👑':'あと10語でキラキラハンコ';}
+  document.getElementById('daily-title').textContent=stToday>=MINI_FROM-1?'ちょこっと'+MINI_N+'語':stToday>=1?'おかわり10語':'今日の復習';
+  if(stToday>=1){document.getElementById('daily-desc').textContent=stToday>=MINI_FROM-1?'すき間に'+MINI_N+'語だけ。何かやる前にサッと！':stToday===2?'3回目は順番の15問：'+seqLabel()+'。できたら王冠ハンコ👑':'あと10語でキラキラハンコ';}
   else document.getElementById('daily-desc').textContent=dueCount>0
     ?'そろそろ出したい漢字が'+dueCount+'語あるよ。今日はその中から10語'
     :'テストで落とした漢字＋そろそろわすれそうな漢字を10語';
@@ -2284,7 +2290,7 @@ function showResult(){
     html+=`<div style="text-align:center;margin:14px 0 6px">
       <div style="display:inline-flex;width:96px;height:96px;align-items:center;justify-content:center;border-radius:50%;background:#fffdf8;border:3px solid #ffb35c;animation:stampPop .5s ease-out">${stampHTML(stampN,80)}</div>
       <div style="font-weight:800;color:#e08a2e;margin-top:6px">${stampN>=3?'王冠ハンコ ゲット！👑':stampN===2?'キラキラハンコ ゲット！':'ハンコ ゲット！'}</div></div>`;
-    html+=`<button class="btn-primary" style="margin-bottom:10px" onclick="startDailyReview()">${stampN>=3?'もう10語やる':stampN===2?'3回目：順番の15問（王冠ハンコ👑）':'おかわり10語（キラキラハンコ）'}</button>`;
+    html+=`<button class="btn-primary" style="margin-bottom:10px" onclick="startDailyReview()">${dailySize(stampN)===MINI_N?'ちょこっと'+MINI_N+'語やる':stampN===2?'3回目：順番の15問（王冠ハンコ👑）':'おかわり10語（キラキラハンコ）'}</button>`;
   }
   if(pState.wrongs.length>0){
     html+=`<button class="btn-retry" onclick="retryWrongs()">間違えたやつだけ再練習</button>`;
@@ -2308,7 +2314,7 @@ function retryWrongs(){
 }
 
 // ===== DAILY REVIEW =====
-// 全回横断で「今日の10語」を自動で選ぶ。
+// 全回横断で「今日の10語」を自動で選ぶ（4回目以降は MINI_N 語）。
 // 優先順位：①テストで落とした漢字 ②間違いが多い漢字 ③マスター後しばらく見てない漢字 ④まだやってない漢字
 // ===== 3回目＝順番の15問（2026-10-18 あゆみ）=====
 // 1・2回目はいつもの「今日の復習」10問。3回目（王冠ハンコの回）は、第19回の1語目から順番に15問ずつ、書ける語も飛ばさずに出す（忘れている語を拾うため）。
@@ -2358,20 +2364,22 @@ function startDailyReview(){
   // ④まだ一度もやってない
   const unseen=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.total===0));
 
+  const N=dailySize();
+  const q=n=>Math.max(1,Math.round(n*N/10)); // 語数が少ない回は、①〜③の枠も同じ割合で小さく
   const picked=[];
   const seen=new Set();
   const take=(arr,max)=>{
     let added=0;
     for(const x of arr){
-      if(picked.length>=10)break;
+      if(picked.length>=N)break;
       if(max&&added>=max)break;
       const key=x.kai+'_'+x.w.k;
       if(seen.has(key))continue;
       seen.add(key);picked.push(x);added++;
     }
   };
-  // 出す日が来た語を先に。10語に足りなければ、まだやってない語で埋める
-  take(fire,3);take(dueWrong,4);take(dueOk,3);take(dueWrong);take(dueOk);take(unseen);
+  // 出す日が来た語を先に。N語に足りなければ、まだやってない語で埋める
+  take(fire,q(3));take(dueWrong,q(4));take(dueOk,q(3));take(dueWrong);take(dueOk);take(unseen);
 
   if(picked.length===0){alert('今日の分はぜんぶ終わってるよ！すごい！');return;}
 
@@ -2383,7 +2391,7 @@ function startDailyReview(){
   document.getElementById('practice-area').style.display='block';
   document.getElementById('result-area').style.display='none';
   renderQuestion();
-  daifukuSay('きょうの10語、いってみよ〜！');
+  daifukuSay(N===MINI_N?'ちょこっと'+N+'語、いってみよ〜！':'きょうの10語、いってみよ〜！');
 }
 
 // ===== MAP =====
