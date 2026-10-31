@@ -2462,6 +2462,7 @@ function renderOverall(){
 // ・あと何回正解が要るか ÷ 正解率 ＝ あと何回書けばいいか。それを入試までの日数で割って「1日に必要な語数」
 // ・いまのペース＝この端末で、きのうまでの7日間に書いた数の平均（state.days。同期はしていない）
 // ・間隔（1・3・7・21日）をあけないと次の段に進まないので、ぜんぶ正解でも入試に間に合わない語も数える
+const DAY_GOAL=90;   // こころが決めた1日の語数（2026-10-31）。変えるときはここ
 const EXAM_DATE=(window.HUB_CONFIG&&window.HUB_CONFIG.examDate)||'2027-01-16';   // 三田・関大第一とも 1/16
 function renderMasterForecast(){
   const box=document.getElementById('mp-body');if(!box)return;
@@ -2504,17 +2505,23 @@ function renderMasterForecast(){
   const gainWeek=wk!==undefined?mastered-state.mpHist[wk]:null;
 
   if(mastered>=all){box.innerHTML='<b style="color:#3fa96a">🎉 ぜんぶマスター！あとは忘れないように「今日の復習」を続けよう</b>';return;}
-  // 今日の目標：いつものペース＋「ちょこっと」1回分（必要数より多くはしない）。毎日すこしずつ上げて追いつく
-  const goal=Math.min(perDay,Math.max(pace,10)+MINI_N);
-  const ok=todayN>=goal;
-  let h = ok
-    ? `<div style="text-align:center;padding:10px;border-radius:12px;background:#eafaf0">
-         <div style="font-size:1.5em;font-weight:900;color:#2d8a52">🎉 今日はOK！</div>
-         <div style="color:#2d8a52;font-weight:700">今日 ${todayN}語 書いたよ（目標 ${goal}語）</div></div>`
-    : `<div style="text-align:center;padding:10px;border-radius:12px;background:#eef6fd">
-         <div style="font-size:1.15em;font-weight:900;color:#2f7fc1">今日の目標 ${goal}語</div>
-         <div style="color:#2f7fc1;font-weight:700">いま ${todayN}語。あと <b>${goal-todayN}語</b> で今日はOK！</div>
-         <div style="height:8px;border-radius:4px;background:#d6e9f8;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.round(todayN/goal*100)}%;background:#4a9bd9"></div></div></div>`;
+  // 今日の目標は2だん。①まずはいつものペース＋「ちょこっと」1回分（ここで一度ほめる）②こころが決めた1日 DAY_GOAL 語がゴール
+  // ①でほめても止まらないよう、ゴールまでの残りをいつも出す（2026-10-31 あゆみ：「今日はOK」で満足してしまったため）
+  const step=Math.min(perDay,Math.max(pace,10)+MINI_N), big=Math.max(DAY_GOAL,step);
+  const bar=`<div style="position:relative;height:10px;border-radius:5px;background:#d6e9f8;margin-top:6px;overflow:hidden">
+      <div style="height:100%;width:${Math.min(100,Math.round(todayN/big*100))}%;background:${todayN>=big?'#3fa96a':'#4a9bd9'}"></div>
+      ${step<big?`<div style="position:absolute;top:0;bottom:0;left:${Math.round(step/big*100)}%;width:2px;background:#fff"></div>`:''}</div>
+    <div style="display:flex;justify-content:space-between;font-size:0.8em;color:#8fa8bc;margin-top:2px"><span>0</span>${step<big?`<span>${step}</span>`:''}<span>${big}語</span></div>`;
+  let h;
+  if(todayN>=big) h=`<div style="text-align:center;padding:10px;border-radius:12px;background:#eafaf0">
+       <div style="font-size:1.5em;font-weight:900;color:#2d8a52">🏆 ${big}語 ゴール！</div>
+       <div style="color:#2d8a52;font-weight:700">今日 ${todayN}語。決めたことをやりきったね！</div>${bar}</div>`;
+  else if(todayN>=step) h=`<div style="text-align:center;padding:10px;border-radius:12px;background:#eef6fd">
+       <div style="color:#2d8a52;font-weight:800">🎉 ${step}語 クリア！いい調子</div>
+       <div style="font-size:1.25em;font-weight:900;color:#2f7fc1;margin-top:2px">${big}語まで あと ${big-todayN}語！</div>${bar}</div>`;
+  else h=`<div style="text-align:center;padding:10px;border-radius:12px;background:#eef6fd">
+       <div style="font-size:1.15em;font-weight:900;color:#2f7fc1">まずは ${step}語（あと ${step-todayN}語）</div>
+       <div style="color:#2f7fc1;font-weight:700">今日のゴール ${big}語まで あと ${big-todayN}語</div>${bar}</div>`;
   // のびたところ（あるときだけ）
   const up=[];
   if(gainWeek>0)up.push(`この1週間で <b>+${gainWeek}語</b> マスター`);
@@ -2528,7 +2535,7 @@ function renderMasterForecast(){
     ぜんぶマスター（5回正解）にするには、あと約${needOk}回の正解（正解率${Math.round(acc*100)}%なら 約${needWrite}回書く）。<br>
     入試までに間に合うペース：1日 <b>${perDay}語</b><br>
     いまのペース：1日 <b>${pace}語</b>（きのうまでの7日間・この端末）${pacePrev?`／先週 ${pacePrev}語`:''}<br>
-    ${catchUp>0?`あと1日 <b>${catchUp}語</b> ふやせば追いつく。今日の目標を毎日クリアすると、少しずつ近づくよ`:`このペースなら間に合う！（1日 ${-catchUp}語 よゆう）`}
+    ${catchUp>0?`あと1日 <b>${catchUp}語</b> ふやせば追いつく。毎日 ${big}語 やりきれば、ぐっと近づくよ`:`このペースなら間に合う！（1日 ${-catchUp}語 よゆう）`}
     ${unseen>0?`<br>まだ出てない漢字 ${unseen}語は、<b>${md(lastStart)}までに1回目</b>を書けば間に合う（1・3・7・21日の間隔で5回正解するため）`:''}
     ${late>0?`<br>ぜんぶ正解しても間隔が足りない漢字：${late}語（入試のあとも続けよう）`:''}
   </div></details>`;
