@@ -286,6 +286,7 @@ body::before{
       <div class="daily-info">
         <div class="daily-title" id="cont-title">続きの回</div>
         <div class="daily-desc" id="cont-desc"></div>
+        <div class="daily-desc" id="cont-plan" style="margin-top:6px;font-weight:800;color:#fff"></div>
       </div>
       <div class="daily-go" id="cont-go" style="color:#2f7fc1">えらぶ</div>
     </div>
@@ -2071,6 +2072,22 @@ function getTotalStats(){
 let currentRound = 19;
 // 続きの回：最後にやった回がまだ全部書けていなければその回、書けていれば次の回
 function nextRound(kai){const ks=Object.keys(ROUNDS).map(Number);const i=ks.indexOf(Number(kai));return i>=0&&i+1<ks.length?ks[i+1]:null;}
+// 1日に何回やればいいか（2026-11-07 あゆみ）：ROUND_PLAN_START 以降に「ぜんぶ練習」を終えた回を数え、残り÷入試までの日数
+const ROUND_PLAN_START='2026-11-07';
+function roundPlan(){
+  const rd=state.roundDone||{}, today=ymd(Date.now()), total=Object.keys(ROUNDS).length;
+  let done=0,todayN=0; for(const k in rd){ if(!ROUNDS[k]||rd[k]<ROUND_PLAN_START)continue; done++; if(rd[k]===today)todayN++; }
+  const [ey,em,ed]=EXAM_DATE.split('-').map(Number), t0=new Date(); t0.setHours(0,0,0,0);
+  const daysLeft=Math.max(1,Math.round((new Date(ey,em-1,ed).getTime()-t0.getTime())/86400000));
+  const left=total-done, perDay=Math.ceil(left/daysLeft);
+  return {total,done,todayN,left,daysLeft,perDay};
+}
+function roundPlanText(){
+  const p=roundPlan();
+  if(p.left<=0) return '🎉 ぜんぶの回を1周したよ！2周目は「にがて特訓」で';
+  const head=p.todayN>=p.perDay?'🎉 今日の回はOK！（'+p.todayN+'回）':'今日やった回 '+p.todayN+'／'+p.perDay;
+  return head+'　あと'+p.left+'回・入試まで'+p.daysLeft+'日 → 1日'+p.perDay+'回でOK';
+}
 function continueRound(){
   let kai=state.lastRound&&ROUNDS[state.lastRound]?Number(state.lastRound):Object.keys(ROUNDS).map(Number)[0];
   const s=getRoundStats(kai);
@@ -2131,6 +2148,7 @@ function renderHome(){
   {const ck=continueRound(), cs=getRoundStats(ck), first=!state.lastRound;
    document.getElementById('cont-title').textContent=(first?'はじめる回：':ck===Number(state.lastRound)?'続きの回：':'次の回：')+'第'+ck+'回 '+ROUNDS[ck].theme;
    document.getElementById('cont-desc').textContent=cs.total+'語（書ける '+cs.ok+'語）。まちがえた漢字は、その回の中でもう一回出るよ';
+   document.getElementById('cont-plan').textContent=roundPlanText();
    document.getElementById('cont-go').textContent=cs.ok>0&&cs.ok<cs.total?'つづき':'スタート';}
   const stToday=(state.stamps||{})[ymd(now)]||0;
   document.getElementById('daily-go').innerHTML=stToday>=MINI_FROM-1?miniPicker(false):'スタート';
@@ -2350,6 +2368,7 @@ function showResult(){
   const perfect=pState.ng===0;
   if(perfect)addXP(30);
   const stampN=(pState.mode==='daily'||ROUND_MODES.includes(pState.mode))?pressStamp():0;
+  if(pState.mode==='all'){state.roundDone=state.roundDone||{};state.roundDone[currentRound]=ymd(Date.now());saveState();}   // 「ぜんぶ練習」を終えた回（1日に何回やればいいかに使う）
   if(pState.mode==='daily'&&pState.seq){state.seqDone=state.seqDone||{};state.seqDone[ymd(Date.now())]=1;saveState();}
 
   let html=`
