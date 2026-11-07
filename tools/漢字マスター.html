@@ -280,6 +280,15 @@ body::before{
     <!-- これまでの積み重ね（減らない数字だけ） -->
     <div id="ts-pile" style="display:flex;gap:8px;margin-bottom:14px;"></div>
     <div id="stamp-card" style="background:#fff;border:2px solid #ffe2bf;border-radius:16px;padding:12px 12px 10px;margin-bottom:14px;"></div>
+    <!-- 続きの回（2026-11-07 こころ「回を選んでやる」）。1回＝30語くらい。まちがえた語は回の最後にもう一度出る -->
+    <div class="daily-card" id="cont-card" style="background:linear-gradient(135deg,#4a9bd9 0%,#7cc4f5 100%);box-shadow:0 4px 16px rgba(74,155,217,0.35)" onclick="currentRound=continueRound();goTab('write')">
+      <div class="daily-icon">📖</div>
+      <div class="daily-info">
+        <div class="daily-title" id="cont-title">続きの回</div>
+        <div class="daily-desc" id="cont-desc"></div>
+      </div>
+      <div class="daily-go" id="cont-go" style="color:#2f7fc1">えらぶ</div>
+    </div>
     <div class="daily-card" onclick="startDailyReview()">
       <div class="daily-icon">🔥</div>
       <div class="daily-info">
@@ -1844,6 +1853,21 @@ const DROPPED = new Set([
   "故障","揮発","忠誠","仏頂面","朗らか","蒸し暑い"
 ]);
 
+// ===== 🔥テストで落とした漢字を「回」にする（2026-11-07 あゆみ・こころ「回を選んでやる」）=====
+// DROPPED の全語（180語）を古いテストから順に DROP_PER 語ずつ、第94回〜に分ける。新しいテストで落とした語は
+// DROPPED の上に足すので、列の最後（いちばん大きい回）に入る。前の回の中身は動かない。
+// 語の読み・例文は、第99回に書いてあればそれ、なければ元の回のものを使う。
+const DROP_FIRST=94, DROP_PER=30;
+(function(){
+  const base=ROUNDS[99]; delete ROUNDS[99];
+  const src={}; for(const w of base.words) src[w.k]=w;
+  for(const[kai,d]of Object.entries(ROUNDS)) for(const w of d.words) if(DROPPED.has(w.k)&&!src[w.k]) src[w.k]=w;
+  const list=[...DROPPED].reverse().filter(k=>src[k]).map(k=>src[k]);   // 古いテストが先
+  const marks='①②③④⑤⑥⑦⑧⑨⑩';
+  for(let i=0;i*DROP_PER<list.length;i++)
+    ROUNDS[DROP_FIRST+i]={theme:'🔥テストで落とした漢字 '+(marks[i]||(i+1)),words:list.slice(i*DROP_PER,(i+1)*DROP_PER)};
+})();
+
 // ===== TROPHIES =====
 const TROPHIES = [
   {id:'first',name:'はじめの一歩',icon:'✏️',desc:'はじめて練習した',check:s=>s.totalPractice>=1},
@@ -1868,7 +1892,14 @@ const STORAGE_KEY = 'kanji_master_v2';
 let state;
 function loadState(){
   const saved = localStorage.getItem(STORAGE_KEY);
-  if(saved){state=JSON.parse(saved);return;}
+  if(saved){
+    state=JSON.parse(saved);
+    // 第99回を第94回〜に分けたので（2026-11-07）、前の「99_語」の記録を新しい回のキーへ写す（1回だけ・古い記録は残す）
+    for(const[kai,d]of Object.entries(ROUNDS)){ if(Number(kai)<DROP_FIRST)continue;
+      for(const w of d.words){const nk=kai+'_'+w.k, ok='99_'+w.k;
+        if(!state.records[nk]&&state.records[ok]) state.records[nk]={...state.records[ok]};}}
+    return;
+  }
   state = {xp:0, achievements:[], records:{}};
   for(const[kai,data]of Object.entries(ROUNDS)){
     for(const w of data.words){
@@ -1928,6 +1959,10 @@ function stampHTML(n,size){
 // 1日の1・2回目は DAILY_N 語（3回目は下の「順番の15問」）。4回目（MINI_FROM）以降は MINI_N 語だけにして、すき間時間にサッと回せるようにする。
 // 4回目以降は、こころが MINI_CHOICES（5語か10語）から自分でえらぶ。えらんだ数は覚えておく（state.miniPick）。はじめは MINI_N。
 const DAILY_N=10, MINI_N=5, MINI_FROM=4, MINI_CHOICES=[5,10];
+// まちがえた語を同じ回の中でくり返す回数（2026-11-07）
+const REPEAT_MAX=2;
+// 回（ぜんぶ練習・にがて特訓・復習チェック）を1つ終えてもハンコ（2026-11-07 こころ「回を選んでやる」）
+const ROUND_MODES=['all','weak','review'];
 function todayStamps(){return (state.stamps||{})[ymd(Date.now())]||0;}
 function isMini(done){return (done==null?todayStamps():done)+1>=MINI_FROM;}
 function miniN(){return MINI_CHOICES.includes(state.miniPick)?state.miniPick:MINI_N;}
@@ -1971,7 +2006,7 @@ function renderStampCard(){
     past+=`<div style="display:flex;align-items:center;gap:6px;font-size:0.68em;color:#b0a79a"><span style="width:46px">${m.getMonth()+1}/${m.getDate()}〜</span>${row}</div>`;
   }
   const n=st[todayK]||0;
-  const msg=n>=3?'王冠ハンコ！今日の復習を3回できたね👑 ここからは5語か10語、えらべるよ':n===2?'キラキラハンコ！3回目は「順番の15問」で王冠ハンコ👑':n===1?'ハンコ押せたよ！おかわり10語でキラキラになるよ':'今日の10語でハンコがもらえるよ';
+  const msg=n>=3?'王冠ハンコ！今日3回できたね👑 ここからは「ちょこっと復習」は5語か10語、えらべるよ':n===2?'キラキラハンコ！あと1回で王冠ハンコ👑':n===1?'ハンコ押せたよ！回を1つ、または「今日の復習」1回で、ハンコが1こ':'回を1つ終えると ハンコが1こ。3こで王冠👑';
   box.innerHTML=`<div style="font-weight:800;color:#e08a2e;font-size:0.9em;margin-bottom:6px">📮 今週のハンコ</div>
     <div style="display:flex;gap:6px">${cells}</div>
     <div style="font-size:0.72em;color:#8a7a66;margin-top:8px;text-align:center">${msg}</div>
@@ -2034,6 +2069,14 @@ function getTotalStats(){
 
 // ===== TAB NAVIGATION =====
 let currentRound = 19;
+// 続きの回：最後にやった回がまだ全部書けていなければその回、書けていれば次の回
+function nextRound(kai){const ks=Object.keys(ROUNDS).map(Number);const i=ks.indexOf(Number(kai));return i>=0&&i+1<ks.length?ks[i+1]:null;}
+function continueRound(){
+  let kai=state.lastRound&&ROUNDS[state.lastRound]?Number(state.lastRound):Object.keys(ROUNDS).map(Number)[0];
+  const s=getRoundStats(kai);
+  if(s.ok>=s.total&&nextRound(kai)!==null)kai=nextRound(kai);
+  return kai;
+}
 function goTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
@@ -2085,6 +2128,10 @@ function renderHome(){
     pile(today,'回','今日<br>書いた','#d4a017');
   renderStampCard();
   renderMasterForecast();
+  {const ck=continueRound(), cs=getRoundStats(ck), first=!state.lastRound;
+   document.getElementById('cont-title').textContent=(first?'はじめる回：':ck===Number(state.lastRound)?'続きの回：':'次の回：')+'第'+ck+'回 '+ROUNDS[ck].theme;
+   document.getElementById('cont-desc').textContent=cs.total+'語（書ける '+cs.ok+'語）。まちがえた漢字は、その回の中でもう一回出るよ';
+   document.getElementById('cont-go').textContent=cs.ok>0&&cs.ok<cs.total?'つづき':'スタート';}
   const stToday=(state.stamps||{})[ymd(now)]||0;
   document.getElementById('daily-go').innerHTML=stToday>=MINI_FROM-1?miniPicker(false):'スタート';
   document.getElementById('daily-go').style.cssText=stToday>=MINI_FROM-1?'background:none;box-shadow:none;padding:0;display:flex;gap:6px':'';
@@ -2092,7 +2139,7 @@ function renderHome(){
   if(stToday>=1){document.getElementById('daily-desc').textContent=stToday>=MINI_FROM-1?'5語か10語、えらんでね。何かやる前にサッと！':stToday===2?'3回目は順番の15問：'+seqLabel()+'。できたら王冠ハンコ👑':'あと10語でキラキラハンコ';}
   else document.getElementById('daily-desc').textContent=dueCount>0
     ?'そろそろ出したい漢字が'+dueCount+'語あるよ。今日はその中から10語'
-    :'テストで落とした漢字＋そろそろわすれそうな漢字を10語';
+    :'前の回をわすれてないかの見直し。テストで落とした漢字＋そろそろわすれそうな漢字を10語';
 
   const list=document.getElementById('round-list');
   list.innerHTML='';
@@ -2102,6 +2149,7 @@ function renderHome(){
     const completed=s.ok===s.total;
     const card=document.createElement('div');
     card.className='round-card'+(completed?' completed':'');
+    if(Number(kai)===continueRound())card.style.borderColor='#4a9bd9';
     card.onclick=()=>{currentRound=parseInt(kai);goTab('write');};
     card.innerHTML=`
       <div class="round-num">${kai}</div>
@@ -2165,6 +2213,7 @@ function startPractice(mode){
     qs=[...data.words];
   }
   qs=shuffle(qs);
+  state.lastRound=currentRound;saveState();   // ホームの「続きの回」に使う
   pState={qs,idx:0,ok:0,ng:0,streak:0,maxStreak:0,wrongs:[],mode};
   document.getElementById('mode-select').style.display='none';
   document.getElementById('practice-area').style.display='block';
@@ -2177,7 +2226,7 @@ function renderQuestion(){
   const key=(q._kai!==undefined?q._kai:currentRound)+'_'+q.k;
   const rec=state.records[key]||(state.records[key]={correct:0,wrong:0,total:0,mastered:false});
 
-  document.getElementById('w-progress').textContent=(pState.idx+1)+' / '+pState.qs.length;
+  document.getElementById('w-progress').textContent=(pState.idx+1)+' / '+pState.qs.length+(q._rep?'　🔁 もう一回！':'');
   document.getElementById('w-reading').textContent=q.r;
   const exEl=document.getElementById('w-example');
   if(q.ex){
@@ -2251,12 +2300,16 @@ function judge(correct){
     if(!state.maxStreak||pState.maxStreak>state.maxStreak)state.maxStreak=pState.maxStreak;
     rec.correct++;
     if(rec.correct>=5)rec.mastered=true;
+    if(q._rep){
+      // 同じ回の中でもう一度出した語（答えを見た直後）は「書けた」にしない。次の日に書けてはじめて「書ける」
+    }else{
     if(!rec.last)rec.okAt=now;   // 書けるようになった日（「この1週間で」に数える）
     rec.last=true;
     // 出す日が来ていた語だけ間隔をのばす（同じ日に何回も正解しても一気に2か月先にはしない）
     if(!rec.due||now>=rec.due-12*3600*1000){
       rec.due=now+INTERVAL_DAYS[rec.step]*86400000;
       rec.step=Math.min(rec.step+1,INTERVAL_DAYS.length-1);
+    }
     }
     addXP(10);
     pState.dotStatus[pState.idx]='ok';
@@ -2267,7 +2320,12 @@ function judge(correct){
     rec.last=false;
     rec.step=0;
     rec.due=now+INTERVAL_DAYS[0]*86400000;   // まちがえたら次の日にもう一度
-    pState.wrongs.push(q);
+    if(!pState.wrongs.some(w=>w.k===q.k&&w._kai===q._kai))pState.wrongs.push(q);
+    // まちがえた語は、その回の最後にもう一度出す（正解するまで、最大 REPEAT_MAX 回）。こころ「同じ漢字が出てこない」（2026-11-07）
+    if(pState.mode!=='retry'&&(q._rep||0)<REPEAT_MAX){
+      pState.qs.push({...q,_rep:(q._rep||0)+1});
+      daifukuSay('あとでもう一回出すね！');
+    }
     addXP(3);
     pState.dotStatus[pState.idx]='ng';
   }
@@ -2290,7 +2348,8 @@ function showResult(){
 
   const perfect=pState.ng===0;
   if(perfect)addXP(30);
-  const stampN=pState.mode==='daily'?pressStamp():0;
+  const stampN=(pState.mode==='daily'||ROUND_MODES.includes(pState.mode))?pressStamp():0;
+  if(pState.mode==='daily'&&pState.seq){state.seqDone=state.seqDone||{};state.seqDone[ymd(Date.now())]=1;saveState();}
 
   let html=`
     <div class="result-area">
@@ -2306,7 +2365,14 @@ function showResult(){
     html+=`<div style="text-align:center;margin:14px 0 6px">
       <div style="display:inline-flex;width:96px;height:96px;align-items:center;justify-content:center;border-radius:50%;background:#fffdf8;border:3px solid #ffb35c;animation:stampPop .5s ease-out">${stampHTML(stampN,80)}</div>
       <div style="font-weight:800;color:#e08a2e;margin-top:6px">${stampN>=3?'王冠ハンコ ゲット！👑':stampN===2?'キラキラハンコ ゲット！':'ハンコ ゲット！'}</div></div>`;
-    if(isMini(stampN)) html+=`<div style="text-align:center;font-weight:800;color:#e08a2e;margin:4px 0">もうちょっとやる？</div><div style="display:flex;gap:10px;margin-bottom:10px">${miniPicker(true)}</div>`;
+    if(ROUND_MODES.includes(pState.mode)){
+      const s=getRoundStats(currentRound), weak=s.total-s.mastered, nx=nextRound(currentRound);
+      html+=`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">`;
+      if(weak>0) html+=`<button class="btn-primary" onclick="startPractice('weak')">💪 この回の にがて特訓（${weak}語）</button>`;
+      if(nx!==null) html+=`<button class="btn-primary" style="background:#4a9bd9" onclick="currentRound=${nx};goTab('write');startPractice('all')">📝 次の回へ：第${nx}回 ${ROUNDS[nx].theme}</button>`;
+      html+=`</div>`;
+    }
+    else if(isMini(stampN)) html+=`<div style="text-align:center;font-weight:800;color:#e08a2e;margin:4px 0">もうちょっとやる？</div><div style="display:flex;gap:10px;margin-bottom:10px">${miniPicker(true)}</div>`;
     else html+=`<button class="btn-primary" style="margin-bottom:10px" onclick="startDailyReview()">${stampN===2?'3回目：順番の15問（王冠ハンコ👑）':'おかわり10語（キラキラハンコ）'}</button>`;
   }
   if(pState.wrongs.length>0){
@@ -2337,11 +2403,13 @@ function retryWrongs(){
 // 1・2回目はいつもの「今日の復習」10問。3回目（王冠ハンコの回）は、第19回の1語目から順番に15問ずつ、書ける語も飛ばさずに出す（忘れている語を拾うため）。
 // どこまで進んだかは「10/19以降に王冠ハンコをもらった日の数」で決める（ハンコはクラウドに残るので、端末が変わってもずれない）。途中でやめた日は進まない。
 // ×だった語は、ふつうの記録どおり次の日の「今日の復習」に出る。回を足すと列の後ろにつながる
-const SEQ_START='2026-10-19', SEQ_N=15;
+const SEQ_START='2026-10-19', SEQ_N=15, SEQ_SWITCH='2026-11-07';
 function seqList(){const a=[];for(const[kai,data]of Object.entries(ROUNDS))for(const w of data.words)a.push({w,kai});return a;}
 function seqPos(){
   const st=state.stamps||{}, today=ymd(Date.now());
-  let n=0; for(const k in st) if(k>=SEQ_START&&k<today&&st[k]>=3) n++;
+  const sd=state.seqDone||{};
+  let n=0; for(const k in st) if(k>=SEQ_START&&k<SEQ_SWITCH&&k<today&&st[k]>=3) n++;   // 11/7より前：王冠ハンコの日
+  for(const k in sd) if(k>=SEQ_SWITCH&&k<today) n++;                                 // 11/7から：順番の15問を実際にやった日
   return (n*SEQ_N)%seqList().length;
 }
 function seqPick(){const all=seqList(),p=seqPos();let a=all.slice(p,p+SEQ_N);if(a.length<SEQ_N)a=a.concat(all.slice(0,SEQ_N-a.length));return a;}
@@ -2351,7 +2419,7 @@ function startSeqReview(){
   goTab('write');
   document.getElementById('write-title').textContent='📚 順番の15問（'+seqLabel()+'）';
   document.getElementById('mode-select').style.display='none';
-  pState={qs,idx:0,ok:0,ng:0,streak:0,maxStreak:0,wrongs:[],mode:'daily',dotStatus:[]};
+  pState={qs,idx:0,ok:0,ng:0,streak:0,maxStreak:0,wrongs:[],mode:'daily',dotStatus:[],seq:true};
   document.getElementById('practice-area').style.display='block';
   document.getElementById('result-area').style.display='none';
   renderQuestion();
