@@ -2172,8 +2172,8 @@ function renderWrite(){
   document.getElementById('result-area').style.display='none';
 
   const s=getRoundStats(currentRound);
-  const weakCount=s.total-s.mastered;
-  const reviewCount=s.mastered;
+  const weakCount=s.total-s.ok;
+  const reviewCount=s.ok;
 
   const sel=document.getElementById('mode-select');
   sel.style.display='block';
@@ -2185,12 +2185,12 @@ function renderWrite(){
     </div>
     <div class="mode-card" onclick="startPractice('weak')">
       <div class="mc-icon">💪</div><div class="mc-title">にがて特訓</div>
-      <div class="mc-desc">まだマスターしてない漢字だけ</div>
+      <div class="mc-desc">いま書けない漢字だけ（×だった・まだやってない）</div>
       <div class="mc-count">${weakCount>0?weakCount+'語':'なし！'}</div>
     </div>
     <div class="mode-card" onclick="startPractice('review')">
       <div class="mc-icon">🔄</div><div class="mc-title">復習チェック</div>
-      <div class="mc-desc">マスター済みの漢字をわすれてないか確認</div>
+      <div class="mc-desc">いま書ける漢字をわすれてないか確認</div>
       <div class="mc-count">${reviewCount>0?reviewCount+'語':'まだなし'}</div>
     </div>
   `;
@@ -2203,12 +2203,13 @@ function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.fl
 function startPractice(mode){
   const data=ROUNDS[currentRound];
   let qs;
+  // にがて特訓＝いま書けない漢字（直前が×、またはまだやってない）。復習チェック＝いま書ける漢字（2026-11-07 あゆみ：前は書けて今書けない語を拾うため）
   if(mode==='weak'){
-    qs=data.words.filter(w=>!state.records[currentRound+'_'+w.k]?.mastered);
-    if(qs.length===0){alert('にがてな漢字はありません！');return;}
+    qs=data.words.filter(w=>!canWrite(state.records[currentRound+'_'+w.k]));
+    if(qs.length===0){alert('この回はぜんぶ書けてるよ！');return;}
   }else if(mode==='review'){
-    qs=data.words.filter(w=>state.records[currentRound+'_'+w.k]?.mastered);
-    if(qs.length===0){alert('まだマスターした漢字がありません');return;}
+    qs=data.words.filter(w=>canWrite(state.records[currentRound+'_'+w.k]));
+    if(qs.length===0){alert('まだ書ける漢字がありません');return;}
   }else{
     qs=[...data.words];
   }
@@ -2366,7 +2367,7 @@ function showResult(){
       <div style="display:inline-flex;width:96px;height:96px;align-items:center;justify-content:center;border-radius:50%;background:#fffdf8;border:3px solid #ffb35c;animation:stampPop .5s ease-out">${stampHTML(stampN,80)}</div>
       <div style="font-weight:800;color:#e08a2e;margin-top:6px">${stampN>=3?'王冠ハンコ ゲット！👑':stampN===2?'キラキラハンコ ゲット！':'ハンコ ゲット！'}</div></div>`;
     if(ROUND_MODES.includes(pState.mode)){
-      const s=getRoundStats(currentRound), weak=s.total-s.mastered, nx=nextRound(currentRound);
+      const s=getRoundStats(currentRound), weak=s.total-s.ok, nx=nextRound(currentRound);
       html+=`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">`;
       if(weak>0) html+=`<button class="btn-primary" onclick="startPractice('weak')">💪 この回の にがて特訓（${weak}語）</button>`;
       if(nx!==null) html+=`<button class="btn-primary" style="background:#4a9bd9" onclick="currentRound=${nx};goTab('write');startPractice('all')">📝 次の回へ：第${nx}回 ${ROUNDS[nx].theme}</button>`;
