@@ -29,7 +29,8 @@
     '.nobi .rd-stamps span{width:26px;height:26px;border-radius:50%;border:2px dashed #ffc9a8;display:flex;align-items:center;justify-content:center;font-size:.8rem;}',
     '.nobi .rd-stamps span.on{border:2px solid #e8611a;background:#e8611a;}',
     '.nobi .rd-stamps b{font-size:.72rem;color:#e8611a;margin-right:4px;min-width:5.5em;}',
-    '.nobi .rd-none{font-size:.72rem;color:#99a;}'
+    '.nobi .rd-none{font-size:.72rem;color:#99a;}',
+    '.nobi .rd-next{background:#f1f0ff;border:2px solid #cfcaf7;} .nobi .rd-next .h{color:#5b4fc4;} .nobi .rd-next .v{color:#8a80d8;}'
   ].join('\n');
   document.head.appendChild(css);
 
@@ -94,6 +95,16 @@
         h+='</div>';
       });
       h+='</div></div>';
+    }
+    // つぎはここで🔥（ねらい単元。赤や「足りない」は出さない）
+    if(S.next && S.next.length){
+      h+='<div class="rd-sec"><div class="rd-lab">🎯 つぎはここで🔥</div>';
+      S.next.forEach(function(x){
+        h+='<div class="rd-row rd-next"><div class="h">'+esc(x.u)+'<span class="v">'+(x.lastPrint?'前のプリント '+md(x.lastPrint):'プリントはこれから')+'</span></div>'+
+          ((x.setsumei&&x.setsumei.length)?'<div class="t">'+md(x.setsumei[0].date)+'にママといっしょに見た「'+esc(x.setsumei[0].n)+'」を、もう一度やってみよう。</div>':'')+
+          '<div class="t">「'+esc(x.u)+'」のプリントや直しをやって送ると、上の🔥がひとつふえるよ。</div></div>';
+      });
+      h+='</div>';
     }
     // 伸びてきた
     h+='<div class="rd-sec"><div class="rd-lab">⬆ 伸びてきた</div>';
