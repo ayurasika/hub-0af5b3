@@ -1,6 +1,6 @@
 // 自動で作られるファイル（tests/build_radar.py）。手で直さず tests/kiroku.json を直す
 window.RADAR = {
- "updated": "2026-11-08",
+ "updated": "2026-11-09",
  "subjects": {
   "sansu": {
    "axes": [
@@ -11,37 +11,37 @@ window.RADAR = {
       "of": 24
      },
      "before": {
-      "got": 13,
-      "of": 22
+      "got": 15,
+      "of": 24
      }
     },
     {
      "u": "数の性質",
      "now": {
-      "got": 15,
-      "of": 26
+      "got": 8,
+      "of": 17
      },
      "before": {
-      "got": 4,
-      "of": 11
+      "got": 11,
+      "of": 22
      }
     },
     {
      "u": "割合・文章題",
      "now": {
       "got": 12,
-      "of": 28
+      "of": 24
      },
      "before": {
-      "got": 13,
-      "of": 29
+      "got": 15,
+      "of": 35
      }
     },
     {
      "u": "速さ",
      "now": {
-      "got": 0,
-      "of": 7
+      "got": 2,
+      "of": 20
      },
      "before": {
       "got": 5,
@@ -51,30 +51,30 @@ window.RADAR = {
     {
      "u": "図形・比",
      "now": {
-      "got": 14,
-      "of": 26
+      "got": 13,
+      "of": 27
      },
      "before": {
-      "got": 11,
-      "of": 29
+      "got": 12,
+      "of": 32
      }
     },
     {
      "u": "立体",
      "now": {
       "got": 9,
-      "of": 19
+      "of": 17
      },
      "before": {
       "got": 2,
-      "of": 11
+      "of": 13
      }
     },
     {
      "u": "場合の数",
      "now": {
       "got": 4,
-      "of": 7
+      "of": 8
      },
      "before": {
       "got": 6,
@@ -85,9 +85,9 @@ window.RADAR = {
    "up": [
     {
      "u": "立体",
-     "before": 18,
-     "now": 47,
-     "diff": 29,
+     "before": 15,
+     "now": 53,
+     "diff": 38,
      "why": {
       "date": "2026-11-03",
       "label": "6年後期補充プリント 第10回（点の移動・水そうグラフ①②）",
@@ -97,23 +97,10 @@ window.RADAR = {
      }
     },
     {
-     "u": "数の性質",
-     "before": 36,
-     "now": 58,
-     "diff": 21,
-     "why": {
-      "date": "2026-10-25",
-      "label": "育成テスト7",
-      "n": "周期・等差数列・約数と余り",
-      "got": 4,
-      "of": 5
-     }
-    },
-    {
      "u": "図形・比",
      "before": 38,
-     "now": 54,
-     "diff": 16,
+     "now": 48,
+     "diff": 11,
      "why": {
       "date": "2026-11-03",
       "label": "6年後期補充プリント 第10回（点の移動・水そうグラフ①②）",
@@ -216,9 +203,13 @@ window.RADAR = {
      "u": "速さ",
      "lastPrint": null,
      "daysAgo": null,
-     "rate": 28,
-     "of": 18,
+     "rate": 23,
+     "of": 31,
      "setsumei": [
+      {
+       "date": "2026-11-09",
+       "n": "へだたりのグラフ（旅人算・折れ目を読む）"
+      },
       {
        "date": "2026-11-06",
        "n": "時計算（かける／わるの区別）"
@@ -229,8 +220,8 @@ window.RADAR = {
      "u": "数の性質",
      "lastPrint": null,
      "daysAgo": null,
-     "rate": 51,
-     "of": 37,
+     "rate": 49,
+     "of": 39,
      "setsumei": [
       {
        "date": "2026-11-06",
@@ -245,90 +236,64 @@ window.RADAR = {
     {
      "u": "漢字",
      "now": {
-      "got": 17,
-      "of": 36
+      "got": 15,
+      "of": 34
      },
      "before": {
-      "got": 22,
-      "of": 53
+      "got": 28,
+      "of": 62
      }
     },
     {
      "u": "語句・文法",
      "now": {
-      "got": 62,
-      "of": 93
+      "got": 56,
+      "of": 91
      },
      "before": {
-      "got": 13,
-      "of": 29
+      "got": 22,
+      "of": 39
      }
     },
     {
      "u": "物語の読みとり",
      "now": {
-      "got": 13,
-      "of": 30
+      "got": 11,
+      "of": 37
      },
      "before": {
-      "got": 14,
-      "of": 33
+      "got": 17,
+      "of": 40
      }
     },
     {
      "u": "説明文の読みとり",
      "now": {
-      "got": 12,
-      "of": 19
+      "got": 8,
+      "of": 21
      },
      "before": {
-      "got": 14,
-      "of": 34
+      "got": 24,
+      "of": 46
      }
     },
     {
      "u": "記述",
      "now": {
-      "got": 8,
-      "of": 15
+      "got": 6,
+      "of": 11
      },
      "before": {
-      "got": 14,
-      "of": 32
+      "got": 16,
+      "of": 36
      }
     }
    ],
    "up": [
     {
-     "u": "語句・文法",
-     "before": 45,
-     "now": 67,
-     "diff": 22,
-     "why": {
-      "date": "2026-11-01",
-      "label": "語句のまとめ 第10回（チェックテスト）",
-      "n": "熟語 ①〜⑳",
-      "got": 20,
-      "of": 20
-     }
-    },
-    {
-     "u": "説明文の読みとり",
-     "before": 41,
-     "now": 63,
-     "diff": 22,
-     "why": {
-      "date": "2026-10-11",
-      "label": "育成テスト5",
-      "n": "[一]",
-      "got": 10,
-      "of": 12
-     }
-    },
-    {
      "u": "記述",
      "before": 44,
-     "now": 53,
+     "now": 55,
      "diff": 10,
      "why": {
       "date": "2026-10-25",
@@ -420,16 +385,16 @@ window.RADAR = {
      "u": "物語の読みとり",
      "lastPrint": null,
      "daysAgo": null,
-     "rate": 43,
-     "of": 63,
+     "rate": 36,
+     "of": 77,
      "setsumei": []
     },
     {
      "u": "漢字",
      "lastPrint": null,
      "daysAgo": null,
-     "rate": 44,
-     "of": 89,
+     "rate": 45,
+     "of": 96,
      "setsumei": []
     }
    ]
@@ -439,30 +404,30 @@ window.RADAR = {
     {
      "u": "生物",
      "now": {
-      "got": 33,
-      "of": 48
+      "got": 34,
+      "of": 49
      },
      "before": {
-      "got": 35,
-      "of": 59
+      "got": 38,
+      "of": 64
      }
     },
     {
      "u": "気象",
      "now": {
-      "got": 1,
-      "of": 7
+      "got": 0,
+      "of": 1
      },
      "before": {
-      "got": 3,
-      "of": 3
+      "got": 4,
+      "of": 9
      }
     },
     {
      "u": "天体・地震・地層",
      "now": {
-      "got": 20,
-      "of": 35
+      "got": 23,
+      "of": 41
      },
      "before": {
       "got": 23,
@@ -472,32 +437,32 @@ window.RADAR = {
     {
      "u": "化学",
      "now": {
-      "got": 40,
-      "of": 54
+      "got": 47,
+      "of": 71
      },
      "before": {
-      "got": 16,
-      "of": 45
+      "got": 20,
+      "of": 50
      }
     },
     {
      "u": "物理",
      "now": {
-      "got": 21,
-      "of": 50
+      "got": 14,
+      "of": 33
      },
      "before": {
-      "got": 14,
-      "of": 36
+      "got": 23,
+      "of": 59
      }
     }
    ],
    "up": [
     {
      "u": "化学",
-     "before": 36,
-     "now": 74,
-     "diff": 39,
+     "before": 40,
+     "now": 66,
+     "diff": 26,
      "why": {
       "date": "2026-11-07",
       "label": "塾技13 物の燃え方（テキストの説明ページ・チャレンジ問題）",
@@ -509,14 +474,27 @@ window.RADAR = {
     {
      "u": "天体・地震・地層",
      "before": 44,
-     "now": 57,
-     "diff": 13,
+     "now": 56,
+     "diff": 12,
      "why": {
       "date": "2026-10-25",
       "label": "育成テスト7",
       "n": "星座早見 [4]",
       "got": 3,
       "of": 3
+     }
+    },
+    {
+     "u": "生物",
+     "before": 59,
+     "now": 69,
+     "diff": 10,
+     "why": {
+      "date": "2026-10-30",
+      "label": "理科のまとめチェックテスト 第9回（標準）",
+      "n": "花びら・おしべの数 [5][6]",
+      "got": 5,
+      "of": 5
      }
     }
    ],
@@ -612,9 +590,9 @@ window.RADAR = {
     {
      "u": "物理",
      "lastPrint": "2026-10-31",
-     "daysAgo": 8,
-     "rate": 41,
-     "of": 86,
+     "daysAgo": 9,
+     "rate": 40,
+     "of": 92,
      "setsumei": []
     }
    ]
