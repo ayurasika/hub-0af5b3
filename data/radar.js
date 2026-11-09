@@ -41,7 +41,7 @@ window.RADAR = {
      "u": "速さ",
      "now": {
       "got": 2,
-      "of": 20
+      "of": 21
      },
      "before": {
       "got": 5,
@@ -203,9 +203,13 @@ window.RADAR = {
      "u": "速さ",
      "lastPrint": null,
      "daysAgo": null,
-     "rate": 23,
-     "of": 31,
+     "rate": 22,
+     "of": 32,
      "setsumei": [
+      {
+       "date": "2026-11-09",
+       "n": "へだたりのグラフ（逆算・いっしょに歩いた速さ）"
+      },
       {
        "date": "2026-11-09",
        "n": "へだたりのグラフ（旅人算・折れ目を読む）"
