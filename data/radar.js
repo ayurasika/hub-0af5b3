@@ -1,6 +1,6 @@
 // 自動で作られるファイル（tests/build_radar.py）。手で直さず tests/kiroku.json を直す
 window.RADAR = {
- "updated": "2026-11-09",
+ "updated": "2026-11-10",
  "subjects": {
   "sansu": {
    "axes": [
@@ -30,7 +30,7 @@ window.RADAR = {
      "u": "割合・文章題",
      "now": {
       "got": 12,
-      "of": 24
+      "of": 26
      },
      "before": {
       "got": 15,
@@ -240,8 +240,8 @@ window.RADAR = {
     {
      "u": "漢字",
      "now": {
-      "got": 15,
-      "of": 34
+      "got": 27,
+      "of": 55
      },
      "before": {
       "got": 28,
@@ -339,23 +339,36 @@ window.RADAR = {
    ],
    "challenge": {
     "hero": {
-     "date": "2026-11-07",
-     "label": "入試に向けて知識を定着させよう 第十二回（敬語）",
-     "u": "語句・文法",
-     "n": "十三④・十四⑤ 尊敬語・謙譲語",
-     "got": 0,
-     "of": 2,
-     "was": 52,
-     "count": 6
+     "date": "2026-11-09",
+     "label": "語句のまとめ 漢字4周 1周目 第2回 p6上（21問）",
+     "u": "漢字",
+     "n": "語句のまとめ第2回 p6上（同音異義語の書き）",
+     "got": 12,
+     "of": 21,
+     "was": 45,
+     "count": 1
     },
     "counts": [
      {
       "u": "語句・文法",
       "count": 6
+     },
+     {
+      "u": "漢字",
+      "count": 1
      }
     ]
    },
    "prints": [
+    {
+     "date": "2026-11-09",
+     "label": "語句のまとめ 漢字4周 1周目 第2回 p6上（21問）",
+     "u": "漢字",
+     "n": "語句のまとめ第2回 p6上（同音異義語の書き）",
+     "got": 12,
+     "of": 21,
+     "challenge": true
+    },
     {
      "date": "2026-11-07",
      "label": "入試に向けて知識を定着させよう 第十二回（敬語）",
@@ -373,15 +386,6 @@ window.RADAR = {
      "got": 0,
      "of": 4,
      "challenge": true
-    },
-    {
-     "date": "2026-11-07",
-     "label": "入試に向けて知識を定着させよう 第十二回（敬語）",
-     "u": "語句・文法",
-     "n": "一・二 敬語の表（⑦②○、⑤⑧⑩⑪は×△）",
-     "got": 2,
-     "of": 6,
-     "challenge": true
     }
    ],
    "next": [
@@ -394,11 +398,11 @@ window.RADAR = {
      "setsumei": []
     },
     {
-     "u": "漢字",
+     "u": "説明文の読みとり",
      "lastPrint": null,
      "daysAgo": null,
-     "rate": 45,
-     "of": 96,
+     "rate": 48,
+     "of": 67,
      "setsumei": []
     }
    ]
@@ -594,9 +598,17 @@ window.RADAR = {
     {
      "u": "物理",
      "lastPrint": "2026-10-31",
-     "daysAgo": 9,
+     "daysAgo": 10,
      "rate": 40,
      "of": 92,
+     "setsumei": []
+    },
+    {
+     "u": "気象",
+     "lastPrint": "2026-11-07",
+     "daysAgo": 3,
+     "rate": 40,
+     "of": 10,
      "setsumei": []
     }
    ]
