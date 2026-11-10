@@ -373,6 +373,8 @@ main{padding-top:30px}
 @media(max-width:650px){.season-book{flex-basis:190px;min-height:0;padding:20px 18px 19px 25px}.season-book .book-art{height:80px;margin-bottom:14px}.season-book strong{font-size:20px}.season-book small{min-height:34px}}
 
 </style>
+<!-- ハブの共通設定（syncUrl）。tools/ から見た相対パス。読めなくても動く（記録を送らないだけ） -->
+<script src="../data/config.js"></script>
 </head>
 <body>
 
@@ -1069,6 +1071,7 @@ function showQuestion() {
 function answer(btn, oi, item) {
   document.querySelectorAll(".quiz-opt").forEach(b => b.disabled = true);
   const correct = oi === item.a;
+  szRecord(QUIZ.indexOf(item), correct);
   if (correct) { quizScore++; btn.classList.add("correct"); }
   else {
     btn.classList.add("wrong");
@@ -1096,6 +1099,29 @@ function finishQuiz() {
   s.style.display = "block";
   $("quiz-restart").style.display = "inline-block";
 }
+
+// ===== 記録（2026-11-10 あゆみ決定：作戦会議でClaudeが前日の星座を読めるように）=====
+// ハブ同期に 1日1キー sZ_YYYY-MM-DD = [開いた回数, 答えた数, 正解数, [まちがえた問題の番号(QUIZの順)...]] を送る。
+// 送るだけで、ハブの画面には何も出さない。同期がなくても動く。
+const SZ_URL = (window.HUB_CONFIG && window.HUB_CONFIG.syncUrl) || "";
+const szDay = (()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");})();
+let szRec = [0,0,0,[]];
+try{ const o=JSON.parse(localStorage.getItem("seiza-log")||"null"); if(o && o.day===szDay && Array.isArray(o.v)) szRec=o.v; }catch(e){}
+let szTimer=null;
+function szSave(){
+  try{ localStorage.setItem("seiza-log", JSON.stringify({day:szDay, v:szRec})); }catch(e){}
+  if(!SZ_URL) return;
+  clearTimeout(szTimer);
+  szTimer=setTimeout(()=>{
+    fetch(SZ_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({["sZ_"+szDay]:{v:szRec,t:Date.now()}})}).catch(()=>{});
+  },1500);
+}
+function szRecord(i, ok){
+  szRec[1]++; if(ok) szRec[2]++;
+  else if(i>=0 && szRec[3].length<30) szRec[3].push(i);
+  szSave();
+}
+szRec[0]++; szSave();
 
 $("quiz-next").addEventListener("click", () => { quizIdx++; showQuestion(); });
 $("quiz-restart").addEventListener("click", startQuiz);
