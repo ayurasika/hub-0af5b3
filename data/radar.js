@@ -1,6 +1,6 @@
 // 自動で作られるファイル（tests/build_radar.py）。手で直さず tests/kiroku.json を直す
 window.RADAR = {
- "updated": "2026-11-10",
+ "updated": "2026-11-11",
  "subjects": {
   "sansu": {
    "axes": [
@@ -8,7 +8,7 @@ window.RADAR = {
      "u": "計算",
      "now": {
       "got": 14,
-      "of": 27
+      "of": 28
      },
      "before": {
       "got": 15,
@@ -30,7 +30,7 @@ window.RADAR = {
      "u": "割合・文章題",
      "now": {
       "got": 20,
-      "of": 37
+      "of": 40
      },
      "before": {
       "got": 15,
@@ -94,19 +94,6 @@ window.RADAR = {
       "n": "水そうグラフ① (1)①②③・(2)①",
       "got": 4,
       "of": 4
-     }
-    },
-    {
-     "u": "割合・文章題",
-     "before": 43,
-     "now": 54,
-     "diff": 11,
-     "why": {
-      "date": "2026-11-08",
-      "label": "合格力育成テスト8（11/8）",
-      "n": "[3](1)(2) 水位と速さ",
-      "got": 2,
-      "of": 2
      }
     },
     {
@@ -611,7 +598,7 @@ window.RADAR = {
     {
      "u": "物理",
      "lastPrint": "2026-10-31",
-     "daysAgo": 10,
+     "daysAgo": 11,
      "rate": 40,
      "of": 92,
      "setsumei": []
@@ -619,7 +606,7 @@ window.RADAR = {
     {
      "u": "気象",
      "lastPrint": "2026-11-07",
-     "daysAgo": 3,
+     "daysAgo": 4,
      "rate": 40,
      "of": 10,
      "setsumei": []
