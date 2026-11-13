@@ -17,7 +17,15 @@ var AUTUMN_GIFTS=[
  {id:'autumn-acorn',name:'どんぐりの置物',day:18,asset:'autumn-acorn',x:42,y:33},
  {id:'autumn-mushroom',name:'きのこのランプ',day:19,asset:'autumn-mushroom',x:88,y:23}
 ];
-DECOR=DECOR.concat(AUTUMN_GIFTS);
+var WINTER_GIFTS=[
+ {id:'winter-snowman',name:'雪だるまのぬいぐるみ',day:21,asset:'winter-snowman',x:68,y:80},
+ {id:'winter-cocoa',name:'マシュマロココア',day:22,asset:'winter-cocoa',x:30,y:37},
+ {id:'winter-tree',name:'フェルトのツリー',day:23,asset:'winter-tree',x:88,y:68},
+ {id:'winter-lantern',name:'金色のランタン',day:24,asset:'winter-lantern',x:22,y:57},
+ {id:'winter-globe',name:'雪のスノードーム',day:25,asset:'winter-globe',x:51,y:33},
+ {id:'winter-cookie-house',name:'ジンジャーブレッドのおうち',day:26,asset:'winter-cookie-house',x:64,y:51}
+];
+DECOR=DECOR.concat(AUTUMN_GIFTS,WINTER_GIFTS);
 function eligibleDays(rewards,today){return Object.keys(rewards||{}).filter(function(d){return d>=START&&d<=today;}).length;}
 function earnedDays(status){var days=status&&status.collectionDays;return status&&status.started&&typeof days==='number'&&isFinite(days)&&days>=0&&Math.floor(days)===days?days:0;}
 function collection(status){
@@ -26,8 +34,10 @@ function collection(status){
  return {days:days,owned:owned,total:Math.min(days,GIFTS.length),next:GIFTS[days]||null};
 }
 // Derived from already validated achievement days: existing progress unlocks immediately, without a new ledger or writes.
-function autumnCollection(status){var days=earnedDays(status),owned={},total=0,next=null;AUTUMN_GIFTS.forEach(function(g){if(days>=g.day){owned[g.id]=true;total++;}else if(!next)next=g;});return {days:days,owned:owned,total:total,next:next};}
-function closet(status){var days=earnedDays(status),owned={},total=0,next=null;OUTFITS.forEach(function(o){if(days>=o.day){owned[o.id]=true;total++;}else if(!next)next=o;});return {days:days,owned:owned,total:total,next:next};}
+function collectionByDay(status,items){var days=earnedDays(status),owned={},total=0,next=null;items.forEach(function(item){if(days>=item.day){owned[item.id]=true;total++;}else if(!next)next=item;});return {days:days,owned:owned,total:total,next:next};}
+function autumnCollection(status){return collectionByDay(status,AUTUMN_GIFTS);}
+function winterCollection(status){return collectionByDay(status,WINTER_GIFTS);}
+function closet(status){return collectionByDay(status,OUTFITS);}
 function dress(state,id,status){if(!closet(status).owned[id])throw Error('この服は、まだもらっていません');var next=valid(state);next.outfit=id;next.hat=false;next.cape=false;return next;}
 function appearance(state,status){
  var clothes=closet(status),outfit=OUTFITS.filter(function(o){return o.id===state.outfit&&clothes.owned[o.id];})[0]||OUTFITS[0],gifts=collection(status);
@@ -51,6 +61,6 @@ function create(storage,preview){
  function save(next,expected){var before=read();if(before.token!==expected)throw Error('別の画面で配置が変わりました。もう一度選んでください');var raw=JSON.stringify(valid(next));if(raw===before.token)return before;storage.setItem(key,raw);undo={before:copy(before.state),after:raw};return read();}
  return {read:read,save:save,undo:function(){var s=read();if(!s.canUndo)throw Error('戻せる変更がありません');storage.setItem(key,JSON.stringify(undo.before));undo=null;return read();},exportJSON:function(){return JSON.stringify({format:'kokoro-room-season-backup-v2',state:read().state},null,2);},restore:function(raw){var obj;try{obj=JSON.parse(raw);}catch(e){throw Error('バックアップを読み取れません');}if(!obj||(obj.format!=='kokoro-room-season-backup-v1'&&obj.format!=='kokoro-room-season-backup-v2'))throw Error('飾りと着せ替えのバックアップではありません');return save(valid(obj.state),read().token);}};
 }
-var api={key:KEY,previewKey:PREVIEW,decor:DECOR,gifts:GIFTS,outfits:OUTFITS,autumnGifts:AUTUMN_GIFTS,startDate:START,eligibleDays:eligibleDays,collection:collection,autumnCollection:autumnCollection,closet:closet,dress:dress,appearance:appearance,initial:initial,valid:valid,create:create};
+var api={key:KEY,previewKey:PREVIEW,decor:DECOR,gifts:GIFTS,outfits:OUTFITS,autumnGifts:AUTUMN_GIFTS,winterGifts:WINTER_GIFTS,startDate:START,eligibleDays:eligibleDays,collection:collection,autumnCollection:autumnCollection,winterCollection:winterCollection,closet:closet,dress:dress,appearance:appearance,initial:initial,valid:valid,create:create};
 if(typeof module==='object'&&module.exports)module.exports=api;else root.RoomSeason=api;
 })(this);
