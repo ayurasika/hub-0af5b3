@@ -1,6 +1,6 @@
 (function(root){
 'use strict';
-var KEY='kokoro-room-season-v1',PREVIEW='kokoro-room-season-preview-v1',START='2026-10-15';
+var KEY='kokoro-room-season-v1',PREVIEW='kokoro-room-season-preview-v1',START='2026-10-15',WINTER_START='2026-11-14';
 var DECOR=[{id:'pumpkin',name:'かぼちゃランタン',x:70,y:83},{id:'ghost',name:'おばけのぬいぐるみ',x:78,y:42},{id:'candy',name:'お菓子かご',x:53,y:43},{id:'stars',name:'月と星のガーランド',x:65,y:26}];
 // Bonus collection uses the existing validated daily ledger. Never change old reward IDs.
 var GIFTS=[{id:'pumpkin',name:'かぼちゃランタン'},{id:'ghost',name:'おばけのぬいぐるみ'},{id:'candy',name:'お菓子かご'},{id:'hat',name:'魔女の帽子'},{id:'stars',name:'月と星のガーランド'},{id:'cape',name:'星の刺繍のマント'}];
@@ -18,26 +18,28 @@ var AUTUMN_GIFTS=[
  {id:'autumn-mushroom',name:'きのこのランプ',day:19,asset:'autumn-mushroom',x:88,y:23}
 ];
 var WINTER_GIFTS=[
- {id:'winter-snowman',name:'雪だるまのぬいぐるみ',day:21,asset:'winter-snowman',x:68,y:80},
- {id:'winter-cocoa',name:'マシュマロココア',day:22,asset:'winter-cocoa',x:30,y:37},
- {id:'winter-tree',name:'フェルトのツリー',day:23,asset:'winter-tree',x:88,y:68},
- {id:'winter-lantern',name:'金色のランタン',day:24,asset:'winter-lantern',x:22,y:57},
- {id:'winter-globe',name:'雪のスノードーム',day:25,asset:'winter-globe',x:51,y:33},
- {id:'winter-cookie-house',name:'ジンジャーブレッドのおうち',day:26,asset:'winter-cookie-house',x:64,y:51}
+ {id:'winter-snowman',name:'雪だるまのぬいぐるみ',day:1,asset:'winter-snowman',x:68,y:80},
+ {id:'winter-cocoa',name:'マシュマロココア',day:2,asset:'winter-cocoa',x:30,y:37},
+ {id:'winter-tree',name:'フェルトのツリー',day:3,asset:'winter-tree',x:88,y:68},
+ {id:'winter-lantern',name:'金色のランタン',day:4,asset:'winter-lantern',x:22,y:57},
+ {id:'winter-globe',name:'雪のスノードーム',day:5,asset:'winter-globe',x:51,y:33},
+ {id:'winter-cookie-house',name:'ジンジャーブレッドのおうち',day:6,asset:'winter-cookie-house',x:64,y:51}
 ];
 DECOR=DECOR.concat(AUTUMN_GIFTS,WINTER_GIFTS);
-function eligibleDays(rewards,today){return Object.keys(rewards||{}).filter(function(d){return d>=START&&d<=today;}).length;}
-function earnedDays(status){var days=status&&status.collectionDays;return status&&status.started&&typeof days==='number'&&isFinite(days)&&days>=0&&Math.floor(days)===days?days:0;}
+function countDays(rewards,today,start){return Object.keys(rewards||{}).filter(function(d){return d>=start&&d<=today;}).length;}
+function eligibleDays(rewards,today){return countDays(rewards,today,START);}
+function winterEligibleDays(rewards,today){return countDays(rewards,today,WINTER_START);}
+function earnedDays(status,key){var days=status&&status[key];return status&&status.started&&typeof days==='number'&&isFinite(days)&&days>=0&&Math.floor(days)===days?days:0;}
 function collection(status){
- var days=earnedDays(status);
+ var days=earnedDays(status,'collectionDays');
  var owned={};GIFTS.forEach(function(g,i){if(days>i)owned[g.id]=true;});
  return {days:days,owned:owned,total:Math.min(days,GIFTS.length),next:GIFTS[days]||null};
 }
 // Derived from already validated achievement days: existing progress unlocks immediately, without a new ledger or writes.
-function collectionByDay(status,items){var days=earnedDays(status),owned={},total=0,next=null;items.forEach(function(item){if(days>=item.day){owned[item.id]=true;total++;}else if(!next)next=item;});return {days:days,owned:owned,total:total,next:next};}
-function autumnCollection(status){return collectionByDay(status,AUTUMN_GIFTS);}
-function winterCollection(status){return collectionByDay(status,WINTER_GIFTS);}
-function closet(status){return collectionByDay(status,OUTFITS);}
+function collectionByDay(days,items){var owned={},total=0,next=null;items.forEach(function(item){if(days>=item.day){owned[item.id]=true;total++;}else if(!next)next=item;});return {days:days,owned:owned,total:total,next:next};}
+function autumnCollection(status){return collectionByDay(earnedDays(status,'collectionDays'),AUTUMN_GIFTS);}
+function winterCollection(status){return collectionByDay(earnedDays(status,'winterDays'),WINTER_GIFTS);}
+function closet(status){return collectionByDay(earnedDays(status,'collectionDays'),OUTFITS);}
 function dress(state,id,status){if(!closet(status).owned[id])throw Error('この服は、まだもらっていません');var next=valid(state);next.outfit=id;next.hat=false;next.cape=false;return next;}
 function appearance(state,status){
  var clothes=closet(status),outfit=OUTFITS.filter(function(o){return o.id===state.outfit&&clothes.owned[o.id];})[0]||OUTFITS[0],gifts=collection(status);
@@ -61,6 +63,6 @@ function create(storage,preview){
  function save(next,expected){var before=read();if(before.token!==expected)throw Error('別の画面で配置が変わりました。もう一度選んでください');var raw=JSON.stringify(valid(next));if(raw===before.token)return before;storage.setItem(key,raw);undo={before:copy(before.state),after:raw};return read();}
  return {read:read,save:save,undo:function(){var s=read();if(!s.canUndo)throw Error('戻せる変更がありません');storage.setItem(key,JSON.stringify(undo.before));undo=null;return read();},exportJSON:function(){return JSON.stringify({format:'kokoro-room-season-backup-v2',state:read().state},null,2);},restore:function(raw){var obj;try{obj=JSON.parse(raw);}catch(e){throw Error('バックアップを読み取れません');}if(!obj||(obj.format!=='kokoro-room-season-backup-v1'&&obj.format!=='kokoro-room-season-backup-v2'))throw Error('飾りと着せ替えのバックアップではありません');return save(valid(obj.state),read().token);}};
 }
-var api={key:KEY,previewKey:PREVIEW,decor:DECOR,gifts:GIFTS,outfits:OUTFITS,autumnGifts:AUTUMN_GIFTS,winterGifts:WINTER_GIFTS,startDate:START,eligibleDays:eligibleDays,collection:collection,autumnCollection:autumnCollection,winterCollection:winterCollection,closet:closet,dress:dress,appearance:appearance,initial:initial,valid:valid,create:create};
+var api={key:KEY,previewKey:PREVIEW,decor:DECOR,gifts:GIFTS,outfits:OUTFITS,autumnGifts:AUTUMN_GIFTS,winterGifts:WINTER_GIFTS,startDate:START,eligibleDays:eligibleDays,winterEligibleDays:winterEligibleDays,collection:collection,autumnCollection:autumnCollection,winterCollection:winterCollection,closet:closet,dress:dress,appearance:appearance,initial:initial,valid:valid,create:create};
 if(typeof module==='object'&&module.exports)module.exports=api;else root.RoomSeason=api;
 })(this);
