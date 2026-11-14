@@ -609,14 +609,14 @@ const ROUNDS = {
     {k:"道路標識",r:"ドウロヒョウシキ",ex:"〜を見る"},
     {k:"支柱",r:"シチュウ",ex:"〜を立てる"},
     {k:"機能",r:"キノウ",ex:"便利な〜"},
+    {k:"技法",r:"ギホウ",ex:"新しい〜を使って絵を描いた"},
     {k:"故障",r:"コショウ",ex:"機械の〜"},
-    {k:"鏡",r:"かがみ",ex:"〜を見る"},
+    {k:"鏡",r:"カガミ",ex:"わたしは〜に姿を映してみた"},
     {k:"姿",r:"スガタ",ex:"〜を映す"},
-    {k:"映る",r:"うつる",ex:"鏡に〜る"},
+    {k:"映す",r:"ウツす",ex:"鏡に姿を〜す"},
     {k:"乱暴",r:"ランボウ",ex:"〜な言葉"},
     {k:"傷",r:"キズ",ex:"〜がつく"},
     {k:"縦横",r:"ジュウオウ",ex:"〜無尽"},
-    {k:"金糸",r:"キンシ",ex:"〜の刺繍"},
     {k:"砂糖",r:"サトウ",ex:"〜と塩"},
     {k:"保証",r:"ホショウ",ex:"〜書"},
     {k:"普及",r:"フキュウ",ex:"スマホの〜"},
@@ -1901,6 +1901,8 @@ function loadState(){
   const saved = localStorage.getItem(STORAGE_KEY);
   if(saved){
     state=JSON.parse(saved);
+    // 2026-11-14 第25回を本と照合：「映る」→「映す」に直したので記録を写す（古い記録は残す）
+    if(state.records&&!state.records["25_映す"]&&state.records["25_映る"]) state.records["25_映す"]={...state.records["25_映る"]};
     // 第99回を第94回〜に分けたので（2026-11-07）、前の「99_語」の記録を新しい回のキーへ写す（1回だけ・古い記録は残す）
     for(const[kai,d]of Object.entries(ROUNDS)){ if(Number(kai)<DROP_FIRST)continue;
       for(const w of d.words){const nk=kai+'_'+w.k, ok='99_'+w.k;
