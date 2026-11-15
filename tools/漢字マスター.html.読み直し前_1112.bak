@@ -1,0 +1,3020 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>漢字マスター — だいふくちゃんといっしょ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%234472C4'/><text x='50' y='78' font-size='78' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900'>漢</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Zen Maru Gothic',sans-serif;
+  background:#eaf4fb;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,220,100,0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(135,206,235,0.15) 0%, transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* ===== Header ===== */
+.header{
+  background:linear-gradient(135deg,#4a9bd9 0%,#6bb5e8 50%,#89c9f0 100%);
+  padding:14px 16px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 3px 15px rgba(74,155,217,0.3);position:relative;z-index:10;
+}
+.header-left{display:flex;align-items:center;gap:10px;}
+.header h1{font-size:1.2em;color:#fff;font-weight:900;}
+.header .sub{font-size:0.7em;color:rgba(255,255,255,0.85);margin-top:1px;}
+.lv-badge{background:#fff;color:#4a9bd9;font-weight:900;font-size:0.9em;padding:5px 12px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.xp-info{font-size:0.65em;color:rgba(255,255,255,0.8);text-align:right;margin-top:2px;}
+.xp-bar-wrap{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,0.3);}
+.xp-bar{height:100%;background:#ffd76a;width:0%;border-radius:0 2px 2px 0;transition:width 0.5s;}
+
+/* ===== Nav ===== */
+.nav{display:flex;background:#fff;border-bottom:2px solid #e8f0f8;position:sticky;top:0;z-index:10;}
+.nav-btn{flex:1;padding:8px 0 6px;border:none;background:none;font-family:inherit;font-size:0.65em;font-weight:700;color:#a0b8cc;cursor:pointer;transition:all 0.2s;border-bottom:3px solid transparent;}
+.nav-btn.active{color:#4a9bd9;border-bottom-color:#4a9bd9;}
+.nav-btn .icon{font-size:1.5em;display:block;margin-bottom:1px;}
+
+/* ===== Content ===== */
+.content{max-width:500px;margin:0 auto;padding:16px 14px 120px;position:relative;z-index:1;}
+.tab{display:none;}.tab.active{display:block;}
+.section-title{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.section-title h2{font-size:1em;color:#2c3e50;white-space:nowrap;}
+.section-title .line{flex:1;height:2px;background:linear-gradient(90deg,#4a9bd9,transparent);}
+
+/* ===== Round cards ===== */
+.round-card{
+  background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;
+  border:2px solid #e8f0f8;box-shadow:0 2px 10px rgba(74,155,217,0.08);
+  display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s;
+}
+.round-card:hover{border-color:#4a9bd9;transform:translateY(-1px);}
+.round-card:active{transform:scale(0.98);}
+.round-card.completed{border-color:#ffd76a;background:#fffdf5;}
+.round-num{
+  background:linear-gradient(135deg,#4a9bd9,#6bb5e8);color:#fff;font-weight:900;font-size:1em;
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.round-card.completed .round-num{background:linear-gradient(135deg,#d4a017,#ffd76a);}
+.round-info{flex:1;min-width:0;}
+.round-theme{font-weight:900;font-size:0.95em;color:#2c3e50;}
+.round-count{font-size:0.7em;color:#8fa8bc;margin-top:1px;}
+.round-progress{height:5px;background:#e8f0f8;border-radius:3px;margin-top:6px;overflow:hidden;}
+.round-progress-bar{height:100%;border-radius:3px;transition:width 0.5s;background:linear-gradient(90deg,#ffd76a,#ffb347);}
+.round-progress-bar.full{background:linear-gradient(90deg,#d4a017,#ffd76a);}
+.round-stars{font-size:0.75em;color:#8fa8bc;flex-shrink:0;text-align:right;}
+.round-stars .num{font-size:1.2em;font-weight:900;color:#4a9bd9;}
+.round-stars .num.done{color:#d4a017;}
+
+/* ===== Daily review card ===== */
+.daily-card{
+  background:linear-gradient(135deg,#ff8a5c 0%,#ffb347 100%);
+  border-radius:16px;padding:18px 16px;margin-bottom:18px;
+  box-shadow:0 4px 16px rgba(255,138,92,0.35);
+  display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;
+  border:2px solid transparent;
+}
+.daily-card:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,138,92,0.45);}
+.daily-card:active{transform:scale(0.98);}
+.daily-icon{font-size:2.2em;flex-shrink:0;}
+.daily-info{flex:1;min-width:0;}
+.daily-title{font-weight:900;font-size:1.1em;color:#fff;}
+.daily-desc{font-size:0.72em;color:rgba(255,255,255,0.9);margin-top:2px;}
+.daily-go{background:#fff;color:#e8702a;font-weight:900;font-size:0.8em;padding:8px 14px;border-radius:20px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.12);}
+
+/* ===== Backup ===== */
+.backup-btn{
+  display:block;width:100%;padding:12px;margin-bottom:8px;border:2px solid #e8f0f8;border-radius:14px;
+  font-family:inherit;font-size:0.9em;font-weight:700;cursor:pointer;background:#fff;color:#4a9bd9;transition:all 0.2s;
+}
+.backup-btn:hover{border-color:#4a9bd9;}
+.backup-note{font-size:0.7em;color:#8fa8bc;margin-bottom:10px;line-height:1.6;}
+
+/* ===== Total stats ===== */
+.total-stats{
+  background:#fff;border-radius:14px;padding:14px;margin-bottom:16px;
+  border:2px solid #e8f0f8;display:flex;text-align:center;
+}
+.ts{flex:1;}
+.ts-num{font-size:1.4em;font-weight:900;}
+.ts-num.gold{color:#d4a017;}
+.ts-num.blue{color:#4a9bd9;}
+.ts-num.gray{color:#ccc;}
+.ts-label{font-size:0.65em;color:#8fa8bc;margin-top:1px;}
+
+/* ===== Mode select ===== */
+.mode-card{
+  background:#fff;border-radius:14px;padding:18px;margin-bottom:10px;
+  border:2px solid #e8f0f8;box-shadow:0 2px 10px rgba(74,155,217,0.08);
+  cursor:pointer;transition:all 0.2s;text-align:center;
+}
+.mode-card:hover{border-color:#4a9bd9;transform:translateY(-1px);}
+.mode-card:active{transform:scale(0.97);}
+.mc-icon{font-size:2em;margin-bottom:4px;}
+.mc-title{font-size:1.05em;font-weight:900;color:#2c3e50;}
+.mc-desc{font-size:0.75em;color:#8fa8bc;margin-top:3px;}
+.mc-count{display:inline-block;margin-top:5px;background:#eaf4fb;color:#4a9bd9;font-weight:700;padding:2px 10px;border-radius:10px;font-size:0.75em;}
+
+.back-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  background:none;border:none;font-family:inherit;font-size:0.85em;
+  color:#4a9bd9;font-weight:700;cursor:pointer;margin-bottom:12px;
+}
+
+/* ===== Write / Practice ===== */
+.write-area{text-align:center;padding:10px 0;}
+.write-progress{font-size:0.85em;color:#8fa8bc;margin-bottom:4px;}
+.write-dots{display:flex;justify-content:center;gap:3px;margin-bottom:20px;flex-wrap:wrap;}
+.dot{width:9px;height:9px;border-radius:50%;background:#dde8f0;transition:all 0.3s;}
+.dot.ok{background:#66bb6a;}.dot.ng{background:#ef5350;}.dot.current{background:#4a9bd9;transform:scale(1.3);}
+.reading-display{font-size:1.7em;font-weight:900;color:#2c3e50;margin:16px 0 6px;}
+.write-hint{font-size:0.8em;color:#8fa8bc;margin-bottom:16px;}
+.write-example{font-size:1em;color:#5a7a99;background:#fff7e6;border:2px dashed #f5c25a;padding:10px 14px;border-radius:12px;margin:0 auto 16px;max-width:300px;line-height:1.6;}
+.write-example .ex-label{font-size:0.75em;color:#c08820;font-weight:700;display:block;margin-bottom:2px;}
+.write-example .ex-blank{color:#e67e22;font-weight:900;}
+.kanji-reveal{font-size:3.5em;font-weight:900;color:#2c3e50;margin:12px 0;filter:blur(18px);transition:filter 0.4s;user-select:none;}
+.kanji-reveal.show{filter:blur(0);}
+.compare-hint{font-size:0.8em;color:#8fa8bc;margin-bottom:8px;display:none;}
+.compare-hint.show{display:block;}
+.practice-count{font-size:0.8em;color:#8fa8bc;margin:12px 0;}
+.practice-count span{color:#4a9bd9;font-weight:900;}
+
+.btn-primary{
+  display:block;width:100%;padding:14px;border:none;border-radius:14px;
+  font-family:inherit;font-size:1.05em;font-weight:900;cursor:pointer;
+  background:linear-gradient(135deg,#ffd76a,#ffb347);color:#5a4a00;
+  box-shadow:0 3px 12px rgba(255,179,71,0.3);transition:all 0.2s;
+}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-primary:active{transform:scale(0.97);}
+.btn-row{display:flex;gap:10px;margin-top:12px;}
+.btn-wrong{
+  flex:1;padding:13px;border:none;border-radius:14px;font-family:inherit;font-size:0.95em;
+  font-weight:900;cursor:pointer;background:#fff;color:#ef5350;border:2px solid #ef5350;transition:all 0.2s;
+}
+.btn-correct{
+  flex:1;padding:13px;border:none;border-radius:14px;font-family:inherit;font-size:0.95em;
+  font-weight:900;cursor:pointer;background:linear-gradient(135deg,#66bb6a,#81c784);
+  color:#fff;border:2px solid transparent;box-shadow:0 3px 12px rgba(102,187,106,0.3);transition:all 0.2s;
+}
+
+/* ===== Result ===== */
+.result-area{text-align:center;padding:20px 0;}
+.result-title{font-size:1.3em;font-weight:900;color:#2c3e50;margin-bottom:8px;}
+.result-stats{display:flex;justify-content:center;gap:24px;margin:16px 0;}
+.result-stat{text-align:center;}
+.result-stat .rs-num{font-size:2em;font-weight:900;}
+.result-stat .rs-num.ok{color:#66bb6a;}
+.result-stat .rs-num.ng{color:#ef5350;}
+.result-stat .rs-label{font-size:0.75em;color:#8fa8bc;}
+.result-msg{font-size:0.85em;color:#8fa8bc;margin:12px 0;}
+.btn-retry{
+  display:inline-block;padding:12px 28px;border:none;border-radius:14px;
+  font-family:inherit;font-size:0.9em;font-weight:900;cursor:pointer;
+  background:#fff;color:#4a9bd9;border:2px solid #4a9bd9;margin:6px;transition:all 0.2s;
+}
+
+/* ===== MAP ===== */
+.stats-bar{display:flex;background:#fff;border-radius:14px;padding:12px;margin-bottom:14px;border:2px solid #e8f0f8;}
+.stat{flex:1;text-align:center;}
+.stat-num{font-size:1.3em;font-weight:900;}
+.stat-num.master{color:#d4a017;}.stat-num.learning{color:#4a9bd9;}.stat-num.yet{color:#ccc;}
+.stat-label{font-size:0.65em;color:#8fa8bc;margin-top:1px;}
+.kanji-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.kg-cell{background:#fff;border-radius:9px;padding:8px 3px;text-align:center;border:2px solid #e8f0f8;transition:all 0.3s;}
+.kg-cell.mastered{border-color:#ffd76a;background:#fffbf0;box-shadow:0 2px 8px rgba(255,215,106,0.25);}
+.kg-cell.mastered .kg-char{color:#b8860b;}
+.kg-cell.learning{border-color:#4a9bd9;background:#f0f7ff;}
+.kg-char{font-size:1.1em;font-weight:900;color:#2c3e50;}
+.kg-read{font-size:0.5em;color:#8fa8bc;margin-top:1px;}
+.kg-status{font-size:0.55em;margin-top:3px;color:#ccc;}
+.kg-cell.mastered .kg-status{color:#f0a030;font-size:0.7em;}
+
+/* ===== Trophy ===== */
+.trophy-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.trophy-cell{background:#fff;border-radius:14px;padding:14px 8px;text-align:center;border:2px solid #e8f0f8;}
+.trophy-cell.unlocked{border-color:#ffd76a;background:#fffbf0;}
+.trophy-icon{font-size:1.8em;margin-bottom:3px;}
+.trophy-cell:not(.unlocked) .trophy-icon{filter:grayscale(1) opacity(0.3);}
+.trophy-name{font-size:0.7em;font-weight:700;color:#2c3e50;}
+.trophy-cell:not(.unlocked) .trophy-name{color:#ccc;}
+
+/* ===== だいふくちゃん ===== */
+.daifuku-float{position:fixed;bottom:16px;right:12px;z-index:100;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.1));cursor:pointer;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.daifuku-bubble{
+  position:fixed;bottom:95px;right:8px;z-index:100;
+  background:#fff;border-radius:14px;padding:8px 12px;
+  font-size:0.75em;color:#2c3e50;font-weight:700;
+  box-shadow:0 3px 12px rgba(0,0,0,0.1);max-width:170px;text-align:center;
+  opacity:0;transition:opacity 0.3s;pointer-events:none;
+}
+.daifuku-bubble.show{opacity:1;}
+.daifuku-bubble::after{content:'';position:absolute;bottom:-7px;right:25px;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #fff;}
+
+/* ===== Achievement popup ===== */
+.ach-popup{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-100px);
+  background:#fff;border-radius:14px;padding:10px 20px;
+  box-shadow:0 6px 25px rgba(0,0,0,0.15);z-index:200;
+  display:flex;align-items:center;gap:8px;border:2px solid #ffd76a;
+  transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+.ach-popup.show{transform:translateX(-50%) translateY(0);}
+.ach-icon{font-size:1.3em;}.ach-text{font-weight:900;font-size:0.8em;color:#2c3e50;}
+.ach-sub{font-size:0.7em;color:#d4a017;font-weight:700;}
+
+/* ===== XP popup ===== */
+.xp-popup{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:1.5em;font-weight:900;color:#d4a017;
+  opacity:0;pointer-events:none;z-index:150;
+  text-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+.xp-popup.show{animation:xpfly 0.8s ease-out forwards;}
+@keyframes xpfly{0%{opacity:1;transform:translate(-50%,-50%);}100%{opacity:0;transform:translate(-50%,-120px);}}
+
+@media(max-width:400px){.kanji-grid{grid-template-columns:repeat(4,1fr);}}
+@keyframes stampPop{0%{transform:scale(2.2) rotate(-18deg);opacity:0}60%{transform:scale(.92) rotate(4deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+</style>
+<!-- ハブの共通設定（syncUrl）。tools/ から見た相対パス。読めなくても動く（同期しないだけ） -->
+<script src="../data/config.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <svg width="28" height="28" viewBox="0 0 32 32"><rect x="4" y="6" width="24" height="20" rx="3" fill="#fff" opacity="0.9"/><text x="16" y="20" text-anchor="middle" font-size="12" font-weight="900" fill="#4a9bd9">漢</text></svg>
+    <div><h1>漢字マスター</h1><div class="sub">だいふくちゃんといっしょ!</div></div>
+  </div>
+  <div style="text-align:right">
+    <div class="lv-badge" id="lv-badge">Lv.1</div>
+    <div class="xp-info" id="xp-info">0 / 100 XP</div>
+  </div>
+  <div class="xp-bar-wrap"><div class="xp-bar" id="xp-bar"></div></div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="goTab('home')"><span class="icon">📚</span>ホーム</button>
+  <button class="nav-btn" onclick="goTab('write')"><span class="icon">✏️</span>れんしゅう</button>
+  <button class="nav-btn" onclick="goTab('map')"><span class="icon">🗺️</span>マップ</button>
+  <button class="nav-btn" onclick="goTab('trophy')"><span class="icon">🏆</span>トロフィー</button>
+</div>
+
+<div class="content">
+  <!-- HOME -->
+  <div class="tab active" id="tab-home">
+    <div class="total-stats">
+      <div class="ts"><div class="ts-num gold" id="ts-master">0</div><div class="ts-label">書ける</div></div>
+      <div class="ts"><div class="ts-num blue" id="ts-total">208</div><div class="ts-label">ぜんぶ</div></div>
+      <div class="ts"><div class="ts-num" id="ts-pct" style="color:#3fa96a">+0</div><div class="ts-label">この1週間で<br>書けるようになった</div></div>
+    </div>
+    <div id="ts-star" style="text-align:center;font-size:0.75em;color:#8fa8bc;margin:-6px 0 10px;"></div>
+    <!-- これまでの積み重ね（減らない数字だけ） -->
+    <div id="ts-pile" style="display:flex;gap:8px;margin-bottom:14px;"></div>
+    <div id="stamp-card" style="background:#fff;border:2px solid #ffe2bf;border-radius:16px;padding:12px 12px 10px;margin-bottom:14px;"></div>
+    <!-- 続きの回（2026-11-07 こころ「回を選んでやる」）。1回＝30語くらい。まちがえた語は回の最後にもう一度出る -->
+    <div class="daily-card" id="cont-card" style="background:linear-gradient(135deg,#4a9bd9 0%,#7cc4f5 100%);box-shadow:0 4px 16px rgba(74,155,217,0.35)">
+      <div class="daily-icon">📖</div>
+      <div class="daily-info">
+        <div class="daily-title" id="cont-title">続きの回</div>
+        <div class="daily-desc" id="cont-desc"></div>
+        <div class="daily-desc" id="cont-plan" style="margin-top:6px;font-weight:800;color:#fff"></div>
+      </div>
+      <div class="daily-go" id="cont-go" style="color:#2f7fc1">えらぶ</div>
+    </div>
+    <div class="daily-card" onclick="startDailyReview()">
+      <div class="daily-icon">🔥</div>
+      <div class="daily-info">
+        <div class="daily-title" id="daily-title">今日の復習</div>
+        <div class="daily-desc" id="daily-desc">テストで落とした漢字＋そろそろわすれそうな漢字を10語</div>
+      </div>
+      <div class="daily-go" id="daily-go">スタート</div>
+    </div>
+    <!-- 入試までにぜんぶマスターになれるか（いまのペースでの目安） -->
+    <div id="master-panel" style="background:linear-gradient(135deg,#f3f9ff,#fff);border:2px solid #b9dcf5;border-radius:16px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-weight:800;color:#2f7fc1;font-size:0.95em;margin-bottom:8px;">🏆 マスターになれるか？！</div>
+      <div id="mp-body" style="font-size:0.8em;color:#555;line-height:1.7;"></div>
+    </div>
+    <div class="section-title"><h2>回をえらぼう</h2><div class="line"></div></div>
+    <div id="round-list"></div>
+  </div>
+
+  <!-- WRITE -->
+  <div class="tab" id="tab-write">
+    <button class="back-btn" onclick="goTab('home')">← もどる</button>
+    <div class="section-title"><h2 id="write-title">第19回 — 自然</h2><div class="line"></div></div>
+    <div id="mode-select"></div>
+    <div id="practice-area" style="display:none">
+      <div class="write-area">
+        <div class="write-progress" id="w-progress">1 / 26</div>
+        <div class="write-dots" id="w-dots"></div>
+        <div class="reading-display" id="w-reading"></div>
+        <div class="write-example" id="w-example" style="display:none"></div>
+        <div class="write-hint">この読みの漢字を紙に書こう！</div>
+        <div class="kanji-reveal" id="w-kanji"></div>
+        <div class="compare-hint" id="w-compare">あなたが書いた字と見くらべよう！</div>
+        <div class="practice-count">この漢字の練習回数：<span id="w-count">0</span> 回</div>
+        <button class="btn-primary" id="w-reveal-btn" onclick="revealKanji()">書けた！答えを見る</button>
+        <div class="btn-row" id="w-judge" style="display:none">
+          <button class="btn-wrong" onclick="judge(false)">ちがった...</button>
+          <button class="btn-correct" onclick="judge(true)">あってた！</button>
+        </div>
+      </div>
+    </div>
+    <div id="result-area" style="display:none"></div>
+  </div>
+
+  <!-- MAP -->
+  <div class="tab" id="tab-map">
+    <button class="back-btn" onclick="goTab('home')">← もどる</button>
+
+    <!-- 全体の到達ぐあい（ぜんぶ合わせて今どこまで進んでるか） -->
+    <div id="overall-panel" style="background:linear-gradient(135deg,#fff8f0,#fff);border:2px solid #ffd9a8;border-radius:16px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-weight:800;color:#e08a2e;font-size:0.95em;margin-bottom:8px;">📊 ぜんぶ合わせて、いまどこまで</div>
+      <div id="ov-bar" style="height:22px;border-radius:11px;overflow:hidden;display:flex;background:#f0f0f0;margin-bottom:6px;"></div>
+      <div id="ov-legend" style="font-size:0.72em;color:#8fa8bc;margin-bottom:10px;"></div>
+      <div id="ov-nums" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      <div id="ov-note" style="font-size:0.75em;color:#666;margin-top:10px;line-height:1.6;"></div>
+      <div id="ov-weak" style="margin-top:10px;"></div>
+    </div>
+
+
+    <div class="section-title"><h2 id="map-title">第19回 — 自然</h2><div class="line"></div></div>
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-num master" id="m-master">0</div><div class="stat-label">マスター</div></div>
+      <div class="stat"><div class="stat-num learning" id="m-learning">0</div><div class="stat-label">練習中</div></div>
+      <div class="stat"><div class="stat-num yet" id="m-yet">0</div><div class="stat-label">まだ</div></div>
+    </div>
+    <div id="map-roundsel" style="margin-bottom:12px;"></div>
+    <div class="kanji-grid" id="kanji-grid"></div>
+  </div>
+
+  <!-- TROPHY -->
+  <div class="tab" id="tab-trophy">
+    <div class="section-title"><h2>トロフィー</h2><div class="line"></div></div>
+    <div class="trophy-grid" id="trophy-grid"></div>
+    <div class="section-title" style="margin-top:24px"><h2>きろくのほぞん</h2><div class="line"></div></div>
+    <div class="backup-note">XPやマスターの記録はこのブラウザの中にあるよ。ときどき「書き出す」でファイルに保存しておくと、消えちゃっても元にもどせるよ（おうちの人向け）。</div>
+    <button class="backup-btn" onclick="exportData()">📤 きろくを書き出す（バックアップ）</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="backup-btn" onclick="document.getElementById('import-file').click()">📥 きろくを読み込む（復元）</button>
+
+    <div class="section-title" style="margin-top:24px"><h2>クラウド同期</h2><div class="line"></div></div>
+    <div class="backup-note">PC・iPad・スマホで進捗を同じにしたい時に使うよ。最初に1回、GitHubの「トークン」を入れる必要があるよ（おうちの人向け）。</div>
+    <button class="backup-btn" onclick="cloudSave()">☁️ クラウドに保存</button>
+    <button class="backup-btn" onclick="cloudLoad()">☁️ クラウドから取得</button>
+    <button class="backup-btn" onclick="cloudSettings()" style="font-size:0.85em">⚙️ 同期設定（トークン・GistID）</button>
+  </div>
+</div>
+
+<!-- だいふくちゃん -->
+<div class="daifuku-bubble" id="bubble"></div>
+<div class="daifuku-float" onclick="daifukuTalk()">
+  <svg width="64" height="64" viewBox="0 0 72 72">
+    <ellipse cx="36" cy="42" rx="18" ry="20" fill="#a8d85e"/>
+    <ellipse cx="36" cy="48" rx="12" ry="13" fill="#f5f0a0"/>
+    <circle cx="36" cy="22" r="16" fill="#a8d85e"/>
+    <circle cx="36" cy="25" r="11" fill="#f5f5dc"/>
+    <circle cx="31" cy="23" r="2.5" fill="#1a1a2e"/>
+    <circle cx="41" cy="23" r="2.5" fill="#1a1a2e"/>
+    <circle cx="32" cy="22" r="0.8" fill="#fff"/>
+    <circle cx="42" cy="22" r="0.8" fill="#fff"/>
+    <path d="M33 28 Q36 32 39 28 Q36 30 33 28Z" fill="#f0a030"/>
+    <circle cx="26" cy="27" r="3" fill="#ffb7b7" opacity="0.5"/>
+    <circle cx="46" cy="27" r="3" fill="#ffb7b7" opacity="0.5"/>
+    <circle cx="30" cy="14" r="1" fill="#5a8a20" opacity="0.4"/>
+    <circle cx="34" cy="12" r="1" fill="#5a8a20" opacity="0.4"/>
+    <circle cx="38" cy="12" r="1" fill="#5a8a20" opacity="0.4"/>
+    <circle cx="42" cy="14" r="1" fill="#5a8a20" opacity="0.4"/>
+    <path d="M18 38 Q10 35 14 45 Q16 42 18 44Z" fill="#8bc34a" opacity="0.8"/>
+    <path d="M54 38 Q62 35 58 45 Q56 42 54 44Z" fill="#8bc34a" opacity="0.8"/>
+    <line x1="30" y1="60" x2="28" y2="66" stroke="#f0a030" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="42" y1="60" x2="44" y2="66" stroke="#f0a030" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M26 66 L28 66 L30 66" stroke="#f0a030" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M42 66 L44 66 L46 66" stroke="#f0a030" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </svg>
+</div>
+
+<div class="ach-popup" id="ach-popup"><div class="ach-icon" id="ach-icon">⭐</div><div><div class="ach-text">ACHIEVEMENT</div><div class="ach-sub" id="ach-name"></div></div></div>
+<div class="xp-popup" id="xp-popup"></div>
+
+<script>
+// ===== DATA =====
+const ROUNDS = {
+  19:{theme:"自然",words:[
+    {k:"緑",r:"ミドリ",ex:"〜の葉っぱ"},
+    {k:"庭園",r:"テイエン",ex:"美しい〜"},
+    {k:"果物",r:"クダモノ",ex:"〜屋さん"},
+    {k:"松",r:"マツ",ex:"〜の木"},
+    {k:"枝",r:"エダ",ex:"木の〜"},
+    {k:"木目",r:"モクメ",ex:"美しい〜"},
+    {k:"野生",r:"ヤセイ",ex:"〜の動物"},
+    {k:"採集",r:"サイシュウ",ex:"昆虫〜"},
+    {k:"昆虫",r:"コンチュウ",ex:"〜採集"},
+    {k:"穀物",r:"コクモツ",ex:"〜を育てる"},
+    {k:"発芽",r:"ハツガ",ex:"種が〜する"},
+    {k:"蒸発",r:"ジョウハツ",ex:"水が〜する"},
+    {k:"受粉",r:"ジュフン",ex:"花の〜"},
+    {k:"移植",r:"イショク",ex:"苗を〜する"},
+    {k:"生糸",r:"キイト",ex:"カイコから〜"},
+    {k:"天敵",r:"テンテキ",ex:"〜から身を守る"},
+    {k:"生態",r:"セイタイ",ex:"動物の〜"},
+    {k:"食物連鎖",r:"ショクモツレンサ",ex:"自然界の〜"},
+    {k:"養蚕",r:"ヨウサン",ex:"〜業"},
+    {k:"樹木",r:"ジュモク",ex:"大きな〜"},
+    {k:"年輪",r:"ネンリン",ex:"木の〜"},
+    {k:"超音波",r:"チョウオンパ",ex:"イルカの〜"},
+    {k:"牧場",r:"ボクジョウ",ex:"〜の牛"},
+    {k:"羊毛",r:"ヨウモウ",ex:"〜のセーター"},
+    {k:"触角",r:"ショッカク",ex:"虫の〜"},
+    {k:"羽毛",r:"ウモウ",ex:"〜布団"}
+  ]},
+  20:{theme:"自然②",words:[
+    {k:"初音",r:"ハツネ",ex:"ウグイスの〜"},
+    {k:"天然",r:"テンネン",ex:"〜の温泉"},
+    {k:"余波",r:"ヨハ",ex:"嵐の〜"},
+    {k:"模様",r:"モヨウ",ex:"美しい〜"},
+    {k:"自転",r:"ジテン",ex:"地球の〜"},
+    {k:"光合成",r:"コウゴウセイ",ex:"植物の〜"},
+    {k:"景色",r:"ケシキ",ex:"美しい〜"},
+    {k:"光明",r:"コウミョウ",ex:"希望の〜"},
+    {k:"雑木林",r:"ゾウキバヤシ",ex:"〜を散歩"},
+    {k:"断層",r:"ダンソウ",ex:"地層の〜"},
+    {k:"治水",r:"チスイ",ex:"〜工事"},
+    {k:"燃える",r:"もえる",ex:"木が〜える"},
+    {k:"快晴",r:"カイセイ",ex:"〜の空"},
+    {k:"暴風雨",r:"ボウフウウ",ex:"はげしい〜"},
+    {k:"台風",r:"タイフウ",ex:"〜が来る"},
+    {k:"織女",r:"ショクジョ",ex:"〜と彦星"},
+    {k:"酸素",r:"サンソ",ex:"〜をすう"},
+    {k:"山岳",r:"サンガク",ex:"〜地帯"},
+    {k:"法則",r:"ホウソク",ex:"自然の〜"},
+    {k:"河川",r:"カセン",ex:"〜が流れる"},
+    {k:"河原",r:"カワラ",ex:"〜で遊ぶ"},
+    {k:"護岸",r:"ゴガン",ex:"〜工事"},
+    {k:"災害",r:"サイガイ",ex:"自然〜"},
+    {k:"堤防",r:"テイボウ",ex:"〜が決壊"},
+    {k:"外気",r:"ガイキ",ex:"〜にふれる"},
+    {k:"雲海",r:"ウンカイ",ex:"山頂の〜"},
+    {k:"満天",r:"マンテン",ex:"〜の星"},
+    {k:"湖水",r:"コスイ",ex:"〜のほとり"},
+    {k:"木漏れ日",r:"コモレビ",ex:"美しい〜"},
+    {k:"気象",r:"キショウ",ex:"〜情報"}
+  ]},
+  21:{theme:"仕事",words:[
+    {k:"退く",r:"しりぞく",ex:"一歩〜く"},
+    {k:"回復",r:"カイフク",ex:"体力が〜する"},
+    {k:"難しい",r:"むずかしい",ex:"〜い問題"},
+    {k:"電光石火",r:"デンコウセッカ",ex:"〜の早業"},
+    {k:"翌日",r:"ヨクジツ",ex:"試験の〜"},
+    {k:"背水",r:"ハイスイ",ex:"〜の陣"},
+    {k:"就職",r:"シュウショク",ex:"会社に〜する"},
+    {k:"困難",r:"コンナン",ex:"〜な状況"},
+    {k:"裁く",r:"さばく",ex:"罪を〜く"},
+    {k:"推進",r:"スイシン",ex:"改革を〜する"},
+    {k:"専門家",r:"センモンカ",ex:"その道の〜"},
+    {k:"実績",r:"ジッセキ",ex:"〜を残す"},
+    {k:"就任",r:"シュウニン",ex:"会長に〜する"},
+    {k:"注文",r:"チュウモン",ex:"〜を受ける"},
+    {k:"採用",r:"サイヨウ",ex:"新人を〜する"},
+    {k:"模倣",r:"モホウ",ex:"〜は創造の母"},
+    {k:"独創的",r:"ドクソウテキ",ex:"〜な発想"},
+    {k:"過労",r:"カロウ",ex:"〜で倒れる"},
+    {k:"縮める",r:"ちぢめる",ex:"距離を〜める"},
+    {k:"任務",r:"ニンム",ex:"〜を果たす"},
+    {k:"損失",r:"ソンシツ",ex:"大きな〜"},
+    {k:"勤める",r:"つとめる（仕事）",ex:"会社に〜める"},
+    {k:"務める",r:"つとめる（役割）",ex:"司会を〜める"},
+    {k:"勤務",r:"キンム",ex:"〜時間"},
+    {k:"勤労",r:"キンロウ",ex:"〜感謝の日"},
+    {k:"易しい",r:"やさしい",ex:"〜い問題"},
+    {k:"異動",r:"イドウ",ex:"人事〜"},
+    {k:"延期",r:"エンキ",ex:"試合を〜する"}
+  ]},
+  22:{theme:"政治・法律",words:[
+    {k:"貧富",r:"ヒンプ",ex:"〜の差"},
+    {k:"領土",r:"リョウド",ex:"国の〜"},
+    {k:"競争",r:"キョウソウ",ex:"〜社会"},
+    {k:"対象",r:"タイショウ",ex:"研究の〜"},
+    {k:"普遍",r:"フヘン",ex:"〜的な真理"},
+    {k:"原理",r:"ゲンリ",ex:"民主主義の〜"},
+    {k:"保障",r:"ホショウ",ex:"社会〜"},
+    {k:"設ける",r:"もうける",ex:"制度を〜ける"},
+    {k:"三権分立",r:"サンケンブンリツ",ex:"〜の原則"},
+    {k:"象徴",r:"ショウチョウ",ex:"平和の〜"},
+    {k:"承認",r:"ショウニン",ex:"議会の〜"},
+    {k:"清潔",r:"セイケツ",ex:"〜な政治"},
+    {k:"明朗",r:"メイロウ",ex:"〜会計"},
+    {k:"裁判官",r:"サイバンカン",ex:"〜が判決"},
+    {k:"正義",r:"セイギ",ex:"〜の味方"},
+    {k:"秩序",r:"チツジョ",ex:"〜を守る"},
+    {k:"交戦権",r:"コウセンケン",ex:"〜の否認"},
+    {k:"選択",r:"センタク",ex:"〜の自由"},
+    {k:"勤労",r:"キンロウ",ex:"〜の義務"},
+    {k:"支持",r:"シジ",ex:"〜率が高い"},
+    {k:"国権",r:"コッケン",ex:"〜の最高機関"},
+    {k:"衆議院",r:"シュウギイン",ex:"〜と参議院"},
+    {k:"任期",r:"ニンキ",ex:"〜は四年"},
+    {k:"優越",r:"ユウエツ",ex:"〜の地位"},
+    {k:"操る",r:"あやつる",ex:"人形を〜る"},
+    {k:"尊重",r:"ソンチョウ",ex:"人権を〜する"},
+    {k:"憲法改正",r:"ケンポウカイセイ",ex:"〜の議論"},
+    {k:"議院内閣制",r:"ギインナイカクセイ",ex:"日本の〜"},
+    {k:"福祉",r:"フクシ",ex:"社会〜"},
+    {k:"納税",r:"ノウゼイ",ex:"〜の義務"},
+    {k:"組織",r:"ソシキ",ex:"大きな〜"}
+  ]},
+  23:{theme:"経済・貿易",words:[
+    {k:"営み",r:"イトナミ",ex:"日々の〜"},
+    {k:"宣伝",r:"センデン",ex:"商品の〜"},
+    {k:"利害得失",r:"リガイトクシツ",ex:"〜を考える"},
+    {k:"拡張",r:"カクチョウ",ex:"道路の〜"},
+    {k:"門戸開放",r:"モンコカイホウ",ex:"〜政策"},
+    {k:"肖像",r:"ショウゾウ",ex:"お札の〜"},
+    {k:"出荷",r:"シュッカ",ex:"野菜を〜する"},
+    {k:"出納",r:"スイトウ",ex:"〜帳"},
+    {k:"工面",r:"クメン",ex:"お金を〜する"},
+    {k:"借り",r:"カリ",ex:"〜を返す"},
+    {k:"需要と供給",r:"ジュヨウとキョウキュウ",ex:"〜のバランス"},
+    {k:"貿易",r:"ボウエキ",ex:"〜会社"},
+    {k:"貸借",r:"タイシャク",ex:"〜対照表"},
+    {k:"歓待",r:"カンタイ",ex:"客を〜する"},
+    {k:"土産",r:"ミヤゲ",ex:"〜を買う"},
+    {k:"招く",r:"マネく",ex:"客を〜く"},
+    {k:"札",r:"サツ",ex:"千円〜"},
+    {k:"損得",r:"ソントク",ex:"〜勘定"},
+    {k:"預金",r:"ヨキン",ex:"〜通帳"},
+    {k:"均一",r:"キンイツ",ex:"〜価格"},
+    {k:"年末",r:"ネンマツ",ex:"〜セール"},
+    {k:"高価",r:"コウカ",ex:"〜な品物"},
+    {k:"経費",r:"ケイヒ",ex:"〜削減"},
+    {k:"損失",r:"ソンシツ",ex:"〜を出す"},
+    {k:"義務",r:"ギム",ex:"〜を果たす"},
+    {k:"生産性",r:"セイサンセイ",ex:"〜の向上"},
+    {k:"減税",r:"ゲンゼイ",ex:"〜の効果"},
+    {k:"首相",r:"シュショウ",ex:"〜官邸"},
+    {k:"情報",r:"ジョウホウ",ex:"〜社会"},
+    {k:"制度",r:"セイド",ex:"新しい〜"}
+  ]},
+  24:{theme:"からだ",words:[
+    {k:"成績",r:"セイセキ",ex:"テストの〜"},
+    {k:"鼻",r:"ハナ",ex:"〜が高い"},
+    {k:"足",r:"アシ",ex:"〜が速い"},
+    {k:"棒",r:"ボウ",ex:"鼻が〜になる"},
+    {k:"額",r:"ヒタイ",ex:"〜の汗"},
+    {k:"胸",r:"ムネ",ex:"〜を張る"},
+    {k:"効き目",r:"キキメ",ex:"薬の〜"},
+    {k:"形相",r:"ギョウソウ",ex:"怒りの〜"},
+    {k:"頭上",r:"ズジョウ",ex:"〜を見上げる"},
+    {k:"眼差し",r:"マナザシ",ex:"優しい〜"},
+    {k:"豊満",r:"ホウマン",ex:"〜な体つき"},
+    {k:"体勢",r:"タイセイ",ex:"〜を整える"},
+    {k:"消化器官",r:"ショウカキカン",ex:"〜の働き"},
+    {k:"脳裏",r:"ノウリ",ex:"〜にひらめく"},
+    {k:"悲惨",r:"ヒサン",ex:"〜な状況"},
+    {k:"素手",r:"ステ",ex:"〜でつかむ"},
+    {k:"胃腸",r:"イチョウ",ex:"〜の調子"},
+    {k:"口調",r:"クチョウ",ex:"やさしい〜"},
+    {k:"眼下",r:"ガンカ",ex:"〜に広がる"},
+    {k:"呼吸",r:"コキュウ",ex:"深い〜"},
+    {k:"断食",r:"ダンジキ",ex:"〜の修行"},
+    {k:"均整",r:"キンセイ",ex:"〜のとれた体"},
+    {k:"不潔",r:"フケツ",ex:"〜な状態"},
+    {k:"震える",r:"フルえる",ex:"寒さで〜える"},
+    {k:"口実",r:"コジツ",ex:"〜を作る"},
+    {k:"個人",r:"コジン",ex:"〜情報"},
+    {k:"反らす",r:"ソらす",ex:"体を〜らす"},
+    {k:"産声",r:"ウブゴエ",ex:"〜をあげる"},
+    {k:"発達",r:"ハッタツ",ex:"〜段階"},
+    {k:"著しい",r:"イチジルしい",ex:"〜い進歩"},
+    {k:"生命",r:"セイメイ",ex:"〜の誕生"},
+    {k:"解毒",r:"ゲドク",ex:"〜作用"},
+    {k:"長身",r:"チョウシン",ex:"〜の選手"}
+  ]},
+  25:{theme:"身の回りのもの",words:[
+    {k:"木綿",r:"モメン",ex:"〜のシャツ"},
+    {k:"特産",r:"トクサン",ex:"地元の〜品"},
+    {k:"幹線",r:"カンセン",ex:"〜道路"},
+    {k:"家財道具",r:"カザイドウグ",ex:"〜一式"},
+    {k:"出版",r:"シュッパン",ex:"〜社"},
+    {k:"乳液",r:"ニュウエキ",ex:"化粧水と〜"},
+    {k:"道路標識",r:"ドウロヒョウシキ",ex:"〜を見る"},
+    {k:"支柱",r:"シチュウ",ex:"〜を立てる"},
+    {k:"機能",r:"キノウ",ex:"便利な〜"},
+    {k:"故障",r:"コショウ",ex:"機械の〜"},
+    {k:"鏡",r:"かがみ",ex:"〜を見る"},
+    {k:"姿",r:"スガタ",ex:"〜を映す"},
+    {k:"映る",r:"うつる",ex:"鏡に〜る"},
+    {k:"乱暴",r:"ランボウ",ex:"〜な言葉"},
+    {k:"傷",r:"キズ",ex:"〜がつく"},
+    {k:"縦横",r:"ジュウオウ",ex:"〜無尽"},
+    {k:"金糸",r:"キンシ",ex:"〜の刺繍"},
+    {k:"砂糖",r:"サトウ",ex:"〜と塩"},
+    {k:"保証",r:"ホショウ",ex:"〜書"},
+    {k:"普及",r:"フキュウ",ex:"スマホの〜"},
+    {k:"要素",r:"ヨウソ",ex:"重要な〜"},
+    {k:"製品",r:"セイヒン",ex:"新〜"},
+    {k:"筆",r:"フデ",ex:"〜で書く"},
+    {k:"必需品",r:"ヒツジュヒン",ex:"生活〜"},
+    {k:"備品",r:"ビヒン",ex:"オフィスの〜"},
+    {k:"二束三文",r:"ニソクサンモン",ex:"〜で売る"},
+    {k:"甲板",r:"カンパン",ex:"船の〜"},
+    {k:"代物",r:"シロモノ",ex:"くわせ〜"},
+    {k:"調度品",r:"チョウドヒン",ex:"部屋の〜"},
+    {k:"往来",r:"オウライ",ex:"人の〜"},
+    {k:"生糸",r:"キイト",ex:"〜の輸出"}
+  ]},
+  26:{theme:"家族・住まい",words:[
+    {k:"退治",r:"タイジ",ex:"シロアリを〜した"},
+    {k:"工夫",r:"クフウ",ex:"ちょっとした〜で快適に"},
+    {k:"快適",r:"カイテキ",ex:"〜に暮らす"},
+    {k:"家屋",r:"カオク",ex:"〜は新しく建てられた"},
+    {k:"点検",r:"テンケン",ex:"火の元を〜する"},
+    {k:"訪ねる",r:"たずねる",ex:"父を〜ねてきた"},
+    {k:"留守",r:"ルス",ex:"〜番をする"},
+    {k:"見当",r:"ケントウ",ex:"この〜のはず"},
+    {k:"窓",r:"まど",ex:"部屋の〜を開ける"},
+    {k:"空ける",r:"あける",ex:"家を〜ける"},
+    {k:"生家",r:"セイカ",ex:"僕の〜は以前ここに"},
+    {k:"戸外",r:"コガイ",ex:"〜に出て遊ぶ"},
+    {k:"注ぐ",r:"そそぐ",ex:"愛情を〜ぎ続ける"},
+    {k:"貸す",r:"かす",ex:"知恵を〜してもらう"},
+    {k:"構う",r:"かまう",ex:"なりふり〜わず働く"},
+    {k:"勧める",r:"すすめる",ex:"お茶を〜める"},
+    {k:"始める",r:"はじめる",ex:"世間話を〜める"},
+    {k:"祖母",r:"ソボ",ex:"〜は毎朝仏前に"},
+    {k:"供える",r:"そなえる",ex:"花と水を〜える"},
+    {k:"不器用",r:"ブキヨウ",ex:"〜な手つきで"},
+    {k:"家族",r:"カゾク",ex:"〜みんなで旅行"},
+    {k:"招待状",r:"ショウタイジョウ",ex:"パーティーの〜を送る"},
+    {k:"訪れる",r:"おとずれる",ex:"わが家を〜れる"},
+    {k:"負い目",r:"おいめ",ex:"世話になった〜"},
+    {k:"誤解",r:"ゴカイ",ex:"〜がもとでけんか"},
+    {k:"幼い",r:"おさない",ex:"〜いころから"},
+    {k:"優れる",r:"すぐれる",ex:"〜れた素質をもつ"},
+    {k:"夫妻",r:"フサイ",ex:"林さん〜がわが家にとまりました"},
+    {k:"異なる",r:"ことなる",ex:"性格が〜なる"},
+    {k:"増築",r:"ゾウチク",ex:"部屋を〜する"}
+  ]},
+  27:{theme:"学校・教育",words:[
+    {k:"延長",r:"エンチョウ",ex:"授業時間を〜する"},
+    {k:"朗読",r:"ロウドク",ex:"「トロッコ」を〜した"},
+    {k:"人柄",r:"ヒトガラ",ex:"品行方正な〜"},
+    {k:"品行方正",r:"ヒンコウホウセイ",ex:"〜な人がら"},
+    {k:"得意満面",r:"トクイマンメン",ex:"高得点をとって〜"},
+    {k:"講義",r:"コウギ",ex:"先生の〜"},
+    {k:"意外",r:"イガイ",ex:"〜にもおもしろい"},
+    {k:"講堂",r:"コウドウ",ex:"学校の〜にいっぱい"},
+    {k:"準備",r:"ジュンビ",ex:"学芸会の〜"},
+    {k:"調える",r:"トトノえる",ex:"必要なものを〜"},
+    {k:"招く",r:"マネく",ex:"先生を〜"},
+    {k:"筆記",r:"ヒッキ",ex:"〜試験"},
+    {k:"口頭",r:"コウトウ",ex:"筆記試験以外に〜試験をする学校もある"},
+    {k:"一朝一夕",r:"イッチョウイッセキ",ex:"〜に習得できない"},
+    {k:"修める",r:"オサめる",ex:"学業を〜"},
+    {k:"始まる",r:"ハジまる",ex:"授業の〜"},
+    {k:"刻まれる",r:"キザまれる",ex:"心に深く〜"},
+    {k:"往復",r:"オウフク",ex:"〜四十分かかった"},
+    {k:"自己紹介",r:"ジコショウカイ",ex:"互いに〜をした"},
+    {k:"和む",r:"ナゴむ",ex:"心が〜"},
+    {k:"早速",r:"サッソク",ex:"〜取り組んだ"},
+    {k:"引率",r:"インソツ",ex:"一年生を〜して登校"},
+    {k:"水魚",r:"スイギョ",ex:"〜の交わり"},
+    {k:"無我夢中",r:"ムガムチュウ",ex:"〜で走った"},
+    {k:"勤勉",r:"キンベン",ex:"とても〜な生徒"},
+    {k:"機会均等",r:"キカイキントウ",ex:"教育の〜"},
+    {k:"囲む",r:"カコむ",ex:"先生を〜んで話す"},
+    {k:"功績",r:"コウセキ",ex:"これまでの〜"},
+    {k:"関心",r:"カンシン",ex:"実験に〜を示す"},
+    {k:"分担",r:"ブンタン",ex:"みんなで〜する"},
+    {k:"厳しい",r:"キビしい",ex:"〜く注意した"}
+  ]},
+  28:{theme:"地理・農村と都市",words:[
+    {k:"紀行",r:"キコウ",ex:"〜文を書いた"},
+    {k:"故郷",r:"コキョウ",ex:"〜に帰ってきた"},
+    {k:"費やす",r:"ツイやす",ex:"読書に〜やしている"},
+    {k:"白砂青松",r:"ハクシャセイショウ",ex:"洋上からの富士と〜"},
+    {k:"減少",r:"ゲンショウ",ex:"人口がどんどん〜"},
+    {k:"大規模",r:"ダイキボ",ex:"〜農法"},
+    {k:"厚い",r:"アツい",ex:"〜い人情を持つ"},
+    {k:"営む",r:"イトナむ",ex:"漁業を〜んでいる"},
+    {k:"果樹園",r:"カジュエン",ex:"〜がたくさんある"},
+    {k:"田園風景",r:"デンエンフウケイ",ex:"のどかな〜"},
+    {k:"田舎",r:"イナカ",ex:"お父さんの〜でスキー"},
+    {k:"原野",r:"ゲンヤ",ex:"〜が少なくなりつつある"},
+    {k:"用意",r:"ヨウイ",ex:"祭りの〜"},
+    {k:"状態",r:"ジョウタイ",ex:"過疎の〜にある"},
+    {k:"群れ",r:"ムれ",ex:"鳥が〜をなして飛ぶ"},
+    {k:"摩擦",r:"マサツ",ex:"住民の間で〜が起きた"},
+    {k:"周囲",r:"シュウイ",ex:"〜の目がうるさくない"},
+    {k:"区画",r:"クカク",ex:"〜整理が行われた都市"},
+    {k:"有数",r:"ユウスウ",ex:"世界〜の過密都市"},
+    {k:"過密",r:"カミツ",ex:"世界有数の〜都市"},
+    {k:"街路樹",r:"ガイロジュ",ex:"排気ガスで〜が弱る"},
+    {k:"市街",r:"シガイ",ex:"バスが〜をぬける"},
+    {k:"往来",r:"オウライ",ex:"車の〜が激しい"},
+    {k:"犯罪",r:"ハンザイ",ex:"〜が増えている"},
+    {k:"津々浦々",r:"ツツウラウラ",ex:"全国〜から集まる"},
+    {k:"縦横",r:"ジュウオウ",ex:"交通網が〜にはりめぐる"},
+    {k:"対策",r:"タイサク",ex:"渋滞に〜を講じる"},
+    {k:"地域",r:"チイキ",ex:"生活水準の〜差"}
+  ]},
+  29:{theme:"感覚・気持ち",words:[
+    {k:"気配",r:"ケハイ",ex:"春の〜が感じられる"},
+    {k:"不思議",r:"フシギ",ex:"〜な話は後を絶たない"},
+    {k:"興奮",r:"コウフン",ex:"絵に〜して眠れず"},
+    {k:"危険",r:"キケン",ex:"〜だと思う"},
+    {k:"快い",r:"ココロヨい",ex:"〜い音楽が聞こえる"},
+    {k:"暖かい",r:"アタタかい",ex:"ずいぶん〜い色"},
+    {k:"容易",r:"ヨウイ",ex:"〜なことではない"},
+    {k:"異彩",r:"イサイ",ex:"〜を放っていた"},
+    {k:"放つ",r:"ハナつ",ex:"異彩を〜っていた"},
+    {k:"印象",r:"インショウ",ex:"〜深いことだ"},
+    {k:"苦痛",r:"クツウ",ex:"手術は〜をともなう"},
+    {k:"痛快",r:"ツウカイ",ex:"〜な発言"},
+    {k:"痛感",r:"ツウカン",ex:"認識不足を〜した"},
+    {k:"情景",r:"ジョウケイ",ex:"夜の〜は寂しい"},
+    {k:"潔い",r:"イサギヨい",ex:"〜く謝ること"},
+    {k:"絶対的",r:"ゼッタイテキ",ex:"〜な権力"},
+    {k:"洗練",r:"センレン",ex:"〜された文章"},
+    {k:"険悪",r:"ケンアク",ex:"〜な関係"},
+    {k:"危うく",r:"アヤうく",ex:"〜く階段から落ちそう"},
+    {k:"熱い",r:"アツい",ex:"〜いお茶が飲めない"},
+    {k:"小刻み",r:"コキザみ",ex:"体は〜にふるえる"},
+    {k:"速やか",r:"スミやか",ex:"〜に行ってもらう"},
+    {k:"強いる",r:"シいる",ex:"人に〜のはやめよう"},
+    {k:"整える",r:"トトノえる",ex:"体の調子を〜"},
+    {k:"微妙",r:"ビミョウ",ex:"〜に食いちがう"},
+    {k:"偶然",r:"グウゼン",ex:"〜おこったと思う"},
+    {k:"必然的",r:"ヒツゼンテキ",ex:"〜におこっている"},
+    {k:"不潔",r:"フケツ",ex:"〜な手"},
+    {k:"普通",r:"フツウ",ex:"ごく〜の子"}
+  ]},
+  30:{theme:"行動・意志",words:[
+    {k:"耕す",r:"タガヤす",ex:"田畑を〜し"},
+    {k:"映す",r:"ウツす",ex:"鏡に顔を〜"},
+    {k:"省く",r:"ハブく",ex:"細かいことを〜いて話す"},
+    {k:"奏でる",r:"カナでる",ex:"ギターの音を〜"},
+    {k:"歓声",r:"カンセイ",ex:"子どもの〜がひびく"},
+    {k:"会釈",r:"エシャク",ex:"静かに〜を交わす"},
+    {k:"付和雷同",r:"フワライドウ",ex:"〜してはだめ"},
+    {k:"率先",r:"ソッセン",ex:"なんでも〜して実行"},
+    {k:"簡潔",r:"カンケツ",ex:"〜にメモする"},
+    {k:"習慣",r:"シュウカン",ex:"メモする〜をつける"},
+    {k:"待機",r:"タイキ",ex:"自宅で〜する"},
+    {k:"経験",r:"ケイケン",ex:"〜に基づいた理論"},
+    {k:"理論",r:"リロン",ex:"経験に基づいた〜"},
+    {k:"荷物",r:"ニモツ",ex:"大きな〜をかつぐ"},
+    {k:"担ぐ",r:"カツぐ",ex:"荷物を〜いでいる"},
+    {k:"軽率",r:"ケイソツ",ex:"〜な行動はつつしむ"},
+    {k:"直情径行",r:"チョクジョウケイコウ",ex:"〜の難点がある"},
+    {k:"採る",r:"トる",ex:"決を〜りたい"},
+    {k:"態度",r:"タイド",ex:"あいまいな〜"},
+    {k:"抵抗",r:"テイコウ",ex:"市民たちは〜した"},
+    {k:"始末",r:"シマツ",ex:"火の〜を確かめる"},
+    {k:"志す",r:"ココロザす",ex:"政治家を〜した"},
+    {k:"試みる",r:"ココロみる",ex:"〜る勇気をもつ"},
+    {k:"納める",r:"オサめる",ex:"税金を〜"},
+    {k:"拝む",r:"オガむ",ex:"ぼくにも〜ませて"},
+    {k:"探す",r:"サガす",ex:"安らぎの故郷を〜"},
+    {k:"告げる",r:"ツげる",ex:"別れを〜げる"},
+    {k:"済む",r:"スむ",ex:"謝っても〜まない"},
+    {k:"預かる",r:"アズかる",ex:"猫を隣に〜かってもらう"},
+    {k:"従う",r:"シタガう",ex:"自分が〜うのは自由"},
+    {k:"打破",r:"ダハ",ex:"独裁政治を〜する"},
+    {k:"対応",r:"タイオウ",ex:"〜に困っている"},
+    {k:"態勢",r:"タイセイ",ex:"準備〜をとる"}
+  ]},
+  31:{theme:"思考・論理",words:[
+    {k:"想像",r:"ソウゾウ",ex:"〜を絶する困難"},
+    {k:"秘密",r:"ヒミツ",ex:"人の〜を明かす"},
+    {k:"貴重",r:"キチョウ",ex:"〜な体験"},
+    {k:"意図",r:"イト",ex:"作者の〜"},
+    {k:"便乗",r:"ビンジョウ",ex:"合格祝いに〜し"},
+    {k:"納得",r:"ナットク",ex:"自分が〜するまで"},
+    {k:"外れる",r:"ハズれる",ex:"予想は〜れた"},
+    {k:"展開",r:"テンカイ",ex:"意外な〜"},
+    {k:"障害",r:"ショウガイ",ex:"通るときの〜"},
+    {k:"立派",r:"リッパ",ex:"外見が〜でも"},
+    {k:"健やか",r:"スコやか",ex:"〜やかな精神"},
+    {k:"精神",r:"セイシン",ex:"健やかな〜"},
+    {k:"半信半疑",r:"ハンシンハンギ",ex:"〜である"},
+    {k:"承知",r:"ショウチ",ex:"ご〜の通り"},
+    {k:"苦手",r:"ニガテ",ex:"〜意識を捨てる"},
+    {k:"捨てる",r:"ステる",ex:"苦手意識を〜てる"},
+    {k:"都合",r:"ツゴウ",ex:"自分の〜だけ考える"},
+    {k:"利己",r:"リコ",ex:"〜的な態度"},
+    {k:"奮う",r:"フルう",ex:"勇気を〜って"},
+    {k:"日常茶飯事",r:"ニチジョウサハンジ",ex:"〜と思える"},
+    {k:"風潮",r:"フウチョウ",ex:"恐ろしい〜だ"},
+    {k:"否定",r:"ヒテイ",ex:"なんでも〜したがる"},
+    {k:"結局",r:"ケッキョク",ex:"〜だまっていた"},
+    {k:"無視",r:"ムシ",ex:"信号を〜する"},
+    {k:"感心",r:"カンシン（ほめる）",ex:"利口な動物だと〜した"},
+    {k:"関心",r:"カンシン（興味）",ex:"生態に〜をいだく"},
+    {k:"観念",r:"カンネン",ex:"時間の〜がない"},
+    {k:"念願",r:"ネンガン",ex:"〜が成就する"},
+    {k:"成就",r:"ジョウジュ",ex:"念願が〜する"},
+    {k:"興味",r:"キョウミ",ex:"〜のある分野"},
+    {k:"警告",r:"ケイコク",ex:"人類に〜している"},
+    {k:"誤り",r:"アヤマリ",ex:"前提こそ〜なのだ"},
+    {k:"逆効果",r:"ギャクコウカ",ex:"冗談は〜だった"},
+    {k:"効率",r:"コウリツ",ex:"〜のよさばかり求める"},
+    {k:"是非",r:"ゼヒ",ex:"事の〜を論じる"},
+    {k:"独立独歩",r:"ドクリツドッポ",ex:"〜の精神"}
+  ]},
+  32:{theme:"気持ち②",words:[
+    {k:"敬う",r:"ウヤマう",ex:"父を〜って生きる"},
+    {k:"有頂天",r:"ウチョウテン",ex:"〜になって後悔"},
+    {k:"強引",r:"ゴウイン",ex:"〜に引っぱる"},
+    {k:"裏腹",r:"ウラハラ",ex:"心とは〜なこと"},
+    {k:"探る",r:"サグる",ex:"本心を〜る"},
+    {k:"歓喜",r:"カンキ",ex:"〜の声"},
+    {k:"直る",r:"ナオる",ex:"機嫌が〜る"},
+    {k:"賞賛",r:"ショウサン",ex:"〜を受ける"},
+    {k:"悲観",r:"ヒカン",ex:"〜してばかり"},
+    {k:"冷める",r:"サめる",ex:"熱が〜める"},
+    {k:"丁重",r:"テイチョウ",ex:"〜なもてなし"},
+    {k:"感謝",r:"カンシャ",ex:"〜しよう"},
+    {k:"困る",r:"コマる",ex:"〜るような質問"},
+    {k:"難しい",r:"ムズカしい",ex:"読み取りが〜い"},
+    {k:"余計",r:"ヨケイ",ex:"〜見たくなる"},
+    {k:"努める",r:"ツトめる",ex:"向上に〜める"},
+    {k:"苦境",r:"クキョウ",ex:"〜に立たされる"},
+    {k:"敬服",r:"ケイフク",ex:"働きには〜する"},
+    {k:"警戒",r:"ケイカイ",ex:"〜させる"},
+    {k:"過ち",r:"アヤマち",ex:"〜を犯す"},
+    {k:"謝り",r:"アヤマり",ex:"速やかに〜る"},
+    {k:"好意",r:"コウイ",ex:"〜をもつ"},
+    {k:"好評",r:"コウヒョウ",ex:"彫刻は〜だった"},
+    {k:"不服",r:"フフク",ex:"〜な人"},
+    {k:"不気味",r:"ブキミ",ex:"〜に静まる"},
+    {k:"愛想",r:"アイソ",ex:"〜がいい人"},
+    {k:"愛用",r:"アイヨウ",ex:"〜のパソコン"},
+    {k:"懐かしむ",r:"ナツかしむ",ex:"子どもの頃を〜"}
+  ]},
+  33:{theme:"芸術・文化",words:[
+    {k:"快挙",r:"カイキョ",ex:"〜をなしとげた"},
+    {k:"競う",r:"キソう",ex:"技を〜い合う"},
+    {k:"歌集",r:"カシュウ",ex:"与謝野晶子の〜"},
+    {k:"絵画",r:"カイガ",ex:"〜・音楽・文学"},
+    {k:"複製",r:"フクセイ",ex:"絵の〜"},
+    {k:"習慣",r:"シュウカン",ex:"歯をみがく〜"},
+    {k:"空前絶後",r:"クウゼンゼツゴ",ex:"〜の大冒険"},
+    {k:"印刷",r:"インサツ",ex:"〜関係の仕事"},
+    {k:"境内",r:"ケイダイ",ex:"神社の〜を歩く"},
+    {k:"伝道",r:"デンドウ",ex:"キリスト教の〜"},
+    {k:"民衆",r:"ミンシュウ",ex:"当時の〜"},
+    {k:"比率",r:"ヒリツ",ex:"〜が高い"},
+    {k:"風俗習慣",r:"フウゾクシュウカン",ex:"〜のちがい"},
+    {k:"主義",r:"シュギ",ex:"資本〜経済"},
+    {k:"著作",r:"チョサク",ex:"作家の〜集"},
+    {k:"翻訳",r:"ホンヤク",ex:"日本語に〜する"},
+    {k:"概念",r:"ガイネン",ex:"数の〜を学ぶ"},
+    {k:"芸術",r:"ゲイジュツ",ex:"〜の歴史"},
+    {k:"民話",r:"ミンワ",ex:"古くから伝わる〜"},
+    {k:"創作",r:"ソウサク",ex:"物語が〜された"},
+    {k:"象徴",r:"ショウチョウ",ex:"苦悩を〜している"},
+    {k:"自画像",r:"ジガゾウ",ex:"画家の〜を見る"},
+    {k:"細工",r:"サイク",ex:"きれいに〜された"},
+    {k:"演奏",r:"エンソウ",ex:"楽器の〜を聞く"},
+    {k:"悲劇",r:"ヒゲキ",ex:"シェークスピアの〜"},
+    {k:"舞",r:"マイ",ex:"古代を思わせる〜"},
+    {k:"伝承",r:"デンショウ",ex:"口伝えで〜された"}
+  ]},
+  34:{theme:"文化・比較",words:[
+    {k:"損失",r:"ソンシツ",ex:"作家の死は大きな〜"},
+    {k:"意義",r:"イギ",ex:"〜のある出来事"},
+    {k:"有無",r:"ウム",ex:"要素の〜"},
+    {k:"定評",r:"テイヒョウ",ex:"絵は〜がある"},
+    {k:"専念",r:"センネン",ex:"勉強に〜する"},
+    {k:"特有",r:"トクユウ",ex:"その時代の〜"},
+    {k:"常識",r:"ジョウシキ",ex:"〜は異なる"},
+    {k:"専門",r:"センモン",ex:"〜家"},
+    {k:"的確",r:"テキカク",ex:"〜に表せない"},
+    {k:"類似点",r:"ルイジテン",ex:"反対語の〜"},
+    {k:"大同小異",r:"ダイドウショウイ",ex:"〜だ"},
+    {k:"前代未聞",r:"ゼンダイミモン",ex:"〜の事件"},
+    {k:"得意",r:"トクイ",ex:"フランス語が〜"},
+    {k:"自給自足",r:"ジキュウジソク",ex:"〜の生活"},
+    {k:"公明正大",r:"コウメイセイダイ",ex:"〜に行われる"},
+    {k:"知恵",r:"チエ",ex:"先人の〜"},
+    {k:"大衆",r:"タイシュウ",ex:"〜の拍手"},
+    {k:"慣例",r:"カンレイ",ex:"国の〜にしたがう"},
+    {k:"流布",r:"ルフ",ex:"学説が〜する"},
+    {k:"評判",r:"ヒョウバン",ex:"大きな〜の本"},
+    {k:"比較",r:"ヒカク",ex:"文化を〜する"},
+    {k:"相違",r:"ソウイ",ex:"文化の〜点"},
+    {k:"千差万別",r:"センサバンベツ",ex:"好みは〜"},
+    {k:"極意",r:"ゴクイ",ex:"〜を教わる"},
+    {k:"通例",r:"ツウレイ",ex:"ならわしを〜という"},
+    {k:"様式",r:"ヨウシキ",ex:"美術の〜"},
+    {k:"脱皮",r:"ダッピ",ex:"前の時代から〜"}
+  ]},
+  35:{theme:"歴史（日本史）",words:[
+    {k:"大和",r:"ヤマト",ex:"〜朝廷が日本を統一"},
+    {k:"古来",r:"コライ",ex:"日本〜の風習"},
+    {k:"元来",r:"ガンライ",ex:"〜これは、ぼくのものだ"},
+    {k:"治める",r:"オサめる",ex:"国を〜める"},
+    {k:"建立",r:"コンリュウ",ex:"寺を〜する"},
+    {k:"子孫",r:"シソン",ex:"〜のために自然を残す"},
+    {k:"由来",r:"ユライ",ex:"神社の〜を調べる"},
+    {k:"各地",r:"カクチ",ex:"日本の〜で起こる"},
+    {k:"暮らす",r:"クらす",ex:"ぜいたくに〜らす"},
+    {k:"時代",r:"ジダイ",ex:"ジュラ紀の〜"},
+    {k:"主人公",r:"シュジンコウ",ex:"大化の改新の〜"},
+    {k:"商人",r:"ショウニン",ex:"〜達が生活"},
+    {k:"宣言",r:"センゲン",ex:"ポツダム〜の内容"},
+    {k:"自由",r:"ジユウ",ex:"〜は死せず"},
+    {k:"人命",r:"ジンメイ",ex:"多くの〜が失われた"},
+    {k:"投下",r:"トウカ",ex:"原爆が〜された"},
+    {k:"解く",r:"トく",ex:"謎を〜き明かす"},
+    {k:"結ぶ",r:"ムスぶ",ex:"条約が〜ばれた"},
+    {k:"状態",r:"ジョウタイ",ex:"鎖国〜だった"},
+    {k:"和歌",r:"ワカ",ex:"気持ちを〜に表す"},
+    {k:"費用",r:"ヒヨウ",ex:"〜がかかった"},
+    {k:"著す",r:"アラワす",ex:"「学問のすすめ」を〜した"},
+    {k:"移る",r:"ウツる",ex:"都が〜った"},
+    {k:"分布",r:"ブンプ",ex:"古墳が〜する"},
+    {k:"規模",r:"キボ",ex:"集落の〜が大きい"},
+    {k:"風習",r:"フウシュウ",ex:"抜歯の〜"}
+  ]},
+  36:{theme:"歴史（日本史②）",words:[
+    {k:"物語",r:"モノガタリ",ex:"源氏〜"},
+    {k:"作品",r:"サクヒン",ex:"鎌倉時代の〜"},
+    {k:"歌集",r:"カシュウ",ex:"わが国最古の〜"},
+    {k:"苦労",r:"クロウ",ex:"大変な〜をして"},
+    {k:"見学",r:"ケンガク",ex:"遺跡を〜しに行く"},
+    {k:"貴族",r:"キゾク",ex:"〜社会に興味"},
+    {k:"病気",r:"ビョウキ",ex:"何の〜で死んだ"},
+    {k:"建立",r:"コンリュウ",ex:"〜された寺"},
+    {k:"意欲",r:"イヨク",ex:"生産〜が高まる"},
+    {k:"出来事",r:"デキゴト",ex:"きっかけになった〜"},
+    {k:"細やか",r:"コマやか",ex:"〜な目をむける"},
+    {k:"希望",r:"キボウ",ex:"国づくりへの〜"},
+    {k:"条約",r:"ジョウヤク",ex:"下関で〜が結ばれた"},
+    {k:"大勢",r:"オオゼイ",ex:"〜の渡来人"},
+    {k:"伝来",r:"デンライ",ex:"種子島に鉄砲が〜した"},
+    {k:"戦死",r:"センシ",ex:"多くの人が〜した"},
+    {k:"痛手",r:"イタデ",ex:"大きな〜を受けた"},
+    {k:"迷信",r:"メイシン",ex:"たくさんの〜が残る"},
+    {k:"伝統",r:"デントウ",ex:"長い〜がある"},
+    {k:"武器",r:"ブキ",ex:"〜を捨てる"},
+    {k:"攻める",r:"セめる",ex:"日本に〜めよせる"},
+    {k:"渡来人",r:"トライジン",ex:"仏教は〜によって"},
+    {k:"影響",r:"エイキョウ",ex:"文化の〜を受ける"},
+    {k:"積極的",r:"セッキョクテキ",ex:"〜に取り入れる"},
+    {k:"庭園",r:"テイエン",ex:"寝殿造の〜"},
+    {k:"戦乱",r:"センラン",ex:"〜が起こる"}
+  ]},
+  37:{theme:"歴史（日本史③）",words:[
+    {k:"功績",r:"コウセキ",ex:"偉大な〜を残す"},
+    {k:"身分",r:"ミブン",ex:"〜の低い武士"},
+    {k:"人気",r:"ニンキ",ex:"〜を集めた"},
+    {k:"使節",r:"シセツ",ex:"アメリカの〜"},
+    {k:"国会",r:"コッカイ",ex:"〜でとりあげた"},
+    {k:"防人",r:"サキモリ",ex:"〜となった"},
+    {k:"脱出",r:"ダッシュツ",ex:"隠岐を〜した"},
+    {k:"都",r:"ミヤコ",ex:"唐の〜の長安"},
+    {k:"防ぐ",r:"フセぐ",ex:"一揆を〜ぐ"},
+    {k:"広める",r:"ヒロめる",ex:"真言宗を〜めた"},
+    {k:"設ける",r:"モウける",ex:"本部が〜けられた"},
+    {k:"管理",r:"カンリ",ex:"土地の〜"},
+    {k:"布教",r:"フキョウ",ex:"キリスト教の〜"},
+    {k:"政治",r:"セイジ",ex:"摂関〜"},
+    {k:"女王",r:"ジョオウ",ex:"邪馬台国の〜"},
+    {k:"目標",r:"モクヒョウ",ex:"富国強兵という〜"},
+    {k:"進める",r:"ススめる",ex:"改新を〜めた"},
+    {k:"役人",r:"ヤクニン",ex:"元〜"},
+    {k:"歴史",r:"レキシ",ex:"〜書として"},
+    {k:"頂く",r:"イタダく",ex:"女王を君主に〜く"},
+    {k:"先祖伝来",r:"センゾデンライ",ex:"〜の宝"},
+    {k:"導く",r:"ミチビく",ex:"破滅に〜いた"},
+    {k:"地位",r:"チイ",ex:"源氏の〜"},
+    {k:"反感",r:"ハンカン",ex:"貴族の〜を買った"},
+    {k:"平定",r:"ヘイテイ",ex:"全国を〜した"}
+  ]},
+  38:{theme:"歴史（日本史④）",words:[
+    {k:"加盟",r:"カメイ",ex:"国連に〜している"},
+    {k:"雑誌",r:"ザッシ",ex:"〜の出版量"},
+    {k:"背く",r:"ソムく",ex:"国王に〜き革命"},
+    {k:"兼ねる",r:"カねる",ex:"書記長と大統領を〜"},
+    {k:"経る",r:"ヘる",ex:"シルクロードを〜て"},
+    {k:"功名",r:"コウミョウ",ex:"〜心に燃える"},
+    {k:"航海",r:"コウカイ",ex:"世界を変える〜"},
+    {k:"成果",r:"セイカ",ex:"船出の〜は大きい"},
+    {k:"伝統",r:"デントウ",ex:"〜を守りながら"},
+    {k:"治める",r:"オサめる",ex:"全国を〜めようとした"},
+    {k:"歴史的",r:"レキシテキ",ex:"〜建造物"},
+    {k:"真相",r:"シンソウ",ex:"事件の〜を究明"},
+    {k:"退路",r:"タイロ",ex:"〜を断たれた"},
+    {k:"断つ",r:"タつ",ex:"退路を〜たれた"},
+    {k:"吸収",r:"キュウシュウ",ex:"西欧文化を〜する"},
+    {k:"極める",r:"キワめる",ex:"栄華を〜めた"},
+    {k:"極秘",r:"ゴクヒ",ex:"〜文書"},
+    {k:"弥生時代",r:"ヤヨイジダイ",ex:"〜の日本人"},
+    {k:"古来",r:"コライ",ex:"日本〜の行事"},
+    {k:"固有",r:"コユウ",ex:"日本〜の文化"},
+    {k:"推移",r:"スイイ",ex:"時代の〜"},
+    {k:"遺産",r:"イサン",ex:"人類の〜"},
+    {k:"遺跡",r:"イセキ",ex:"縄文時代の〜"},
+    {k:"営業",r:"エイギョウ",ex:"自由に〜させた"},
+    {k:"統一",r:"トウイツ",ex:"ますを〜した"},
+    {k:"流出",r:"リュウシュツ",ex:"海外への〜を防ぐ"},
+    {k:"総辞職",r:"ソウジショク",ex:"内閣が〜した"}
+  ]},
+  51:{theme:"☀️夏期講習 その1",words:[
+    {k:"垂れる",r:"タれる",ex:"頭を〜れる"},
+    {k:"効率",r:"コウリツ",ex:"〜よく勉強する"},
+    {k:"意外",r:"イガイ",ex:"〜な答えが返ってきた"},
+    {k:"率先",r:"ソッセン",ex:"〜して行動する"},
+    {k:"開放",r:"カイホウ（あけはなつ）",ex:"プールを〜する"},
+    {k:"解放",r:"カイホウ（ときはなす）",ex:"奴隷を〜する"},
+    {k:"快方",r:"カイホウ（よくなる）",ex:"病気が〜に向かう"},
+    {k:"衛星",r:"エイセイ（星）",ex:"人工〜を打ち上げる"},
+    {k:"衛生",r:"エイセイ（清潔）",ex:"食品の〜管理"},
+    {k:"対照",r:"タイショウ（くらべる）",ex:"〜的な性格の兄弟"},
+    {k:"対象",r:"タイショウ（相手）",ex:"小学生を〜にした調査"}
+  ]},
+  52:{theme:"☀️夏期講習 その2",words:[
+    {k:"拾得",r:"シュウトク",ex:"〜物を届ける"},
+    {k:"快活",r:"カイカツ",ex:"〜な少年に出会った"},
+    {k:"供養",r:"クヨウ",ex:"先祖の〜を行う"},
+    {k:"機械",r:"キカイ（マシン）",ex:"精密〜の工場"},
+    {k:"機会",r:"キカイ（チャンス）",ex:"絶好の〜をのがす"},
+    {k:"器械",r:"キカイ（体操・器具）",ex:"〜体操の練習"},
+    {k:"収拾",r:"シュウシュウ（おさめる）",ex:"事態を〜する"},
+    {k:"収集",r:"シュウシュウ（集める）",ex:"切手を〜する"},
+    {k:"計る",r:"ハカる（時間）",ex:"時間を〜る"},
+    {k:"測る",r:"ハカる（長さ・角度）",ex:"角度を〜る"},
+    {k:"量る",r:"ハカる（重さ）",ex:"物の重さを〜る"},
+    {k:"図る",r:"ハカる（くわだてる）",ex:"改善を〜る"},
+    {k:"治める",r:"オサめる（政治）",ex:"国を〜める"},
+    {k:"収める",r:"オサめる（手に入れる）",ex:"成功を〜める"},
+    {k:"納める",r:"オサめる（払う）",ex:"税金を〜める"},
+    {k:"修める",r:"オサめる（学ぶ）",ex:"学業を〜める"}
+  ]},
+  53:{theme:"☀️夏期講習 その3",words:[
+    {k:"進退",r:"シンタイ",ex:"打開策もなく、〜きわまる"},
+    {k:"真価",r:"シンカ",ex:"〜を発揮する"},
+    {k:"率いる",r:"ヒキいる",ex:"群れを〜いる"},
+    {k:"感謝",r:"カンシャ",ex:"〜状をもらう"},
+    {k:"快い",r:"ココロヨい",ex:"風が〜い"},
+    {k:"善後策",r:"ゼンゴサク",ex:"〜を立てる（×前後策）"},
+    {k:"不可欠",r:"フカケツ",ex:"〜な条件（×不可決）"},
+    {k:"静物画",r:"セイブツガ",ex:"果物の〜を描く（×生物画）"},
+    {k:"行楽地",r:"コウラクチ",ex:"〜がにぎわう（×後楽地）"},
+    {k:"独創的",r:"ドクソウテキ",ex:"〜な発想（×独想的）"}
+  ]},
+  54:{theme:"☀️夏期講習 その4",words:[
+    {k:"河川",r:"カセン",ex:"多くの〜が流れている地域"},
+    {k:"満天",r:"マンテン",ex:"〜に広がる星空"},
+    {k:"大台",r:"オオダイ",ex:"やっと千人の〜に乗った"},
+    {k:"人災",r:"ジンサイ",ex:"今回の被害は〜ではないか"}
+  ]},
+  55:{theme:"☀️夏期講習 その5",words:[
+    {k:"尊重",r:"ソンチョウ",ex:"相手の意見を〜する"},
+    {k:"職務",r:"ショクム",ex:"秘書として、〜をきちんと果たす"},
+    {k:"統合",r:"トウゴウ",ex:"中学校の〜が計画されている"},
+    {k:"操縦",r:"ソウジュウ",ex:"飛行機を〜してみたい"},
+    {k:"貧富",r:"ヒンプ",ex:"〜の差が激しい国"}
+  ]},
+  56:{theme:"☀️夏期講習 その6",words:[
+    {k:"当初",r:"トウショ",ex:"〜の目標を達成できた"},
+    {k:"独創",r:"ドクソウ",ex:"〜的な考え"},
+    {k:"奮い",r:"フルい",ex:"気持ちを〜い立たせる"}
+  ]},
+  57:{theme:"☀️夏期講習 その7",words:[
+    {k:"派手",r:"ハデ",ex:"〜な格好をした人"},
+    {k:"門戸",r:"モンコ",ex:"〜を開放する"},
+    {k:"悪習",r:"アクシュウ",ex:"物を粗末にする〜がある"},
+    {k:"破損",r:"ハソン",ex:"屋根が〜する"}
+  ]},
+  58:{theme:"☀️夏期講習 その8",words:[
+    {k:"専念",r:"センネン",ex:"研究に〜する"},
+    {k:"採用",r:"サイヨウ",ex:"会社の〜試験を受ける"},
+    {k:"家路",r:"イエジ",ex:"〜を急ぐ人々"},
+    {k:"派生",r:"ハセイ",ex:"かな文字は漢字から〜してできた"},
+    {k:"候補",r:"コウホ",ex:"選手の〜に挙げられる"},
+    {k:"就く",r:"ツく",ex:"職に〜く"},
+    {k:"支障",r:"シショウ",ex:"少々の遅れなら〜はないよ"},
+    {k:"帯びる",r:"オびる",ex:"葉が赤みを〜びる"},
+    {k:"展覧",r:"テンラン",ex:"絵の〜会に行く"}
+  ]},
+  59:{theme:"☀️夏期講習 その9",words:[
+    {k:"秘めた",r:"ヒめた",ex:"心に〜めた決意"},
+    {k:"脳裏",r:"ノウリ",ex:"〜に焼きついて離れない光景"},
+    {k:"貸借",r:"タイシャク",ex:"金銭の〜は良くない"},
+    {k:"解毒",r:"ゲドク",ex:"〜作用のある植物"},
+    {k:"態勢",r:"タイセイ",ex:"万全の受け入れ〜で、来客を待つ"},
+    {k:"潔く",r:"イサギヨく",ex:"〜く自分の非を認めて謝った"},
+    {k:"損なう",r:"ソコなう",ex:"機嫌を〜なうと口をきかない"},
+    {k:"財布",r:"サイフ",ex:"〜を落として必死に探す"},
+    {k:"均一",r:"キンイツ",ex:"百円〜の店を利用する"},
+    {k:"出納",r:"スイトウ",ex:"役所の〜係としてお金を管理する"}
+  ]},
+  60:{theme:"☀️夏期講習 その10",words:[
+    {k:"明ける",r:"アける",ex:"梅雨が〜ける"},
+    {k:"幼い",r:"オサナい",ex:"妹はまだ〜い"},
+    {k:"家屋",r:"カオク",ex:"木造の〜が立ち並んでいる"},
+    {k:"留守",r:"ルス",ex:"〜番をたのまれた"},
+    {k:"故障",r:"コショウ",ex:"パソコンが〜した"},
+    {k:"木綿",r:"モメン",ex:"〜のシャツを買った"},
+    {k:"美談",r:"ビダン",ex:"彼の行動は〜として今も残っている"},
+    {k:"砂糖",r:"サトウ",ex:"紅茶に〜を入れて飲む"},
+    {k:"出版",r:"シュッパン",ex:"父は〜社に勤めている"},
+    {k:"訪れる",r:"オトズれる",ex:"あこがれの大学を〜れた"}
+  ]},
+  61:{theme:"☀️夏期講習 その11",words:[
+    {k:"招待",r:"ショウタイ",ex:"友達をパーティーに〜する"},
+    {k:"観戦",r:"カンセン",ex:"野球の試合を〜する"},
+    {k:"割く",r:"サく",ex:"時間を〜いて人と会う"},
+    {k:"供給",r:"キョウキュウ",ex:"需要と〜の関係"},
+    {k:"要領",r:"ヨウリョウ",ex:"〜がわかれば簡単だった"},
+    {k:"暴く",r:"アバく",ex:"正体を〜く"},
+    {k:"納める",r:"オサめる",ex:"税金を〜める"},
+    {k:"勤める",r:"ツトめる",ex:"父はテレビ局に〜めている"},
+    {k:"努める",r:"ツトめる",ex:"事態の解決に〜める"},
+    {k:"刻む",r:"キザむ",ex:"おじの言葉をしっかりと心に〜む"}
+  ]},
+  62:{theme:"☀️夏期講習 書き取り（敬語表のプリント 大問四）",words:[
+    {k:"建てる",r:"タてる",ex:"家を〜てる"},
+    {k:"晴れる",r:"ハれる",ex:"明日は〜れるだろう"},
+    {k:"効く",r:"キく",ex:"〜く薬"},
+    {k:"助ける",r:"タスける",ex:"困っている人を〜ける"},
+    {k:"情け",r:"ナサけ",ex:"〜けをかける"},
+    {k:"細かい",r:"コマかい",ex:"〜かい粒"},
+    {k:"責任",r:"セキニン",ex:"〜感の強い人"},
+    {k:"律義",r:"リチギ",ex:"父は〜な性格だ"},
+    {k:"満ちる",r:"ミちる",ex:"月が〜ちる"},
+    {k:"従える",r:"シタガえる",ex:"けらいを〜えた王様"}
+  ]},
+  63:{theme:"☀️夏期講習 書き取り（大問四・もう1枚）",words:[
+    {k:"告げる",r:"ツげる",ex:"時計のベルが六時を〜げた"},
+    {k:"商売",r:"ショウバイ",ex:"新しい〜を始める"},
+    {k:"損ねる",r:"ソコねる",ex:"お客の気分を〜ねてしまった"},
+    {k:"親しい",r:"シタしい",ex:"〜い友だち"},
+    {k:"権力",r:"ケンリョク",ex:"〜をにぎる"},
+    {k:"腹",r:"ハラ",ex:"〜が痛む"},
+    {k:"一周",r:"イッシュウ",ex:"〜二百メートル"},
+    {k:"固まる",r:"カタまる",ex:"考えが〜まる"},
+    {k:"改める",r:"アラタめる",ex:"まちがいを〜める"},
+    {k:"永久",r:"エイキュウ",ex:"〜につづく"}
+  ]},
+  64:{theme:"☀️夏期講習 その12",words:[
+    {k:"測る",r:"ハカる",ex:"河川の水深を〜る"},
+    {k:"進展",r:"シンテン",ex:"話し合いはいい方向に〜している"},
+    {k:"愛想",r:"アイソ",ex:"〜笑いをする"},
+    {k:"回復",r:"カイフク",ex:"天候が〜する"},
+    {k:"調達",r:"チョウタツ",ex:"資金を〜する"},
+    {k:"操作",r:"ソウサ",ex:"機械を〜する"},
+    {k:"専用",r:"センヨウ",ex:"関係者〜の出入り口"},
+    {k:"経つ",r:"タつ",ex:"時間が〜つ"},
+    {k:"近視",r:"キンシ",ex:"〜用の眼鏡を作る"},
+    {k:"半径",r:"ハンケイ",ex:"〜5センチの円を書く"}
+  ]},
+  65:{theme:"☀️夏期講習 その13",words:[
+    {k:"増える",r:"フえる",ex:"街の人口が〜える"},
+    {k:"度胸",r:"ドキョウ",ex:"〜のある子"},
+    {k:"困難",r:"コンナン",ex:"〜を乗りこえる"},
+    {k:"修理",r:"シュウリ",ex:"屋根を〜する"},
+    {k:"沿って",r:"ソって",ex:"川に〜って歩く"},
+    {k:"仮",r:"カリ",ex:"この案はまだ〜のもので、決定ではない"},
+    {k:"大群",r:"タイグン",ex:"アリの〜を観察する"},
+    {k:"挙げる",r:"アげる",ex:"全力を〜げる"},
+    {k:"器官",r:"キカン",ex:"消化〜の検査を受ける"},
+    {k:"至難",r:"シナン",ex:"父の考えを変えるのは〜のわざだ"}
+  ]},
+  66:{theme:"☀️夏期講習 書き取り（8/5分①）",words:[
+    {k:"胸板",r:"ムナイタ",ex:"彼は体格が良く〜も厚い"},
+    {k:"金銭",r:"キンセン",ex:"生命は〜では買えない"},
+    {k:"訳す",r:"ヤクす",ex:"文章を英語に〜す"},
+    {k:"遺伝",r:"イデン",ex:"このクセは父からの〜だ"},
+    {k:"出荷",r:"シュッカ",ex:"野菜を〜する"},
+    {k:"優れる",r:"スグれる",ex:"〜れた才能"},
+    {k:"粉",r:"コ",ex:"身を〜にして働く"},
+    {k:"飛行機",r:"ヒコウキ",ex:"紙〜を飛ばす"},
+    {k:"舌",r:"シタ",ex:"失敗して〜を出した"},
+    {k:"仮病",r:"ケビョウ",ex:"〜をつかって休む"}
+  ]},
+  67:{theme:"☀️夏期講習 書き取り（8/5分②）",words:[
+    {k:"首",r:"クビ",ex:"手紙を〜を長くして待つ"},
+    {k:"折る",r:"オる",ex:"木の枝は〜ってはいけない"},
+    {k:"覚める",r:"サめる",ex:"目が〜める"},
+    {k:"誤字",r:"ゴジ",ex:"〜の無い文章を書きなさい"},
+    {k:"好む",r:"コノむ",ex:"水のある所を〜む動物"},
+    {k:"修める",r:"オサめる",ex:"学問を〜める"},
+    {k:"納める",r:"オサめる",ex:"税金を〜める"},
+    {k:"貸す",r:"カす",ex:"友だちに本を〜す"},
+    {k:"染まる",r:"ソまる",ex:"まっ赤に〜まった布"},
+    {k:"園",r:"ソノ",ex:"桜の〜"}
+  ]},
+  68:{theme:"☀️夏期講習 その14",words:[
+    {k:"和ませる",r:"ナゴませる",ex:"この曲は私の心を〜ませる"},
+    {k:"性格",r:"セイカク",ex:"彼の〜を探る"},
+    {k:"整える",r:"トトノえる",ex:"大会に向けて体調を〜える"},
+    {k:"修める",r:"オサめる",ex:"学問を〜める"},
+    {k:"並ぶ",r:"ナラぶ",ex:"一列に〜ぶ"},
+    {k:"無用",r:"ムヨウ",ex:"もうじき終わるので、手伝いは〜です"},
+    {k:"均等",r:"キントウ",ex:"教育の機会〜について話し合う"},
+    {k:"延ばす",r:"ノばす",ex:"台風のため、出発日を先に〜ばした"},
+    {k:"備える",r:"ソナえる",ex:"災害に〜えて必要な物をまとめる"},
+    {k:"担う",r:"ニナう",ex:"部長としての責任を〜っている"}
+  ]},
+  69:{theme:"☀️夏期講習 その15",words:[
+    {k:"往来",r:"オウライ",ex:"この道は、大型車の〜が多い"},
+    {k:"大規模",r:"ダイキボ",ex:"駅前で〜な工事が行われている"},
+    {k:"街路樹",r:"ガイロジュ",ex:"秋になると、ここの〜は美しく紅葉する"},
+    {k:"策略",r:"サクリャク",ex:"相手チームの〜を見抜く"},
+    {k:"営む",r:"イトナむ",ex:"祖父は、林業を〜んでいる"},
+    {k:"費やす",r:"ツイやす",ex:"趣味のために、大金を〜やす"},
+    {k:"田舎",r:"イナカ",ex:"春休みに母の〜に帰省する"},
+    {k:"縦横",r:"ジュウオウ",ex:"〜無尽の活躍を見せた兄"},
+    {k:"地域",r:"チイキ",ex:"様々な〜から通学している"},
+    {k:"保護",r:"ホゴ",ex:"自然環境を〜する"}
+  ]},
+  70:{theme:"☀️夏期講習 その16",words:[
+    {k:"興奮",r:"コウフン",ex:"試合前で〜している選手"},
+    {k:"配分",r:"ハイブン",ex:"時間〜に気をつけて解く"},
+    {k:"痛感",r:"ツウカン",ex:"自分たちの練習不足を〜した"},
+    {k:"情報",r:"ジョウホウ",ex:"明日、旅先の〜を集めるつもりだ"},
+    {k:"険悪",r:"ケンアク",ex:"両者の関係がだんだん〜になっている"},
+    {k:"寒波",r:"カンパ",ex:"来週、〜が訪れるそうだ"},
+    {k:"強要",r:"キョウヨウ",ex:"参加を〜するのは良くない"},
+    {k:"閉じる",r:"トじる",ex:"目を〜じて考える"},
+    {k:"救出",r:"キュウシュツ",ex:"おぼれた人を〜する"},
+    {k:"危ない",r:"アブない",ex:"廊下を走るのは〜ないよ"}
+  ]},
+  71:{theme:"☀️夏期講習 その17",words:[
+    {k:"省略",r:"ショウリャク",ex:"言葉を〜すると、相手に伝わらない"},
+    {k:"歓声",r:"カンセイ",ex:"サッカー選手のすばらしい技に〜があがる"},
+    {k:"預ける",r:"アズける",ex:"銀行にお金を〜ける"},
+    {k:"耕す",r:"タガヤす",ex:"畑を〜して、種をまいた"},
+    {k:"輸入",r:"ユニュウ",ex:"原料を〜する"},
+    {k:"経験",r:"ケイケン",ex:"私には海外旅行の〜がない"},
+    {k:"拝む",r:"オガむ",ex:"祖父は毎朝仏壇を〜んでいる"},
+    {k:"告白",r:"コクハク",ex:"自分の罪を〜する"},
+    {k:"批判",r:"ヒハン",ex:"他人のやり方を〜する"},
+    {k:"整理",r:"セイリ",ex:"たまった書類を〜する"}
+  ]},
+  72:{theme:"☀️夏期講習 その18",words:[
+    {k:"境内",r:"ケイダイ",ex:"神社の〜を散歩する"},
+    {k:"損害",r:"ソンガイ",ex:"大きな〜が出た"},
+    {k:"著しく",r:"イチジルしく",ex:"最近、著しく値段の上がった商品"},
+    {k:"演技",r:"エンギ",ex:"舞台で〜をする"},
+    {k:"知識",r:"チシキ",ex:"本で得た知識を活用する"},
+    {k:"貿易",r:"ボウエキ",ex:"日本と外国の貿易について学ぶ"},
+    {k:"定評",r:"テイヒョウ",ex:"彼の話のうまさには定評がある"},
+    {k:"専門",r:"センモン",ex:"君の話は専門的すぎてよくわからない"}
+  ]},
+  // ===== 後期 ステージⅤ（80番台＝後期第N回を 80+N に）=====
+  // 例文は本のまま＋（　）で意味のヒント。意味とセットで覚えるため（2026-09-05あゆみ提案）
+  // 2026-10-18 あゆみの写真から追加（後期第1回・第4回）
+  81:{theme:"🔬後期 第1回（科学・自然現象）",words:[
+    {k:"恩恵",r:"オンケイ",ex:"何だかんだと言っても、ぼくたちは科学の〜に浴している"},
+    {k:"芽生える",r:"メバえる",ex:"おじのお土産をきっかけに、科学に対する興味が〜えた"},
+    {k:"磁石",r:"ジシャク",ex:"S極だけ、あるいはN極だけの〜というのは存在するのだろうか"},
+    {k:"仮説",r:"カセツ",ex:"多分こうなるのではないかと〜を立てて行動してみる"},
+    {k:"観測",r:"カンソク",ex:"今夜は天体〜を楽しむ予定だ"},
+    {k:"作用",r:"サヨウ",ex:"てこの三点として、力点と支点と〜点がある"},
+    {k:"標本",r:"ヒョウホン",ex:"博物館で、動物の〜を見た"},
+    {k:"風土",r:"フウド",ex:"日本の〜に適した木造建築の技術を研究する"},
+    {k:"対象",r:"タイショウ",ex:"研究の〜を選ぶ"},
+    {k:"兆し",r:"キザし",ex:"鳥の群れの異常な動きから、天災の〜しを感じた"},
+    {k:"動作",r:"ドウサ",ex:"チンパンジーの〜を鋭く観察する"},
+    {k:"反る",r:"ソる",ex:"空気が乾いていて、壁に立てかけておいた板が〜ってしまった"},
+    {k:"寒暖",r:"カンダン",ex:"三月は〜の差が激しいので、お体にお気をつけください"},
+    {k:"暑さ",r:"アツさ",ex:"〜さ寒さも彼岸まで"},
+    {k:"温暖",r:"オンダン",ex:"〜な気候なので、暮らしやすい土地だと言われている"},
+    {k:"気象",r:"キショウ",ex:"世界の〜について情報収集を行う"},
+    {k:"降参",r:"コウサン",ex:"この雨にはお手上げだ。本当に〜だ"},
+    {k:"次第",r:"シダイ",ex:"早朝はくもっていた天候が、〜に良くなってきた"},
+    {k:"急激",r:"キュウゲキ",ex:"気温が〜に変化した"},
+    {k:"急速",r:"キュウソク",ex:"台風が〜に日本列島に近づいている"},
+    {k:"辺り",r:"アタり",ex:"空を雲がうめつくしているので、今夜〜りから雨になるだろう"},
+    {k:"棒",r:"ボウ",ex:"〜状の金属の端を熱する"},
+    {k:"訳",r:"ワケ",ex:"実験がうまくいかなかった〜を考える"},
+    {k:"反射",r:"ハンシャ",ex:"光の〜についての実験をする"},
+    {k:"試す",r:"タメす",ex:"仮説を〜すために実験をする"},
+    {k:"蒸気",r:"ジョウキ",ex:"水を熱していくと〜が出る"},
+    {k:"燃焼",r:"ネンショウ",ex:"物質が〜して光を放つ"},
+    {k:"混ぜる",r:"マぜる",ex:"青色に黄色を〜ぜると何色になるのだろう"},
+    {k:"照らす",r:"テらす",ex:"二つの実験結果を〜らして考える"},
+    {k:"誕生",r:"タンジョウ",ex:"生命の〜を探る"},
+  ]},
+  82:{theme:"🍂後期 第2回（自然）",words:[
+    {k:"沿岸",r:"エンガン",ex:"ここは豊かな海にめぐまれ、〜漁業が盛んである（海ぞい）"},
+    {k:"染まる",r:"ソまる",ex:"海が、真っ赤な夕日の色に〜まっている（色がつく）"},
+    {k:"流域",r:"リュウイキ",ex:"高知県の四万十川〜には、美しい自然がのこされている（川が流れる地域）"},
+    {k:"雑木林",r:"ゾウキばやし",ex:"子どものころ、家の近くの〜でよく遊んだものだ（いろんな木がまざった林）"},
+    {k:"樹木",r:"ジュモク",ex:"話はできないけれど、私は〜と心を通わせることができる気がする（木のこと）"},
+    {k:"木立",r:"コダチ",ex:"〜の中にたたずんでいる女の子がいた（木が立ち並んでいる所）"},
+    {k:"芽",r:"メ",ex:"草や木は、ふつう種から〜がでて大きくなる"},
+    {k:"保護",r:"ホゴ",ex:"生態系を考えて自然を〜しよう（守る）"},
+    {k:"装い",r:"ヨソオい",ex:"紅葉が始まり、街の景色が秋の〜になった（すがた・かざり）"},
+    {k:"沿い",r:"ゾい",ex:"道路〜に、イチョウの並木がある（〜にそって）"},
+    {k:"砂利",r:"ジャリ",ex:"子どものころは、よく〜を使って遊んだものだ（小石）"},
+    {k:"源",r:"ミナモト",ex:"人間の〜をたどっていくと猿に行きつくのは本当か（はじまり・もと）"},
+    {k:"飼う",r:"カう",ex:"家では今、動物はなにも〜っていません"},
+    {k:"飼育",r:"シイク",ex:"動物園の〜係のおじさんがアライグマをだいている（動物を育てる）"},
+    {k:"世話",r:"セワ",ex:"うさぎはかわいいが〜をするのはとても大変だ"},
+    {k:"分布",r:"ブンプ",ex:"オオカミはその昔、世界で最も広く〜する動物だった（あちこちに分かれて存在する）"},
+    {k:"産卵",r:"サンラン",ex:"昨日、アカウミガメの〜の様子をテレビで見た（卵を産む）"},
+    {k:"生息",r:"セイソク",ex:"この密林に〜する動物を調査することになった（生きてすんでいる）"},
+    {k:"特有",r:"トクユウ",ex:"この動きはサル〜のものだ（それだけが持っている）"},
+    {k:"録音",r:"ロクオン",ex:"ぼくは姉と二人で夏休みに百種類近い野鳥の鳴き声を〜した"},
+    {k:"幹",r:"ミキ",ex:"キツツキがくちばしで〜をつつく音が聞こえる（木の太い部分。新幹線の幹）"},
+    {k:"豊か",r:"ユタか",ex:"白い〜な大輪の花を見た（たっぷりある）"},
+    {k:"季節",r:"キセツ",ex:"花の様子で〜を知る"},
+    {k:"絶やす",r:"タやす",ex:"あの公園は花壇に花を〜すことがない（なくしてしまう）"},
+    {k:"桜",r:"サクラ",ex:"〜の花がいっせいにさいた"},
+    {k:"熟れた",r:"ウれた",ex:"〜トマトは甘くておいしい（じゅくして食べごろになった）"},
+    {k:"苦労",r:"クロウ",ex:"〜して富士山の頂上にたどり着いた"},
+    {k:"覚める",r:"サめる",ex:"山から眺めた景色は、目が〜めるような美しさだった"},
+    {k:"頂いた",r:"イタダいた",ex:"雪を〜富士はやはり絵になる（頭にのせた）"},
+    {k:"映える",r:"ハえる",ex:"青空を背景に〜、冬の富士山（美しく目立つ）"}
+  ]},
+  83:{theme:"💼後期 第3回（職業・会社・仕事）",words:[
+    {k:"提供",r:"テイキョウ",ex:"父が勤める会社が〜しているテレビ番組を見た（さし出して役立てる）"},
+    {k:"管理",r:"カンリ",ex:"組織が大きくなると〜が難しくなる（とりしきる）"},
+    {k:"未熟",r:"ミジュク",ex:"私は入社してまだ三年にしかならない〜者です（まだ一人前でない）"},
+    {k:"終始",r:"シュウシ",ex:"受付の女性は、〜笑顔で応対していた（はじめから終わりまでずっと）"},
+    {k:"研修",r:"ケンシュウ",ex:"新入社員の〜は会社にとって大切だ（仕事を学ぶ訓練）"},
+    {k:"考案",r:"コウアン",ex:"入社二年目の社員が今度の新製品を〜した（考え出す）"},
+    {k:"周知",r:"シュウチ",ex:"社内でのルールの〜徹底をよろしくお願いいたします（みんなに知らせる）"},
+    {k:"責任",r:"セキニン",ex:"だれの〜なのか、はっきりさせてほしい"},
+    {k:"資格",r:"シカク",ex:"何かの〜を持っていてもそれが生かされなければ意味がない"},
+    {k:"家路",r:"イエジ",ex:"やっと仕事を終え、〜についたときはもう夜中だった（家へ帰る道）"},
+    {k:"輸入",r:"ユニュウ",ex:"何かを〜して、それを加工するというやり方もある（外国から買い入れる）"},
+    {k:"任せます",r:"マカせます",ex:"ここまできたら後は、運を天に〜（ゆだねる）"},
+    {k:"要領",r:"ヨウリョウ",ex:"世の中〜のいい人が勝つとは限らない（うまくやるこつ）"},
+    {k:"熟練",r:"ジュクレン",ex:"〜した職人の技に感嘆した（なれて上手）"},
+    {k:"相談",r:"ソウダン",ex:"ぼくには何でも〜にのってもらえる友達がいる"},
+    {k:"研究",r:"ケンキュウ",ex:"わたしのクラスの担任の先生は〜熱心な人だ"},
+    {k:"辞めて",r:"ヤめて",ex:"父は会社を〜、ペンションを始めた（やめる。「止」ではない）"},
+    {k:"看板",r:"カンバン",ex:"こんな品物を売っていたのでは、お店の〜が泣くよ（店の名を出す板）"},
+    {k:"発足",r:"ホッソク",ex:"自警団を〜させた（組織が動きだす。「ハッソク」とも）"},
+    {k:"作業",r:"サギョウ",ex:"みんなで手分けして〜をすればよいだろう"},
+    {k:"至急",r:"シキュウ",ex:"目的地に着いたら、〜連絡してください（大いそぎで）"},
+    {k:"縦",r:"タテ",ex:"図面上で〜と横に線を引く"},
+    {k:"成功",r:"セイコウ",ex:"あの人は飲食業界での〜者と言われている"},
+    {k:"折半",r:"セッパン",ex:"商売の利益を二人で〜することにした（半分ずつに分ける）"},
+    {k:"迷って",r:"マヨって",ex:"兄は大学を卒業した後、どういう道に進むべきか〜いる"},
+    {k:"就いた",r:"ツいた",ex:"いくつもの難関をくぐりぬけて、人気の高い職業に〜（その仕事につく）"},
+    {k:"追求",r:"ツイキュウ",ex:"企業は利益〜だけではなく、社会貢献も考えるべきだ（追いもとめる）"},
+    {k:"技術",r:"ギジュツ",ex:"自分の持っている〜を生かした仕事をしたい"},
+    {k:"俳優",r:"ハイユウ",ex:"あの〜は芸達者でいろいろな役をこなす"},
+    {k:"門戸",r:"モンコ",ex:"男性にも航空機の客室乗務員の〜が開放されている（出入り口＝受け入れの道）"}
+  ]},
+  84:{theme:"📰後期 第4回（社会面・ニュース）",words:[
+    {k:"行方",r:"ユクエ",ex:"〜不明の人が見つかった"},
+    {k:"時刻",r:"ジコク",ex:"電車が〜どおりに発車した"},
+    {k:"運賃",r:"ウンチン",ex:"電車の〜の値上げは、物価に影響を与える"},
+    {k:"影響",r:"エイキョウ",ex:"電車の運賃の値上げは、物価に〜を与える"},
+    {k:"改札",r:"カイサツ",ex:"昔は人が切符にはさみを入れていたが、今では自動〜だ"},
+    {k:"事故",r:"ジコ",ex:"近所で交通〜があったので、現場までかけつけた"},
+    {k:"遺失",r:"イシツ",ex:"電車内の忘れ物は、駅の〜物係りに問い合わせてください"},
+    {k:"収縮",r:"シュウシュク",ex:"交通機関の発達で、世界が〜したとも言われる"},
+    {k:"標識",r:"ヒョウシキ",ex:"道路〜には様々な種類があり、それぞれ異なる意味を表している"},
+    {k:"拝見",r:"ハイケン",ex:"乗車券を〜いたします"},
+    {k:"新幹線",r:"シンカンセン",ex:"九州に〜が開通した"},
+    {k:"停留所",r:"テイリュウジョ",ex:"家からバスの〜まで歩いて五分だ"},
+    {k:"汚職",r:"オショク",ex:"その〜事件の黒幕の正体を暴く"},
+    {k:"安否",r:"アンピ",ex:"外国で事故があったらしく、日本人の〜について問い合わせた"},
+    {k:"張る",r:"ハる",ex:"立ち入り禁止のテープが〜られていた"},
+    {k:"救急",r:"キュウキュウ",ex:"「〜」とは急場をすくうことを言います"},
+    {k:"博識",r:"ハクシキ",ex:"どんなに〜な人でも、その事件の原因をつきとめられないだろう"},
+    {k:"警察",r:"ケイサツ",ex:"私たちの生活は〜官の努力で守られている"},
+    {k:"財布",r:"サイフ",ex:"昨日、紛失した〜が無事見つかりました"},
+    {k:"暴く",r:"アバく",ex:"週刊誌によって〜かれた政治家と企業の黒い関係"},
+    {k:"防ぐ",r:"フセぐ",ex:"凶悪な犯罪は、起こる前に〜がなければならない"},
+    {k:"無事",r:"ブジ",ex:"冬山で遭難した登山隊は、五日後に〜全員救出された"},
+    {k:"究明",r:"キュウメイ",ex:"早速、事故の原因〜に当たりたい"},
+    {k:"群集",r:"グンシュウ",ex:"〜心理で暴動が起こる"},
+    {k:"暮らす",r:"クらす",ex:"この土地で、父は四十年も〜らしています"},
+    {k:"和らぐ",r:"ヤワらぐ",ex:"その場の緊張した雰囲気が、ふと〜らいだ"},
+    {k:"河川",r:"カセン",ex:"この川は一級〜らしいが、それにしても水が汚れている"},
+    {k:"盛ん",r:"サカん",ex:"この地域ではミカンの栽培が〜んに行われている"},
+    {k:"位置",r:"イチ",ex:"図書館で借りた本を、元通りの〜に返しておく"},
+    {k:"領土",r:"リョウド",ex:"国土の一部が他国の〜によって分断されている国を「飛び地国」という"},
+    {k:"臨海",r:"リンカイ",ex:"日本にはいくつかの〜工業地帯がある"},
+  ]},
+  85:{theme:"🏛️後期 第5回（政治・社会）",words:[
+    {k:"支配",r:"シハイ",ex:"日本は昔、武士が〜していた"},
+    {k:"訪問",r:"ホウモン",ex:"諸外国を〜する体験をしてみたい"},
+    {k:"利益",r:"リエキ",ex:"景気が回復して〜が出るようになった"},
+    {k:"預金",r:"ヨキン",ex:"銀行に〜する"},
+    {k:"貯金",r:"チョキン",ex:"郵便局に〜する"},
+    {k:"届ける",r:"トドける",ex:"財布を拾ったので、交番へ〜けることにした"},
+    {k:"損",r:"ソン",ex:"多少は〜をすることを覚悟しないと、商売など出来ないよ"},
+    {k:"消費",r:"ショウヒ",ex:"資源を〜するのと浪費するのとでは大違いです"},
+    {k:"浪費",r:"ロウヒ",ex:"資源を消費するのと〜するのとでは大違いです（むだづかい）"},
+    {k:"体裁",r:"テイサイ",ex:"卒業式には、みな〜のいい服を着ています（見かけ・外見）"},
+    {k:"参拝",r:"サンパイ",ex:"祖母は、いつかは伊勢神宮に〜したいと言っていた"},
+    {k:"七夕",r:"タナバタ",ex:"七月七日の〜祭りが楽しみだ"},
+    {k:"横暴",r:"オウボウ",ex:"役人の〜にたまりかねた市民はたちあがった（勝手でひどい）"},
+    {k:"条件",r:"ジョウケン",ex:"〜が整えば交渉は成立する"},
+    {k:"首脳",r:"シュノウ",ex:"各国の〜が横浜で会談した（中心になる人）"},
+    {k:"憲法",r:"ケンポウ",ex:"昭和二十一年十一月三日、日本国〜が公布された"},
+    {k:"候補",r:"コウホ",ex:"駅前で、市議会議員選挙の〜者が演説をしている"},
+    {k:"実験",r:"ジッケン",ex:"平和を求める私たちは、核〜に反対します"},
+    {k:"樹立",r:"ジュリツ",ex:"両国の外交関係〜に関する共同声明に調印した（打ち立てる）"},
+    {k:"内閣",r:"ナイカク",ex:"私の将来の夢は、〜総理大臣になることです"},
+    {k:"判断",r:"ハンダン",ex:"経済政策のよしあしは、首相独りでは〜できない"},
+    {k:"肥やす",r:"コやす",ex:"わいろをもらって私腹を〜す政治家は許せない（不正に自分の得にする）"},
+    {k:"災害",r:"サイガイ",ex:"〜対策を十分に練る必要がある"},
+    {k:"刷新",r:"サッシン",ex:"政治改革をするには、選挙制度を〜する必要があるだろう（すっかり新しくする）"},
+    {k:"賛否",r:"サンピ",ex:"首相の新しい提案には〜両論が出た（賛成と反対）"},
+    {k:"適切",r:"テキセツ",ex:"政治改革の〜な方法はないだろうか"},
+    {k:"歴訪",r:"レキホウ",ex:"日本の首相がヨーロッパ諸国を〜した（次々に訪ねる）"},
+    {k:"仲裁",r:"チュウサイ",ex:"けんかの〜だけは、ひきうけるものではない（間に入って仲直りさせる）"},
+    {k:"職業",r:"ショクギョウ",ex:"〜選択の自由は、憲法第二十二条で保障されている"},
+    {k:"治安",r:"チアン",ex:"最近、〜が悪化しているようなので気をつけよう（世の中の安全）"},
+    {k:"規律",r:"キリツ",ex:"団体生活では、〜ある行動が求められます（守るべききまり）"}
+  ]},
+  86:{theme:"🤝後期 第6回（情報・人とのかかわり）",words:[
+    {k:"確かめる",r:"タシかめる",ex:"自分の目でも〜べきだ"},
+    {k:"延び延び",r:"ノびノび",ex:"〜になっていたプロジェクトがやっと行われる"},
+    {k:"郵便",r:"ユウビン",ex:"今日もぼくあての〜は来なかった"},
+    {k:"資源",r:"シゲン",ex:"〜として再利用できる"},
+    {k:"復旧",r:"フッキュウ",ex:"台風で流された橋の〜工事"},
+    {k:"報道",r:"ホウドウ",ex:"完全に公正中立な〜"},
+    {k:"財産",r:"ザイサン",ex:"多くの〜を残してあげる"},
+    {k:"署名",r:"ショメイ",ex:"行政改革推進のための〜運動"},
+    {k:"述べる",r:"ノべる",ex:"意見を論理的に〜べる"},
+    {k:"正確",r:"セイカク",ex:"新聞から〜な情報を得る"},
+    {k:"背景",r:"ハイケイ",ex:"事件の〜を探る"},
+    {k:"情報",r:"ジョウホウ",ex:"〜化社会では、その内容の吟味が大切"},
+    {k:"親善",r:"シンゼン",ex:"日韓〜大使に任命された"},
+    {k:"動向",r:"ドウコウ",ex:"政治や経済の〜をとらえる"},
+    {k:"反映",r:"ハンエイ",ex:"ことばは世相の〜だ"},
+    {k:"許す",r:"ユルす",ex:"世の中には〜せることと〜せないことがある"},
+    {k:"不可欠",r:"フカケツ",ex:"人間の道に〜の要素（欠かせない）"},
+    {k:"保険",r:"ホケン",ex:"健康〜に加入する（保健とまちがえない）"},
+    {k:"作法",r:"サホウ",ex:"〜とは形ではなく、心である"},
+    {k:"祖先",r:"ソセン",ex:"人間の〜は本当にサルなのか"},
+    {k:"規則",r:"キソク",ex:"〜は人間をしばるものではない"},
+    {k:"君臨",r:"クンリン",ex:"政財界の頂点に〜する（王のように上に立つ）"},
+    {k:"応対",r:"オウタイ",ex:"お客さんに礼儀正しく〜した"},
+    {k:"浴びる",r:"アびる",ex:"みんなの非難を〜びた"},
+    {k:"属する",r:"ゾクする",ex:"化学部に〜している"},
+    {k:"高価",r:"コウカ",ex:"あまりにも〜な品物"},
+    {k:"義務",r:"ギム",ex:"権利と〜は表裏一体"},
+    {k:"忠告",r:"チュウコク",ex:"先生の〜を素直に聞く"},
+    {k:"報いる",r:"ムクいる",ex:"ご恩に〜いる（おかえしをする）"},
+    {k:"保存",r:"ホゾン",ex:"冷凍〜された食品"}
+  ]},
+  87:{theme:"🏥後期 第7回（病院・からだ）",words:[
+    {k:"粉",r:"コ",ex:"身を〜にして働いても、病気になっては何にもならない"},
+    {k:"検査",r:"ケンサ",ex:"いろいろな〜をしたが、どこも悪いところはないと言われた"},
+    {k:"看護",r:"カンゴ",ex:"必死の〜のかいがあって、病状は劇的に改善した"},
+    {k:"補給",r:"ホキュウ",ex:"フルマラソンでは途中で、水分の〜が必要だ"},
+    {k:"痛み",r:"イタミ",ex:"突然背中に鋭い〜が走り、短い悲鳴を上げてしまった"},
+    {k:"激しい",r:"ハゲシイ",ex:"何人かのけが人が出た、〜試合だった"},
+    {k:"退いた",r:"シリゾイタ",ex:"Ｎ選手は体力の限界を感じ、現役を〜"},
+    {k:"指導",r:"シドウ",ex:"コーチの熱心な〜のおかげで平泳ぎが得意になった"},
+    {k:"背筋",r:"ハイキン",ex:"運動のしすぎで、〜が痛い"},
+    {k:"負傷",r:"フショウ",ex:"今回の工場の事故で、〜者がたくさんでた"},
+    {k:"栄養",r:"エイヨウ",ex:"〜のある食事をとって、合格だ"},
+    {k:"背後",r:"ハイゴ",ex:"〜に人の気配を感じた"},
+    {k:"健康",r:"ケンコウ",ex:"〜に勝るものはないと思う"},
+    {k:"臓器",r:"ゾウキ",ex:"〜移植の医術は格段の進歩をとげた"},
+    {k:"筋肉",r:"キンニク",ex:"久しぶりに運動したので翌日〜痛になった"},
+    {k:"姿勢",r:"シセイ",ex:"〜を正してあいさつをしましょう"},
+    {k:"感覚器官",r:"カンカクキカン",ex:"〜の働きによって、人間は外界の情報を取り入れる"},
+    {k:"限界",r:"ゲンカイ",ex:"人間の走る速さはどのくらいが〜なのだろうか"},
+    {k:"境目",r:"サカイメ",ex:"歯と歯ぐきの〜には汚れがたまりやすい"},
+    {k:"神経",r:"シンケイ",ex:"脳には〜細胞が集まっています"},
+    {k:"快方",r:"カイホウ",ex:"父の病気は、〜に向かった"},
+    {k:"測定",r:"ソクテイ",ex:"体力〜の日に、かぜをひいてしまった"},
+    {k:"心臓",r:"シンゾウ",ex:"人の前に立つと、緊張のせいか〜がどきどきする"},
+    {k:"発作",r:"ホッサ",ex:"彼は、時々〜をおこす"},
+    {k:"感染",r:"カンセン",ex:"インフルエンザに〜してしまった"},
+    {k:"治す",r:"ナオス",ex:"これは胃の病気を〜ための薬だ"},
+    {k:"解こう",r:"トコウ",ex:"難しい問題も落ちついて考えて〜"},
+    {k:"独特",r:"ドクトク",ex:"二郎のしゃべり方や言い回しは〜な味がある"},
+    {k:"予測",r:"ヨソク",ex:"わたしの〜が外れて、午後から雨が降り出した"},
+    {k:"競り",r:"セリ",ex:"人間は〜合うことで能力をみがくことができる"}
+  ]},
+  88:{theme:"🏫後期 第8回（学校・集団生活）",words:[
+    {k:"順延",r:"ジュンエン",ex:"遠足は、悪天候の場合〜される"},
+    {k:"募集",r:"ボシュウ",ex:"キャンプの参加者を〜する"},
+    {k:"晩",r:"バン",ex:"朝から〜までゲームばかりして"},
+    {k:"探検",r:"タンケン",ex:"ぼくは裏山へ〜に行くのが好きだ"},
+    {k:"便利",r:"ベンリ",ex:"わたしの家はどこへいくにも〜なところにある"},
+    {k:"広大",r:"コウダイ",ex:"〜な敷地の中に、一軒の家がある"},
+    {k:"築く",r:"キズク",ex:"理想の社会を〜くには"},
+    {k:"居間",r:"イマ",ex:"わが家の〜には大きなテレビがあります"},
+    {k:"収納",r:"シュウノウ",ex:"この広さなら大きな荷物でも〜できる"},
+    {k:"支度",r:"シタク",ex:"母が晩ご飯の〜をしていた（仕度とも書く）"},
+    {k:"迎え",r:"ムカエ",ex:"祖父母を東京駅まで〜に行こう"},
+    {k:"仕業",r:"シワザ",ex:"テーブルの上が散らかっているのは弟の〜だ"},
+    {k:"政策",r:"セイサク",ex:"北欧諸国は社会福祉〜が充実していることで知られる"},
+    {k:"割いて",r:"サイテ",ex:"漢字の練習に少し時間を〜ください"},
+    {k:"講演",r:"コウエン",ex:"教育の未来について、〜を頼まれた"},
+    {k:"模写",r:"モシャ",ex:"絵画の勉強のため、名画を〜する"},
+    {k:"提案",r:"テイアン",ex:"素晴らしい〜だと、その場の全員が拍手した"},
+    {k:"開放",r:"カイホウ（あける）",ex:"校庭を市民に〜する"},
+    {k:"整列",r:"セイレツ",ex:"避難訓練のとき、校庭に全校生徒が〜した"},
+    {k:"点呼",r:"テンコ",ex:"起床直後に〜をとる"},
+    {k:"記す",r:"シルス",ex:"ウサギの飼育日誌を〜ことにした"},
+    {k:"議論",r:"ギロン",ex:"自然破壊の問題について〜しよう"},
+    {k:"権利",r:"ケンリ",ex:"教育を受ける〜がある"},
+    {k:"持参",r:"ジサン",ex:"遠足には必ずかさを〜すること"},
+    {k:"編んだ",r:"アンダ",ex:"みんなの作文を集めて、文集を〜"},
+    {k:"敗れて",r:"ヤブレテ",ex:"サッカーの試合でとなりのクラスに〜しまった"},
+    {k:"境界",r:"キョウカイ",ex:"この町は隣の町との〜が分かりにくい"},
+    {k:"帰省",r:"キセイ",ex:"田舎の我が家におじさんが〜してきた"},
+    {k:"郷里",r:"キョウリ",ex:"〜にいる両親のことが恋しくなった"},
+    {k:"散在",r:"サンザイ",ex:"山のふもとには民家が〜している"}
+  ]},
+  89:{theme:"🏭後期 第9回（ものづくり・建物）",words:[
+    {k:"宣言",r:"センゲン",ex:"この工場は、無事故〜をしている"},
+    {k:"由来",r:"ユライ",ex:"この商品の名前の〜を知りたい"},
+    {k:"処置",r:"ショチ",ex:"掃除機のホースがこわれて応急〜をした"},
+    {k:"改善",r:"カイゼン",ex:"この商品にはまだまだ〜の余地がある"},
+    {k:"筋",r:"スジ",ex:"この漆器を作った職人はなかなか〜がいい"},
+    {k:"細工",r:"サイク",ex:"この新製品にはちょっとした〜がある"},
+    {k:"入場券",r:"ニュウジョウケン",ex:"テーマパークの〜をもらった"},
+    {k:"並んで",r:"ナランデ",ex:"新発売のお菓子が店頭に〜いる"},
+    {k:"創作",r:"ソウサク",ex:"どんな小さなものでも、〜するのは楽しいものだ"},
+    {k:"絶対",r:"ゼッタイ",ex:"〜に安全な乗り物はない"},
+    {k:"裁って",r:"タッテ（布を）",ex:"祖母は、自分で生地を〜、私の洋服を縫ってくれた"},
+    {k:"束ねる",r:"タバネル",ex:"黒いひもを、百本ずつに〜作業をする"},
+    {k:"地味",r:"ジミ",ex:"あなたはいつも〜な服装をしていますね"},
+    {k:"派手",r:"ハデ",ex:"あなたはいつも〜な格好をしているので、遠くにいても一目でわかる"},
+    {k:"服装",r:"フクソウ",ex:"海外旅行の時は、行き先の季節と気候にあった〜を選びましょう"},
+    {k:"制服",r:"セイフク",ex:"中学生の兄の〜は、ブレザーだ"},
+    {k:"改築",r:"カイチク",ex:"古くなった家を思い切って〜することにした"},
+    {k:"装置",r:"ソウチ",ex:"わたしは演劇の舞台〜に興味がある"},
+    {k:"階段",r:"カイダン",ex:"マンションの五階の自宅まで、〜で上ってくる"},
+    {k:"建って",r:"タッテ（家が）",ex:"大きなマンションが空き地に〜いた"},
+    {k:"模型",r:"モケイ",ex:"建物を作る前に、〜を作って検討する"},
+    {k:"建築",r:"ケンチク",ex:"父はヨーロッパの十七世紀の〜に興味があるらしい"},
+    {k:"著しく",r:"イチジルシク",ex:"しばらく見ないうちに、工事が〜進展していた"},
+    {k:"燃料",r:"ネンリョウ",ex:"石油ストーブの〜を買いに、近所のガソリンスタンドに行く"},
+    {k:"肥料",r:"ヒリョウ",ex:"〜のにおいで、田舎の農村のことを思い出した"},
+    {k:"能率",r:"ノウリツ",ex:"現代社会では、〜をあげることも要求される"},
+    {k:"綿密",r:"メンミツ",ex:"計画を実行するため、みんなで〜に話し合った"},
+    {k:"通過",r:"ツウカ",ex:"一番線を猛スピードで特急列車が〜する"},
+    {k:"汽笛",r:"キテキ",ex:"遠くの方で〜が聞こえた"},
+    {k:"経由",r:"ケイユ",ex:"東京から大阪を〜して、岡山へ行くことにした"}
+  ]},
+  // 2026-10-18 あゆみの写真から追加（後期第10回・第11回。塾ではこれからの回）
+  90:{theme:"🧰後期 第10回（人が作り出したもの）",words:[
+    {k:"保つ",r:"タモつ",ex:"飛行機が高度を〜ち、目的地めざして進んでいる"},
+    {k:"車窓",r:"シャソウ",ex:"〜の眺めを楽しみながら、汽車の旅を続けた"},
+    {k:"臨時",r:"リンジ",ex:"サッカーの国際試合があるので、〜の電車が出るそうだ"},
+    {k:"郷土",r:"キョウド",ex:"ここは〜料理を出してくれる店だ"},
+    {k:"産物",r:"サンブツ",ex:"市場には日本各地の〜が集まってくる"},
+    {k:"焼く",r:"ヤく",ex:"今晩、家族そろって〜き肉を食べに行く"},
+    {k:"賞味",r:"ショウミ",ex:"このお菓子はすでに〜期限を過ぎている"},
+    {k:"粉末",r:"フンマツ",ex:"この〜にお湯を注ぐと、おいしいお茶ができあがります"},
+    {k:"器用",r:"キヨウ",ex:"私の知り合いのフランス人は、お箸を〜に使いこなす"},
+    {k:"半ば",r:"ナカば",ex:"肉は真っ黒にこげて、〜ば炭のようになっていた"},
+    {k:"鋼鉄",r:"コウテツ",ex:"この工場で〜を製造している"},
+    {k:"映像",r:"エイゾウ",ex:"この液晶画面では、美しい〜が思う存分楽しめる"},
+    {k:"画一",r:"カクイツ",ex:"同じ会社の製品は、デザインが〜的になりがちだ"},
+    {k:"構造",r:"コウゾウ",ex:"コンピュータの〜は、非常に複雑です"},
+    {k:"至難",r:"シナン",ex:"故障した電化製品を素人が修理するのは〜の技です"},
+    {k:"破損",r:"ハソン",ex:"教室の扉の〜した部分を修理する"},
+    {k:"絹",r:"キヌ",ex:"〜はシルクロードを通って日本に伝わったらしい"},
+    {k:"実際",r:"ジッサイ",ex:"〜に出来上がったのは、手本とは似ても似つかないものだった"},
+    {k:"届く",r:"トドく",ex:"今日の午前中に、注文したものが〜きました"},
+    {k:"机",r:"ツクエ",ex:"たくさんの本が〜の上に積まれている"},
+    {k:"鉄棒",r:"テツボウ",ex:"校庭の〜で逆上がりの練習をした"},
+    {k:"整理",r:"セイリ",ex:"散らかった道具を〜しよう"},
+    {k:"直径",r:"チョッケイ",ex:"定規を使って円の〜を測った"},
+    {k:"街路樹",r:"ガイロジュ",ex:"〜として、イチョウが植えられた"},
+    {k:"器",r:"ウツワ",ex:"〜がきれいだと料理もおいしそうに見える"},
+    {k:"期待",r:"キタイ",ex:"人工知能の開発は人類を救うものとして〜を寄せられている"},
+    {k:"出版",r:"シュッパン",ex:"印刷技術の普及が、本の〜を手軽なものにした"},
+    {k:"著者",r:"チョシャ",ex:"この作品の〜のことをもっと調べてみよう"},
+    {k:"直筆",r:"ジキヒツ",ex:"大好きな野球選手の〜のサインをもらった"},
+    {k:"刷る",r:"スる",ex:"昔は、一冊の本を〜るにも膨大な時間がかかった"},
+  ]},
+  91:{theme:"🌡️後期 第11回（状態・性質・様子）",words:[
+    {k:"必至",r:"ヒッシ",ex:"失敗は〜となった"},
+    {k:"優先",r:"ユウセン",ex:"この道は歩行者が〜ですよ"},
+    {k:"結構",r:"ケッコウ",ex:"ここから隣町の駅までは、〜な距離がある"},
+    {k:"机上",r:"キジョウ",ex:"どんなに話し合っても〜の空論にすぎない"},
+    {k:"認識",r:"ニンシキ",ex:"相手のことを姉だと〜するまでに時間がかかった"},
+    {k:"厳か",r:"オゴソか",ex:"教会の中は、〜かな雰囲気だった"},
+    {k:"担う",r:"ニナう",ex:"オリンピック選手たちは国民の期待を〜い現地へ向かった"},
+    {k:"適応",r:"テキオウ",ex:"畑の野菜は、寒冷地の気候に〜できずに枯れてしまった"},
+    {k:"破る",r:"ヤブる",ex:"消しゴムを使っているとき、勢いあまってノートを〜ってしまった"},
+    {k:"列挙",r:"レッキョ",ex:"先生は家庭ゴミの種類を黒板に〜した"},
+    {k:"圧巻",r:"アッカン",ex:"先日観た映画のラストシーンは〜だった"},
+    {k:"一対",r:"イッツイ",ex:"アゲハチョウの頭部には〜の触角がある"},
+    {k:"支える",r:"ササえる",ex:"水は、人間の生命を〜えるために欠くことができない資源だ"},
+    {k:"欠く",r:"カく",ex:"水は、人間の生命を支えるために〜くことができない資源だ"},
+    {k:"混乱",r:"コンラン",ex:"昨年は〜の一年だった"},
+    {k:"蒸す",r:"ムす",ex:"〜し上がったばかりのおまんじゅうを見て、つばを飲み込んだ"},
+    {k:"熱い",r:"アツい",ex:"芸術に寄せる〜い思いが、今日の彼の作品を生んだのである"},
+    {k:"純真",r:"ジュンシン",ex:"いつまでも〜な気持ちを持ちつづけてほしい"},
+    {k:"容姿",r:"ヨウシ",ex:"〜端麗という言葉は彼女のためにあるものだ"},
+    {k:"分別",r:"フンベツ",ex:"タロウはまだ小学生なのに〜がある"},
+    {k:"直ちに",r:"タダちに",ex:"言われたことは〜ちに実行します"},
+    {k:"専ら",r:"モッパら",ex:"お正月は〜らテレビを見ていた"},
+    {k:"承る",r:"ウケタマワる",ex:"ご注文ありがたく〜ります"},
+    {k:"背負う",r:"セオう",ex:"向こうから子供を〜った女の人が歩いてくる"},
+    {k:"率直",r:"ソッチョク",ex:"何か不満があるのなら〜に言ってほしい"},
+    {k:"冷静",r:"レイセイ",ex:"どんな事態になっても〜に判断できるようにしよう"},
+    {k:"看病",r:"カンビョウ",ex:"けがをした小犬をみんなでつきっきりで〜した"},
+    {k:"説得",r:"セットク",ex:"父を〜して、自転車を買ってもらった"},
+    {k:"洗う",r:"アラう",ex:"外から帰ってきたら手を〜うのをわすれないこと"},
+    {k:"断る",r:"コトワる",ex:"映画に誘われたが、都合がつかなかったので〜った"},
+    {k:"調査",r:"チョウサ",ex:"町の〜を進めていくといろいろなことが分かってきた"},
+  ]},
+  92:{theme:"💭後期 第12回（状態・性質・様子②）",words:[
+    {k:"自負",r:"ジフ",ex:"父の言葉には、人間としての〜心が表されている"},
+    {k:"秘める",r:"ヒめる",ex:"兄は、宇宙に対する熱い思いを心に〜めている"},
+    {k:"果たす",r:"ハたす",ex:"最後までやって責任を〜たすことは大切だ"},
+    {k:"必死",r:"ヒッシ",ex:"〜になって逃げる"},
+    {k:"規模",r:"キボ",ex:"このコンサートホールは千人まで入る〜である"},
+    {k:"均一",r:"キンイツ",ex:"〜価格の店が、このごろ増えてきた"},
+    {k:"始終",r:"シジュウ",ex:"彼は〜、「自分の方が正しい」と言い張っていた"},
+    {k:"盛大",r:"セイダイ",ex:"会社を退職する人のために、〜に送別会を開いてあげよう"},
+    {k:"与える",r:"アタえる",ex:"表現の工夫は、詩に命を〜える有効な手段でなければならぬ"},
+    {k:"有効",r:"ユウコウ",ex:"表現の工夫は、詩に命を与える〜な手段でなければならぬ"},
+    {k:"一切",r:"イッサイ",ex:"何を聞かれても〜答えなかった"},
+    {k:"際限",r:"サイゲン",ex:"〜なく続く道をひたすら走り続けた"},
+    {k:"厳密",r:"ゲンミツ",ex:"〜に言えば、君の言うことはまちがっているけどね"},
+    {k:"若干",r:"ジャッカン",ex:"太郎のすぐ怒る性格は、大人になった今も〜残っている"},
+    {k:"可能",r:"カノウ",ex:"大した力にはなれないけれど、〜な限り協力するよ"},
+    {k:"絶好",r:"ゼッコウ",ex:"今日はとてもよく晴れて、〜の行楽日和だ"},
+    {k:"臨む",r:"ノゾむ",ex:"落ち着いて試験に〜むことができた"},
+    {k:"巻く",r:"マく",ex:"水がうずを〜いて、排水口に流れこんでいった"},
+    {k:"潔白",r:"ケッパク",ex:"自分自身で身の〜を証明する以外にない"},
+    {k:"縦断",r:"ジュウダン",ex:"いつか自転車で日本〜してみたい"},
+    {k:"自覚",r:"ジカク",ex:"〜を持って学習すると、内容の定着もよくなるらしい"},
+    {k:"絶える",r:"タえる",ex:"転校した友だちとしばらく文通していたが、そのうち〜えてしまった"},
+    {k:"損なう",r:"ソコなう",ex:"環境破壊によって、自然の浄化機能が、〜なわれている"},
+    {k:"反応",r:"ハンノウ",ex:"大きな声で呼んでも、だれも〜してくれなかった"},
+    {k:"前兆",r:"ゼンチョウ",ex:"このところの異常気象は、なにかの〜か"},
+    {k:"都度",r:"ツド",ex:"テストはその〜やり直して、間違えた原因をはっきりさせましょう"},
+    {k:"無造作",r:"ムゾウサ",ex:"姉は、いつも〜に髪を束ねています"},
+    {k:"厳重",r:"ゲンジュウ",ex:"今後、同じ過ちをくり返さないように〜に注意したい"},
+    {k:"真紅",r:"シンク",ex:"〜の花びらが朝つゆにぬれていた"},
+    {k:"親身",r:"シンミ",ex:"その医者は〜になって診察してくれた"},
+    {k:"結束",r:"ケッソク",ex:"ぼくのクラスは運動会をきっかけに〜が固くなった"},
+  ]},
+  93:{theme:"🏃後期 第13回（行動）",words:[
+    {k:"挙げる",r:"アげる",ex:"いくつかの例を〜げて、自分の意見に説得力を持たせた"},
+    {k:"効果",r:"コウカ",ex:"ちょっとした工夫で、目をみはるような〜があった"},
+    {k:"空く",r:"アく",ex:"手が〜いていたら手伝ってほしい"},
+    {k:"干す",r:"ホす",ex:"そのわがままな女優は役を〜された"},
+    {k:"危ない",r:"アブない",ex:"そんなにがけに近寄っては〜ないよ"},
+    {k:"節約",r:"セツヤク",ex:"〜することは決して恥ずかしいことではない"},
+    {k:"報告",r:"ホウコク",ex:"何かをしたら、必ず〜するという習慣を身に付けよう"},
+    {k:"約束",r:"ヤクソク",ex:"みんなと五時に駅で会う〜をしている"},
+    {k:"合図",r:"アイズ",ex:"次郎は、わたしに静かにしているようにと、目で〜した"},
+    {k:"移す",r:"ウツす",ex:"引っ越しに伴って、住民票も〜した"},
+    {k:"寄る",r:"ヨる",ex:"市役所に行くついでに、友だちの家に〜ってみよう"},
+    {k:"興じる",r:"キョウじる",ex:"キャンプの夜は、友だちとトランプに〜じた"},
+    {k:"交わす",r:"カわす",ex:"彼女とはあまり仲はよくないが、あいさつだけは〜わしておこう"},
+    {k:"散策",r:"サンサク",ex:"近所の公園を〜した"},
+    {k:"盛る",r:"モる",ex:"このレポートは言いたいことを〜りこみすぎていてわかりにくい"},
+    {k:"率いる",r:"ヒキいる",ex:"新しい仲間を〜いて、チームを結成した"},
+    {k:"究める",r:"キワめる",ex:"その道を〜めた人の意見は説得力がある"},
+    {k:"散歩",r:"サンポ",ex:"少し近所を〜してから家に帰ることにしよう"},
+    {k:"謝恩",r:"シャオン",ex:"近所のスーパーが開店十周年の〜セールをやっているところだ"},
+    {k:"賛成",r:"サンセイ",ex:"〜か反対かを決める前に、もっと議論が必要だよ"},
+    {k:"視線",r:"シセン",ex:"彼女の熱い〜を感じたとき、ぼくの顔が熱くなった"},
+    {k:"争う",r:"アラソう",ex:"みな先を〜って、決勝戦のチケットを手に入れようとした"},
+    {k:"体験",r:"タイケン",ex:"祖父は戦争の〜を話してくれた"},
+    {k:"提げる",r:"サげる",ex:"父はバッグを肩から〜げていた"},
+    {k:"説く",r:"トく",ex:"お坊さんが、人の生きる道を〜いている"},
+    {k:"果たす",r:"ハたす",ex:"約束を〜たすことができて、安心しました"},
+    {k:"従順",r:"ジュウジュン",ex:"権威に〜なやつは信用できない"},
+    {k:"遺伝",r:"イデン",ex:"兄は大学で〜について学んだ"},
+    {k:"研ぐ",r:"トぐ",ex:"無心になって、刃物を〜いだ"},
+    {k:"孝行",r:"コウコウ",ex:"将来、しっかりと親〜ができるようになりたい"},
+  ]},
+  99:{theme:"🔥テストで落とした漢字",words:[
+    {k:"確信",r:"カクシン",ex:"自分が正しいと〜している（かたく信じる）"},
+    {k:"同乗",r:"ドウジョウ",ex:"父の車に〜させてもらう（同じ乗り物に乗る）"},
+    {k:"存命",r:"ゾンメイ",ex:"祖母が〜のうちに聞いておきたい（生きていること）"},
+    {k:"頂点",r:"チョウテン",ex:"山の〜に立つ"},
+    {k:"談笑",r:"ダンショウ",ex:"みんなで〜する（うちとけて話し笑う）"},
+    {k:"比類",r:"ヒルイ",ex:"〜ないほどの強さ"},
+    {k:"演芸",r:"エンゲイ",ex:"〜会を見にいく"},
+    {k:"氷解",r:"ヒョウカイ",ex:"疑問が〜する"},
+    {k:"基づく",r:"モトづく",ex:"事実に〜づく"},
+    {k:"興す",r:"オコす",ex:"産業を〜す"},
+    {k:"承る",r:"ウケタマワる",ex:"ご注文を〜る"},
+    {k:"有頂天",r:"ウチョウテン",ex:"ほめられて〜になる"},
+    {k:"懐かしむ",r:"ナツかしむ",ex:"昔を〜む"},
+    {k:"漁師",r:"リョウシ",ex:"〜が船で漁に出る"},
+    {k:"大統領",r:"ダイトウリョウ",ex:"アメリカの〜"},
+    {k:"導き",r:"ミチビき",ex:"先生の〜き"},
+    {k:"会得",r:"エトク",ex:"コツを〜する"},
+    {k:"散布",r:"サンプ",ex:"農薬を〜する"},
+    {k:"考証",r:"コウショウ",ex:"時代〜がしっかりした映画"},
+    {k:"授かる",r:"サズかる",ex:"知恵を〜かる"},
+    {k:"観覧車",r:"カンランシャ",ex:"遊園地の〜"},
+    {k:"報われる",r:"ムクわれる",ex:"努力が〜われる"},
+    {k:"検査",r:"ケンサ",ex:"持ち物を〜する（エリア特訓 国語第2回で×）"},
+    {k:"姿勢",r:"シセイ",ex:"〜を正してすわる"},
+    {k:"命名",r:"メイメイ",ex:"新しい船に〜する"},
+    {k:"養う",r:"ヤシナう",ex:"家族を〜う／体力を〜う"},
+    {k:"世間話",r:"セケンばなし",ex:"となりの人と〜をする"},
+    {k:"典型",r:"テンケイ",ex:"〜的な例をあげる"},
+    {k:"録音",r:"ロクオン",ex:"会議の内容を〜する"},
+    {k:"改善",r:"カイゼン",ex:"生活習慣を〜する"},
+    {k:"確実",r:"カクジツ",ex:"〜な方法を選ぶ"},
+    {k:"貧しい",r:"マズしい",ex:"〜しい生活"},
+    {k:"除外",r:"ジョガイ",ex:"対象から〜する"},
+    {k:"古今",r:"ココン",ex:"〜東西の名作"},
+    {k:"降る",r:"フる",ex:"雨が〜る"},
+    // 2026-08-01 夏期講習特別テスト1（★＝白紙だったもの）
+    {k:"所属",r:"ショゾク",ex:"サッカー部に〜する"},
+    {k:"評論家",r:"ヒョウロンカ",ex:"映画〜の話を聞く"},
+    {k:"軽やか",r:"カロやか",ex:"〜な足どりで歩く"},
+    {k:"燃焼",r:"ネンショウ",ex:"ろうそくが完全〜する"},
+    {k:"夫婦",r:"フウフ",ex:"〜で店をやっている"},
+    {k:"勧告",r:"カンコク",ex:"ひなんを〜する"},
+    // 2026-08-30 全国公開模試7（大問一・未収録だった語）
+    {k:"忠誠",r:"チュウセイ",ex:"主君に〜をちかう"},
+    {k:"仏頂面",r:"ブッチョウづら",ex:"きげんが悪くて〜をする"},
+    {k:"朗らか",r:"ホガらか",ex:"〜な笑い声がひびく"},
+    {k:"蒸し暑い",r:"ムしアツい",ex:"今日はとても〜い"},
+    {k:"揮発",r:"キハツ",ex:"〜性の高い液体"},
+    // 2026-09-05 語句まとめテスト（84点）で落とした同音異義語。対になる語を（）に入れて区別する
+    {k:"最後",r:"サイゴ",ex:"列の〜に並ぶ（順番のおわり。⇔最期＝命のおわり）"},
+    {k:"最期",r:"サイゴ",ex:"戦争で〜をとげる（死ぬとき。「期」は命のおわりのとき。⇔最後＝順番）"},
+    {k:"保険",r:"ホケン",ex:"健康〜に入る（あぶないことにそなえるお金。⇔保健＝健康をたもつ）"},
+    {k:"保健",r:"ホケン",ex:"〜室の先生（健康をたもつ。⇔保険＝もしもの時のお金）"},
+    {k:"過程",r:"カテイ",ex:"鉄ができる〜を調べる（できるまでのとちゅうの道すじ。⇔課程＝学校のコース）"},
+    {k:"課程",r:"カテイ",ex:"博士〜に進む（学校で課されるコース。⇔過程＝とちゅうの道すじ）"},
+    {k:"明暗",r:"メイアン",ex:"君と僕で〜が分かれた（明るいと暗い。⇔名案＝いいアイデア）"},
+    // 2026-09-06 エリア別特訓 甲南2025の国語で書けなかった3語
+    {k:"総動員",r:"ソウドウイン",ex:"家族を〜して大そうじをした（全員をあつめて動かす。「総」＝ぜんぶ）"},
+    {k:"連呼",r:"レンコ",ex:"選挙カーが名前を〜する（何度もくりかえし呼ぶ。「連」＝つらねる）"},
+    {k:"複雑",r:"フクザツ",ex:"〜な気持ち／〜な計算（こみいっている。⇔単純。「複」はころもへん）"},
+    {k:"貯蔵庫",r:"チョゾウコ",ex:"野菜を〜に入れる（ためて（貯）しまって（蔵）おく倉庫）"},
+    {k:"路面",r:"ロメン",ex:"雨で〜がすべりやすい（道路の表面。〜電車＝道路の上を走る電車）"},
+    // 2026-09-06 合格力実践テスト1で書けなかった漢字
+    {k:"門松",r:"カドマツ",ex:"お正月に〜をかざる（門の前に立てる松。「かど」と読む）"},
+    {k:"制する",r:"セイする",ex:"感情を〜／機先を〜（おさえる・とりしきる。「制服」「制限」の制）"},
+    {k:"月刊誌",r:"ゲッカンシ",ex:"〜を毎月買う（月に1回「刊行」される雑誌。週刊誌・日刊紙のなかま）"},
+    // 2026-10-05 全国公開模試8（大問四・白紙だった語。全国正答率 奮起41 承服7 尊厳24 圧巻39 就航6 反骨39 源泉34）
+    {k:"奮起",r:"フンキ",ex:"敗れた悔しさをばねに〜する（気持ちをふるい立たせる）"},
+    {k:"承服",r:"ショウフク",ex:"先生の決定には〜できない（言われたことを受け入れて従う）"},
+    {k:"尊厳",r:"ソンゲン",ex:"人間の〜を大切にする（とうとく、おかしてはならないこと）"},
+    {k:"圧巻",r:"アッカン",ex:"最後の合唱が〜だった（全体の中でいちばんすばらしい見どころ）"},
+    {k:"就航",r:"シュウコウ",ex:"新しい客船が〜する（船や飛行機がはじめて決まった道すじを行き来すること）"},
+    {k:"反骨",r:"ハンコツ",ex:"〜精神のある人（権力や世の流れに逆らう強い心）"},
+    {k:"源泉",r:"ゲンセン",ex:"力の〜は努力にある（ものごとのもと。温泉のわき出るところも言う）"},
+    // 2026-10-11 育成テストV第5回（大問五・「消防所」と書いた。全国正答率74%）
+    {k:"消防署",r:"ショウボウショ",ex:"火事の知らせで〜から消防車が出動した（「署」は役所のこと。「所」とまちがえない）"}
+  ]}
+};
+
+// 公開模試・育成テストで実際に落とした漢字（最優先で復習に出す）
+const DROPPED = new Set([
+  // 2026-10-18 合格力実践テスト6で落とした漢字（書き）。必至・同乗＝白紙／口頭＝「口答」と書いた／確信＝×。読みの「急く・面・委細」は読みの扱いを決めてから
+  "必至","口頭","確信","同乗",
+  // 2026-10-11 育成テストV第5回で落とした漢字（消防署＝「所」と書いた／親善＝「耕善」と書いた／復旧＝塾の採点で×）
+  "消防署","復旧","親善",
+  // 2026-10-05 全国公開模試8で白紙だった漢字
+  "奮起","承服","尊厳","圧巻","就航","反骨","源泉",
+  // 2026-09-20 合格力実践テスト3で落とした漢字
+  "保護","存命","頂点","談笑","快活",
+  "比類","演芸","氷解","基づく","興す","承る","有頂天","懐かしむ",
+  "漁師","大統領","導き","会得","散布","考証","授かる","観覧車","報われる",
+  "清潔","務める","慣例","成就",
+  // 夏期講習 その1（遡り分）
+  "垂れる","効率","意外","率先","解放","快方","衛生","対照","対象",
+  // 夏期講習 その2
+  "拾得","快活","供養","機会","器械","収集","図る","治める","収める","修める",
+  // 夏期講習 その3
+  "進退","真価","率いる","感謝","快い","善後策","不可欠","静物画","行楽地","独創的",
+  // 夏期講習 その4
+  "河川","満天","大台","人災",
+  // 夏期講習 その5
+  "尊重","職務","統合","操縦","貧富",
+  // 夏期講習 その6
+  "当初","独創","奮い",
+  // 夏期講習 その7
+  "派手","門戸","悪習","破損",
+  // 2026-08-01 夏期講習特別テスト1（所属・評論家・軽やかは白紙だった＝7割以上の子が書けている）
+  "所属","評論家","軽やか","燃焼","夫婦","勧告",
+  // 夏期講習 その8（赤○＝①⑧⑨⑩）
+  "専念","支障","帯びる","展覧",
+  // 夏期講習 その9（赤○＝⑧⑩）
+  "財布","出納",
+  // 夏期講習 その10（赤○＝①⑦）
+  "明ける","美談",
+  // 夏期講習 その11（赤○＝②③⑤）
+  "観戦","割く","要領",
+  // 敬語表のプリント 大問四（赤○＝5,7,8）
+  "情け","責任","律義",
+  // 大問四もう1枚（赤○＝1,2,3,4,8,9）
+  "告げる","商売","損ねる","親しい","固まる","改める",
+  // 夏期講習 その12（赤○＝③⑤⑥⑧⑨）
+  "愛想","調達","操作","経つ","近視",
+  // 夏期講習 その13（赤○＝①⑧⑩）
+  "増える","挙げる","至難",
+  // 書き取り 8/5分①（赤線＝2,3,4,5,6,7,8,10）
+  "金銭","訳す","遺伝","出荷","優れる","粉","飛行機","仮病",
+  // 書き取り 8/5分②（赤線＝3,4,6,9,10）
+  "覚める","誤字","修める","染まる","園",
+  // エリア特訓 国語第2回（8/8）
+  "検査",
+  // 入試実戦模試2（8/11）大問一 問一 ②〜⑤
+  "世間話","典型","録音","改善",
+  // エリア特訓 国語 入試問題研究③（8/17）大問二 問一 a・c・e
+  "姿勢","命名","養う",
+  // 夏期特別テスト2で白紙・未収録だった5語（8/8）
+  "確実","貧しい","除外","古今","降る",
+  // 夏期講習 その14（★＝③⑦⑨）
+  "整える","均等","備える",
+  // 夏期講習 その15（赤○＝④⑥⑧）
+  "策略","費やす","縦横",
+  // 夏期講習 その16（赤印＝①②⑤）
+  "興奮","配分","険悪",
+  // 夏期講習 その18（赤○＝書きの①②③④）
+  "境内","損害","著しく","演技",
+  // 2026-09-05 語句まとめテスト（84点）で落とした同音異義語
+  "収拾","最後","最期","保険","保健","過程","課程","明暗",
+  // 2026-09-06 エリア別特訓 甲南2025 国語
+  "総動員","連呼","複雑","貯蔵庫","路面",
+  // 2026-09-06 合格力実践テスト1（保証・講義はROUNDSに既収録）
+  "門松","保証","講義","制する","月刊誌",
+  // 2026-08-30 全国公開模試7 大問一（×＝故障・揮発／白紙＝操縦・忠誠・仏頂面・朗らか・蒸し暑い）
+  "故障","揮発","忠誠","仏頂面","朗らか","蒸し暑い"
+]);
+
+// ===== 🔥テストで落とした漢字を「回」にする（2026-11-07 あゆみ・こころ「回を選んでやる」）=====
+// DROPPED の全語（180語）を古いテストから順に DROP_PER 語ずつ、第94回〜に分ける。新しいテストで落とした語は
+// DROPPED の上に足すので、列の最後（いちばん大きい回）に入る。前の回の中身は動かない。
+// 語の読み・例文は、第99回に書いてあればそれ、なければ元の回のものを使う。
+const DROP_FIRST=94, DROP_PER=30;
+(function(){
+  const base=ROUNDS[99]; delete ROUNDS[99];
+  const src={}; for(const w of base.words) src[w.k]=w;
+  for(const[kai,d]of Object.entries(ROUNDS)) for(const w of d.words) if(DROPPED.has(w.k)&&!src[w.k]) src[w.k]=w;
+  const list=[...DROPPED].reverse().filter(k=>src[k]).map(k=>src[k]);   // 古いテストが先
+  const marks='①②③④⑤⑥⑦⑧⑨⑩';
+  for(let i=0;i*DROP_PER<list.length;i++)
+    ROUNDS[DROP_FIRST+i]={theme:'🔥テストで落とした漢字 '+(marks[i]||(i+1)),words:list.slice(i*DROP_PER,(i+1)*DROP_PER)};
+})();
+
+// ===== TROPHIES =====
+const TROPHIES = [
+  {id:'first',name:'はじめの一歩',icon:'✏️',desc:'はじめて練習した',check:s=>s.totalPractice>=1},
+  {id:'streak3',name:'3連続！',icon:'🔥',desc:'3問連続正解',check:s=>s.maxStreak>=3},
+  {id:'streak5',name:'5連続！',icon:'🔥',desc:'5問連続正解',check:s=>s.maxStreak>=5},
+  {id:'streak10',name:'10連続！',icon:'💥',desc:'10問連続正解',check:s=>s.maxStreak>=10},
+  {id:'master1',name:'初マスター',icon:'⭐',desc:'はじめて1語マスター',check:s=>s.totalMastered>=1},
+  {id:'master10',name:'10語マスター',icon:'📖',desc:'10語マスターした',check:s=>s.totalMastered>=10},
+  {id:'master50',name:'50語マスター',icon:'🎯',desc:'50語マスターした',check:s=>s.totalMastered>=50},
+  {id:'master100',name:'100語マスター',icon:'👑',desc:'100語マスターした',check:s=>s.totalMastered>=100},
+  {id:'master150',name:'150語マスター',icon:'💎',desc:'150語マスターした',check:s=>s.totalMastered>=150},
+  {id:'masterAll',name:'全語マスター！',icon:'🏆',desc:'全部マスターした！',check:s=>s.totalMastered>=s.totalWords},
+  {id:'round1',name:'回クリア！',icon:'🌈',desc:'1つの回を全マスター',check:s=>s.roundsCleared>=1},
+  {id:'round3',name:'3回クリア',icon:'🎖️',desc:'3つの回を全マスター',check:s=>s.roundsCleared>=3},
+  {id:'lv5',name:'Lv.5到達',icon:'📗',desc:'レベル5になった',check:s=>s.level>=5},
+  {id:'lv10',name:'Lv.10到達',icon:'📘',desc:'レベル10になった',check:s=>s.level>=10},
+  {id:'lv20',name:'Lv.20到達',icon:'📕',desc:'レベル20になった',check:s=>s.level>=20},
+];
+
+// ===== STATE =====
+const STORAGE_KEY = 'kanji_master_v2';
+let state;
+function loadState(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(saved){
+    state=JSON.parse(saved);
+    // 第99回を第94回〜に分けたので（2026-11-07）、前の「99_語」の記録を新しい回のキーへ写す（1回だけ・古い記録は残す）
+    for(const[kai,d]of Object.entries(ROUNDS)){ if(Number(kai)<DROP_FIRST)continue;
+      for(const w of d.words){const nk=kai+'_'+w.k, ok='99_'+w.k;
+        if(!state.records[nk]&&state.records[ok]) state.records[nk]={...state.records[ok]};}}
+    return;
+  }
+  state = {xp:0, achievements:[], records:{}};
+  for(const[kai,data]of Object.entries(ROUNDS)){
+    for(const w of data.words){
+      const key = kai+'_'+w.k;
+      state.records[key]={correct:0,wrong:0,total:0,mastered:false};
+    }
+  }
+  saveState();
+}
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+
+// ===== くりかえし出題（間隔をのばす）=====
+// 正解するたびに、次に出すまでを 1日→3日→1週間→3週間→2か月 とのばす。まちがえたら次の日にもう一度
+const INTERVAL_DAYS=[1,3,7,21,60];
+// 2026-09-30より前の記録には last/step/due がないので、今ある数字からだいたいで作る
+function ensureSched(rec){
+  if(!rec||rec.step!==undefined)return rec;
+  if(rec.total>0){
+    rec.last=rec.mastered||(rec.correct>0&&rec.correct>=rec.wrong);
+    rec.step=rec.mastered?3:(rec.last?Math.min(rec.correct,2):0);
+    rec.due=(rec.lastSeen||Date.now())+INTERVAL_DAYS[rec.step]*86400000;
+  }else{
+    rec.step=0;
+  }
+  return rec;
+}
+// 「書ける」＝最後に出たとき正解した語
+function canWrite(rec){return !!(rec&&ensureSched(rec).last);}
+
+// ===== ハンコカード（1回目は花・2回目はキラキラ・3回目以降は王冠）=====
+// 画像はdata URIで埋め込み。空にすると絵文字で出る
+const STAMP_IMG={normal:'data:image/webp;base64,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',kira:'data:image/webp;base64,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'};  // 2026-09-30 あゆみがChatGPTで作った花のハンコ（ピンク・金）
+function ymd(ms){const d=new Date(ms);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function stampHTML(n,size){
+  if(!n)return '';
+  if(n>=3){
+    const flower=STAMP_IMG.kira
+      ? `<img src="${STAMP_IMG.kira}" alt="" style="position:absolute;inset:19% 9% 3%;width:82%;height:78%;object-fit:contain;filter:hue-rotate(220deg)">`
+      : '<span style="position:absolute;inset:22% 0 0;font-size:0.65em;line-height:1">💎</span>';
+    return `<span role="img" aria-label="王冠ハンコ" style="position:relative;display:inline-block;width:${size}px;height:${size}px;font-size:${size}px;flex-shrink:0">
+      <svg viewBox="0 0 100 100" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+        <circle cx="50" cy="55" r="42" fill="#faf0ff" stroke="#e1b951" stroke-width="2"/>
+        <circle cx="50" cy="55" r="38" fill="none" stroke="#f2d588" stroke-width="1" stroke-dasharray="2 3"/>
+      </svg>${flower}
+      <svg viewBox="0 0 100 100" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+        <path d="M29 12 L38 19 L50 4 L62 19 L71 12 L66 30 L34 30 Z" fill="#ffd35f" stroke="#b98018" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M34 32 H66" stroke="#b98018" stroke-width="3" stroke-linecap="round"/>
+        <path d="M50 17 L54 22 L50 27 L46 22 Z" fill="#a766d1"/>
+        <path d="M13 32 L15 38 L21 40 L15 42 L13 48 L11 42 L5 40 L11 38 Z M86 62 L88 68 L94 70 L88 72 L86 78 L84 72 L78 70 L84 68 Z" fill="#ffd35f" stroke="#c7982a" stroke-width=".6"/>
+      </svg></span>`;
+  }
+  const kira=n>=2, img=kira?STAMP_IMG.kira:STAMP_IMG.normal;
+  if(img)return `<img src="${img}" alt="${kira?'キラキラハンコ':'花のハンコ'}" style="width:${size}px;height:${size}px;object-fit:contain">`;
+  return `<span role="img" aria-label="${kira?'キラキラハンコ':'花のハンコ'}" style="font-size:${Math.round(size*0.8)}px;line-height:1">${kira?'🌟':'🌸'}</span>`;
+}
+// ===== 今日の復習の語数 =====
+// 1日の1・2回目は DAILY_N 語（3回目は下の「順番の15問」）。4回目（MINI_FROM）以降は MINI_N 語だけにして、すき間時間にサッと回せるようにする。
+// 4回目以降は、こころが MINI_CHOICES（5語か10語）から自分でえらぶ。えらんだ数は覚えておく（state.miniPick）。はじめは MINI_N。
+const DAILY_N=10, MINI_N=5, MINI_FROM=4, MINI_CHOICES=[5,10];
+// まちがえた語を同じ回の中でくり返す回数（2026-11-07）
+const REPEAT_MAX=2;
+// 回（ぜんぶ練習・にがて特訓・復習チェック）を1つ終えてもハンコ（2026-11-07 こころ「回を選んでやる」）
+const ROUND_MODES=['all','weak','review'];
+function todayStamps(){return (state.stamps||{})[ymd(Date.now())]||0;}
+function isMini(done){return (done==null?todayStamps():done)+1>=MINI_FROM;}
+function miniN(){return MINI_CHOICES.includes(state.miniPick)?state.miniPick:MINI_N;}
+function dailySize(done){return isMini(done)?miniN():DAILY_N;}
+// 5語・10語のえらぶボタン（えらんでいる方を白く）
+function miniPicker(big){
+  return MINI_CHOICES.map(n=>{const on=n===miniN();
+    return `<button onclick="event.stopPropagation();startDailyReview(${n})" style="border:none;border-radius:20px;padding:${big?'12px 0':'8px 12px'};${big?'flex:1;font-size:1em;':'font-size:0.8em;'}font-weight:900;cursor:pointer;background:${on?'#fff':'rgba(255,255,255,0.35)'};color:${on?'#e8702a':'#fff'};${big&&!on?'background:#ffd9b8;color:#c4601f;':''}">${n}語</button>`;}).join('');
+}
+function pressStamp(){
+  const k=ymd(Date.now());
+  state.stamps=state.stamps||{};
+  state.stamps[k]=(state.stamps[k]||0)+1;
+  saveState();
+  if(typeof syncQueueStamp==='function')syncQueueStamp(k);
+  return state.stamps[k];
+}
+function renderStampCard(){
+  const box=document.getElementById('stamp-card');if(!box)return;
+  const st=state.stamps||{}, now=new Date(), dow=(now.getDay()+6)%7;   // 月曜はじまり
+  const mon=new Date(now.getFullYear(),now.getMonth(),now.getDate()-dow);
+  const names=['月','火','水','木','金','土','日'], todayK=ymd(now.getTime());
+  let cells='';
+  for(let i=0;i<7;i++){
+    const d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);
+    const k=ymd(d.getTime()), n=st[k]||0, isToday=k===todayK;
+    cells+=`<div style="flex:1;text-align:center;">
+      <div style="font-size:0.65em;color:${isToday?'#e08a2e':'#8fa8bc'};font-weight:${isToday?800:600}">${names[i]}</div>
+      <div style="aspect-ratio:1;margin-top:3px;border-radius:50%;border:2px ${isToday?'solid #ffb35c':'dashed #e8dccb'};background:#fffdf8;display:flex;align-items:center;justify-content:center;overflow:hidden">${stampHTML(n,40)}</div>
+    </div>`;
+  }
+  // 先週までの4週ぶん（押せなかった日は小さな点。×は出さない）
+  let past='';
+  for(let w=4;w>=1;w--){
+    let row='';
+    for(let i=0;i<7;i++){
+      const d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()-7*w+i), n=st[ymd(d.getTime())]||0;
+      row+=`<span style="display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center">${n?stampHTML(n,16):'<span style="width:5px;height:5px;border-radius:50%;background:#ece6dc;display:inline-block"></span>'}</span>`;
+    }
+    const m=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()-7*w);
+    past+=`<div style="display:flex;align-items:center;gap:6px;font-size:0.68em;color:#b0a79a"><span style="width:46px">${m.getMonth()+1}/${m.getDate()}〜</span>${row}</div>`;
+  }
+  const n=st[todayK]||0;
+  const msg=n>=3?'王冠ハンコ！今日3回できたね👑 ここからは「ちょこっと復習」は5語か10語、えらべるよ':n===2?'キラキラハンコ！あと1回で王冠ハンコ👑':n===1?'ハンコ押せたよ！回を1つ、または「今日の復習」1回で、ハンコが1こ':'回を1つ終えると ハンコが1こ。3こで王冠👑';
+  box.innerHTML=`<div style="font-weight:800;color:#e08a2e;font-size:0.9em;margin-bottom:6px">📮 今週のハンコ</div>
+    <div style="display:flex;gap:6px">${cells}</div>
+    <div style="font-size:0.72em;color:#8a7a66;margin-top:8px;text-align:center">${msg}</div>
+    <details style="margin-top:6px"><summary style="font-size:0.68em;color:#b0a79a;cursor:pointer">これまでのカード</summary><div style="margin-top:4px;display:grid;gap:3px">${past}</div></details>`;
+}
+function getLevel(xp){
+  let lv=1,need=100;
+  while(xp>=need){xp-=need;lv++;need=Math.floor(100+lv*20);}
+  return{lv,cur:xp,need};
+}
+function addXP(n){
+  state.xp+=n;saveState();updateHeader();
+  showXPPopup('+'+n+' XP');
+}
+function showXPPopup(txt){
+  const p=document.getElementById('xp-popup');
+  p.textContent=txt;p.classList.remove('show');
+  void p.offsetWidth;p.classList.add('show');
+}
+
+// ===== HEADER =====
+function updateHeader(){
+  const info=getLevel(state.xp);
+  document.getElementById('lv-badge').textContent='Lv.'+info.lv;
+  document.getElementById('xp-info').textContent=info.cur+' / '+info.need+' XP';
+  document.getElementById('xp-bar').style.width=(info.cur/info.need*100)+'%';
+}
+
+// ===== STATS HELPERS =====
+function getRoundStats(kai){
+  const words=ROUNDS[kai].words;
+  let mastered=0,learning=0,yet=0,ok=0;
+  for(const w of words){
+    const rec=state.records[kai+'_'+w.k];
+    if(!rec){yet++;continue;}
+    if(canWrite(rec))ok++;
+    if(rec.mastered)mastered++;
+    else if(rec.total>0)learning++;
+    else yet++;
+  }
+  return{mastered,learning,yet,ok,total:words.length};
+}
+function getTotalStats(){
+  let mastered=0,total=0,roundsCleared=0,maxStreak=0,totalPractice=0;
+  for(const[kai,data]of Object.entries(ROUNDS)){
+    let roundMastered=0;
+    for(const w of data.words){
+      total++;
+      const rec=state.records[kai+'_'+w.k];
+      if(rec){
+        if(rec.mastered){mastered++;roundMastered++;}
+        totalPractice+=rec.total;
+      }
+    }
+    if(roundMastered===data.words.length)roundsCleared++;
+  }
+  return{totalMastered:mastered,totalWords:total,roundsCleared,totalPractice,
+    maxStreak:state.maxStreak||0,level:getLevel(state.xp).lv};
+}
+
+// ===== TAB NAVIGATION =====
+let currentRound = 19;
+// 続きの回：最後にやった回を「ぜんぶ練習」で終えていなければその回、終えていれば次の回
+function nextRound(kai){const ks=Object.keys(ROUNDS).map(Number);const i=ks.indexOf(Number(kai));return i>=0&&i+1<ks.length?ks[i+1]:null;}
+// 1日に何回やればいいか（2026-11-07 あゆみ）：ROUND_PLAN_START 以降に「ぜんぶ練習」を終えた回を数え、残り÷入試までの日数
+const ROUND_PLAN_START='2026-11-07';
+function roundPlan(){
+  const rd=state.roundDone||{}, today=ymd(Date.now()), total=Object.keys(ROUNDS).length;
+  let done=0,todayN=0; for(const k in rd){ if(!ROUNDS[k]||rd[k]<ROUND_PLAN_START)continue; done++; if(rd[k]===today)todayN++; }
+  const [ey,em,ed]=EXAM_DATE.split('-').map(Number), t0=new Date(); t0.setHours(0,0,0,0);
+  const daysLeft=Math.max(1,Math.round((new Date(ey,em-1,ed).getTime()-t0.getTime())/86400000));
+  const left=total-done, perDay=Math.ceil(left/daysLeft);
+  return {total,done,todayN,left,daysLeft,perDay};
+}
+function roundPlanText(){
+  const p=roundPlan();
+  if(p.left<=0) return '🎉 ぜんぶの回を1周したよ！2周目は「にがて特訓」で';
+  const head=p.todayN>=p.perDay?'🎉 今日の回はOK！（'+p.todayN+'回）':'今日やった回 '+p.todayN+'／'+p.perDay;
+  return head+'　あと'+p.left+'回・入試まで'+p.daysLeft+'日 → 1日'+p.perDay+'回でOK';
+}
+// 途中でやめた回（24時間以内）を続きから
+function inProgValid(){const ip=state.inProg;return ip&&ip.p&&ip.p.idx<ip.p.qs.length&&Date.now()-ip.at<24*3600*1000&&(ip.p.mode==='daily'||ROUNDS[ip.round])?ip:null;}
+function resumePractice(){
+  const ip=inProgValid(); if(!ip){goTab('home');return;}
+  if(ip.p.mode!=='daily')currentRound=ip.round;
+  goTab('write');
+  document.getElementById('write-title').textContent=ip.title;
+  document.getElementById('mode-select').style.display='none';
+  pState={...ip.p,dotStatus:ip.p.dotStatus||[]};
+  document.getElementById('practice-area').style.display='block';
+  document.getElementById('result-area').style.display='none';
+  renderQuestion();
+  daifukuSay('続きからだよ！あと'+(pState.qs.length-pState.idx)+'語');
+}
+function continueRound(){
+  let kai=state.lastRound&&ROUNDS[state.lastRound]?Number(state.lastRound):Object.keys(ROUNDS).map(Number)[0];
+  // 「ぜんぶ練習」を終えた回なら次の回へ（×の残りは結果画面の「にがて特訓」か、一覧から）
+  if((state.roundDone||{})[kai]&&nextRound(kai)!==null)kai=nextRound(kai);
+  return kai;
+}
+function goTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>{
+    b.classList.toggle('active',
+      (name==='home'&&i===0)||(name==='write'&&i===1)||
+      (name==='map'&&i===2)||(name==='trophy'&&i===3));
+  });
+  if(name==='home')renderHome();
+  if(name==='write')renderWrite();
+  if(name==='map')renderMap();
+  if(name==='trophy')renderTrophy();
+}
+
+// ===== HOME =====
+function renderHome(){
+  const ts=getTotalStats();
+  const now=Date.now(),WEEK=7*86400000;
+  let okAll=0,okWeek=0,dueCount=0;
+  for(const[kai,data]of Object.entries(ROUNDS)){
+    for(const w of data.words){
+      const rec=state.records[kai+'_'+w.k];
+      if(!rec)continue;
+      if(canWrite(rec)){okAll++;if(rec.okAt&&now-rec.okAt<WEEK)okWeek++;}
+      if(rec.total>0&&rec.due&&rec.due<=now)dueCount++;
+    }
+  }
+  document.getElementById('ts-master').textContent=okAll;
+  document.getElementById('ts-total').textContent=ts.totalWords;
+  document.getElementById('ts-pct').textContent='+'+okWeek;
+  document.getElementById('ts-star').textContent='⭐マスター（何回も正解した漢字）：'+ts.totalMastered+'語';
+  // これまでの積み重ね：書いた回数・正解した回数・練習した日・今日書いた数
+  let wrote=0,rights=0;
+  const dayset=new Set(Object.keys(state.days||{}));
+  const dkey=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+  for(const k in state.records){
+    const r=state.records[k];
+    wrote+=r.total||0; rights+=r.correct||0;
+    if(r.lastSeen)dayset.add(dkey(r.lastSeen));   // 日ごとの記録がない前の分は、最後にやった日から拾う
+  }
+  const today=(state.days&&state.days[dkey(now)])||0;
+  const pile=(num,unit,label,color)=>`<div style="flex:1;background:#fff;border:1.5px solid ${color}40;border-radius:12px;padding:8px 4px;text-align:center;">
+    <div style="font-size:1.25em;font-weight:900;color:${color}">${num}<span style="font-size:0.6em;font-weight:700">${unit}</span></div>
+    <div style="font-size:0.62em;color:#8fa8bc;line-height:1.3">${label}</div></div>`;
+  document.getElementById('ts-pile').innerHTML=
+    pile(wrote,'回','これまでに<br>書いた','#4a9bd9')+
+    pile(rights,'回','そのうち<br>正解','#3fa96a')+
+    pile(dayset.size,'日','練習した日','#e08a2e')+
+    pile(today,'回','今日<br>書いた','#d4a017');
+  renderStampCard();
+  renderMasterForecast();
+  {const ip=inProgValid(), card=document.getElementById('cont-card');
+   if(ip){
+     const left=ip.p.qs.length-ip.p.idx;
+     document.getElementById('cont-title').textContent='途中の回：'+ip.title.replace(/^第(\d+)回 — /,'第$1回 ');
+     document.getElementById('cont-desc').textContent='あと'+left+'語で終わり（'+ip.p.idx+'語やった）。ここから続きができるよ';
+     document.getElementById('cont-go').textContent='つづき';
+     card.onclick=resumePractice;
+   }else{
+     const ck=continueRound(), cs=getRoundStats(ck), first=!state.lastRound;
+     document.getElementById('cont-title').textContent=(first?'はじめる回：':ck===Number(state.lastRound)?'続きの回：':'次の回：')+'第'+ck+'回 '+ROUNDS[ck].theme;
+     document.getElementById('cont-desc').textContent=cs.total+'語（書ける '+cs.ok+'語）。まちがえた漢字は、その回の中でもう一回出るよ';
+     document.getElementById('cont-go').textContent=cs.ok>0&&cs.ok<cs.total?'つづき':'スタート';
+     card.onclick=()=>{currentRound=ck;goTab('write');};
+   }
+   document.getElementById('cont-plan').textContent=roundPlanText();}
+  const stToday=(state.stamps||{})[ymd(now)]||0;
+  document.getElementById('daily-go').innerHTML=stToday>=MINI_FROM-1?miniPicker(false):'スタート';
+  document.getElementById('daily-go').style.cssText=stToday>=MINI_FROM-1?'background:none;box-shadow:none;padding:0;display:flex;gap:6px':'';
+  document.getElementById('daily-title').textContent=stToday>=MINI_FROM-1?'ちょこっと復習':stToday>=1?'おかわり10語':'今日の復習';
+  if(stToday>=1){document.getElementById('daily-desc').textContent=stToday>=MINI_FROM-1?'5語か10語、えらんでね。何かやる前にサッと！':stToday===2?'3回目は順番の15問：'+seqLabel()+'。できたら王冠ハンコ👑':'あと10語でキラキラハンコ';}
+  else document.getElementById('daily-desc').textContent=dueCount>0
+    ?'そろそろ出したい漢字が'+dueCount+'語あるよ。今日はその中から10語'
+    :'前の回をわすれてないかの見直し。テストで落とした漢字＋そろそろわすれそうな漢字を10語';
+
+  const list=document.getElementById('round-list');
+  list.innerHTML='';
+  for(const[kai,data]of Object.entries(ROUNDS)){
+    const s=getRoundStats(kai);
+    const pct=Math.round(s.ok/s.total*100);
+    const completed=s.ok===s.total;
+    const card=document.createElement('div');
+    card.className='round-card'+(completed?' completed':'');
+    if(Number(kai)===continueRound())card.style.borderColor='#4a9bd9';
+    card.onclick=()=>{currentRound=parseInt(kai);goTab('write');};
+    card.innerHTML=`
+      <div class="round-num">${kai}</div>
+      <div class="round-info">
+        <div class="round-theme">${data.theme}</div>
+        <div class="round-count">${s.total}語</div>
+        <div class="round-progress"><div class="round-progress-bar${completed?' full':''}" style="width:${pct}%"></div></div>
+      </div>
+      <div class="round-stars"><div class="num${completed?' done':''}">${s.ok}</div>/${s.total}</div>
+    `;
+    list.appendChild(card);
+  }
+}
+
+// ===== WRITE =====
+function renderWrite(){
+  const data=ROUNDS[currentRound];
+  document.getElementById('write-title').textContent='第'+currentRound+'回 — '+data.theme;
+  document.getElementById('practice-area').style.display='none';
+  document.getElementById('result-area').style.display='none';
+
+  const s=getRoundStats(currentRound);
+  const weakCount=s.total-s.ok;
+  const reviewCount=s.ok;
+
+  const sel=document.getElementById('mode-select');
+  sel.style.display='block';
+  sel.innerHTML=`
+    <div class="mode-card" onclick="startPractice('all')">
+      <div class="mc-icon">📝</div><div class="mc-title">ぜんぶ練習</div>
+      <div class="mc-desc">${s.total}語ぜんぶをランダムに出題</div>
+      <div class="mc-count">${s.total}語</div>
+    </div>
+    <div class="mode-card" onclick="startPractice('weak')">
+      <div class="mc-icon">💪</div><div class="mc-title">にがて特訓</div>
+      <div class="mc-desc">いま書けない漢字だけ（×だった・まだやってない）</div>
+      <div class="mc-count">${weakCount>0?weakCount+'語':'なし！'}</div>
+    </div>
+    <div class="mode-card" onclick="startPractice('review')">
+      <div class="mc-icon">🔄</div><div class="mc-title">復習チェック</div>
+      <div class="mc-desc">いま書ける漢字をわすれてないか確認</div>
+      <div class="mc-count">${reviewCount>0?reviewCount+'語':'まだなし'}</div>
+    </div>
+  `;
+}
+
+// ===== PRACTICE =====
+let pState={qs:[],idx:0,ok:0,ng:0,streak:0,maxStreak:0,wrongs:[],mode:''};
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+function startPractice(mode){
+  const data=ROUNDS[currentRound];
+  let qs;
+  // にがて特訓＝いま書けない漢字（直前が×、またはまだやってない）。復習チェック＝いま書ける漢字（2026-11-07 あゆみ：前は書けて今書けない語を拾うため）
+  if(mode==='weak'){
+    qs=data.words.filter(w=>!canWrite(state.records[currentRound+'_'+w.k]));
+    if(qs.length===0){alert('この回はぜんぶ書けてるよ！');return;}
+  }else if(mode==='review'){
+    qs=data.words.filter(w=>canWrite(state.records[currentRound+'_'+w.k]));
+    if(qs.length===0){alert('まだ書ける漢字がありません');return;}
+  }else{
+    qs=[...data.words];
+  }
+  qs=shuffle(qs);
+  state.lastRound=currentRound;state.inProg=null;saveState();   // ホームの「続きの回」に使う
+  pState={qs,idx:0,ok:0,ng:0,streak:0,maxStreak:0,wrongs:[],mode};
+  document.getElementById('mode-select').style.display='none';
+  document.getElementById('practice-area').style.display='block';
+  document.getElementById('result-area').style.display='none';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q=pState.qs[pState.idx];
+  const key=(q._kai!==undefined?q._kai:currentRound)+'_'+q.k;
+  const rec=state.records[key]||(state.records[key]={correct:0,wrong:0,total:0,mastered:false});
+
+  document.getElementById('w-progress').textContent=(pState.idx+1)+' / '+pState.qs.length+(q._rep?'　🔁 もう一回！':'');
+  document.getElementById('w-reading').textContent=q.r;
+  const exEl=document.getElementById('w-example');
+  if(q.ex){
+    exEl.innerHTML='<span class="ex-label">れいぶん</span>'+q.ex.replace(/〜/g,'<span class="ex-blank">〇〇〇</span>');
+    exEl.style.display='block';
+  }else{
+    exEl.style.display='none';
+  }
+  document.getElementById('w-kanji').textContent=q.k;
+  document.getElementById('w-kanji').classList.remove('show');
+  document.getElementById('w-compare').classList.remove('show');
+  document.getElementById('w-count').textContent=rec.total;
+  document.getElementById('w-reveal-btn').style.display='block';
+  document.getElementById('w-judge').style.display='none';
+
+  // dots
+  const dots=document.getElementById('w-dots');
+  dots.innerHTML='';
+  for(let i=0;i<pState.qs.length;i++){
+    const d=document.createElement('div');
+    d.className='dot';
+    if(i<pState.idx){
+      const wasOk=!pState.wrongs.some(w=>w===pState.qs[i]);
+      // check by index
+      d.classList.add(i<pState.ok+pState.ng?(pState.wrongIndices&&pState.wrongIndices.has(i)?'ng':'ok'):'');
+    }
+    if(i===pState.idx)d.classList.add('current');
+    dots.appendChild(d);
+  }
+  // simpler dot tracking
+  updateDots();
+}
+
+// Track which indices were wrong
+function updateDots(){
+  if(!pState.dotStatus)pState.dotStatus=[];
+  const dots=document.getElementById('w-dots');
+  dots.innerHTML='';
+  for(let i=0;i<pState.qs.length;i++){
+    const d=document.createElement('div');
+    d.className='dot';
+    if(pState.dotStatus[i]==='ok')d.classList.add('ok');
+    if(pState.dotStatus[i]==='ng')d.classList.add('ng');
+    if(i===pState.idx)d.classList.add('current');
+    dots.appendChild(d);
+  }
+}
+
+function revealKanji(){
+  document.getElementById('w-kanji').classList.add('show');
+  document.getElementById('w-compare').classList.add('show');
+  document.getElementById('w-reveal-btn').style.display='none';
+  document.getElementById('w-judge').style.display='flex';
+}
+
+function judge(correct){
+  const q=pState.qs[pState.idx];
+  const key=(q._kai!==undefined?q._kai:currentRound)+'_'+q.k;
+  const rec=state.records[key]||(state.records[key]={correct:0,wrong:0,total:0,mastered:false});
+  ensureSched(rec);
+  const now=Date.now();
+  rec.total++;
+  rec.lastSeen=now;
+  // 日ごとに書いた数（「練習した日」「今日書いた」に使う）
+  {const d=new Date(now),dk=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+   state.days=state.days||{};state.days[dk]=(state.days[dk]||0)+1;}
+
+  if(correct){
+    pState.ok++;pState.streak++;
+    if(pState.streak>pState.maxStreak)pState.maxStreak=pState.streak;
+    if(!state.maxStreak||pState.maxStreak>state.maxStreak)state.maxStreak=pState.maxStreak;
+    rec.correct++;
+    if(rec.correct>=5)rec.mastered=true;
+    if(q._rep){
+      // 同じ回の中でもう一度出した語（答えを見た直後）は「書けた」にしない。次の日に書けてはじめて「書ける」
+    }else{
+    if(!rec.last)rec.okAt=now;   // 書けるようになった日（「この1週間で」に数える）
+    rec.last=true;
+    // 出す日が来ていた語だけ間隔をのばす（同じ日に何回も正解しても一気に2か月先にはしない）
+    if(!rec.due||now>=rec.due-12*3600*1000){
+      rec.due=now+INTERVAL_DAYS[rec.step]*86400000;
+      rec.step=Math.min(rec.step+1,INTERVAL_DAYS.length-1);
+    }
+    }
+    addXP(10);
+    pState.dotStatus[pState.idx]='ok';
+  }else{
+    pState.ng++;pState.streak=0;
+    rec.wrong++;
+    rec.mastered=false;
+    rec.last=false;
+    rec.step=0;
+    rec.due=now+INTERVAL_DAYS[0]*86400000;   // まちがえたら次の日にもう一度
+    if(!pState.wrongs.some(w=>w.k===q.k&&w._kai===q._kai))pState.wrongs.push(q);
+    // まちがえた語は、その回の最後にもう一度出す（正解するまで、最大 REPEAT_MAX 回）。こころ「同じ漢字が出てこない」（2026-11-07）
+    if(pState.mode!=='retry'&&(q._rep||0)<REPEAT_MAX){
+      pState.qs.push({...q,_rep:(q._rep||0)+1});
+      daifukuSay('あとでもう一回出すね！');
+    }
+    addXP(3);
+    pState.dotStatus[pState.idx]='ng';
+  }
+  // 途中でやめても続きからできるよう、いまの回の状態を残す（2026-11-07 あゆみ）。終わったら消す
+  pState.idx++;
+  state.inProg=pState.idx<pState.qs.length?{round:currentRound,title:document.getElementById('write-title').textContent,at:now,
+    p:{qs:pState.qs,idx:pState.idx,ok:pState.ok,ng:pState.ng,streak:pState.streak,maxStreak:pState.maxStreak,wrongs:pState.wrongs,mode:pState.mode,dotStatus:pState.dotStatus,seq:!!pState.seq}}:null;
+  pState.idx--;
+  saveState();
+  if(typeof syncQueueWord==='function') syncQueueWord(key);   // この1語だけクラウドに送る
+  checkAchievements();
+
+  pState.idx++;
+  if(pState.idx>=pState.qs.length){
+    showResult();
+  }else{
+    renderQuestion();
+  }
+}
+
+function showResult(){
+  document.getElementById('practice-area').style.display='none';
+  const area=document.getElementById('result-area');
+  area.style.display='block';
+
+  const perfect=pState.ng===0;
+  if(perfect)addXP(30);
+  const stampN=(pState.mode==='daily'||ROUND_MODES.includes(pState.mode))?pressStamp():0;
+  if(pState.mode==='all'){state.roundDone=state.roundDone||{};state.roundDone[currentRound]=ymd(Date.now());}
+  state.inProg=null;saveState();   // 「ぜんぶ練習」を終えた回（1日に何回やればいいかに使う）
+  if(pState.mode==='daily'&&pState.seq){state.seqDone=state.seqDone||{};state.seqDone[ymd(Date.now())]=1;saveState();}
+
+  let html=`
+    <div class="result-area">
+      <div class="result-title">${perfect?'パーフェクト！！':'おつかれさま！'}</div>
+      <div class="result-stats">
+        <div class="result-stat"><div class="rs-num ok">${pState.ok}</div><div class="rs-label">あってた</div></div>
+        <div class="result-stat"><div class="rs-num ng">${pState.ng}</div><div class="rs-label">ちがった</div></div>
+      </div>
+      ${perfect?'<div class="result-msg">🎉 パーフェクトボーナス +30 XP！</div>':''}
+      ${pState.maxStreak>=3?'<div class="result-msg">🔥 最高連続正解：'+pState.maxStreak+'</div>':''}
+  `;
+  if(stampN){
+    html+=`<div style="text-align:center;margin:14px 0 6px">
+      <div style="display:inline-flex;width:96px;height:96px;align-items:center;justify-content:center;border-radius:50%;background:#fffdf8;border:3px solid #ffb35c;animation:stampPop .5s ease-out">${stampHTML(stampN,80)}</div>
+      <div style="font-weight:800;color:#e08a2e;margin-top:6px">${stampN>=3?'王冠ハンコ ゲット！👑':stampN===2?'キラキラハンコ ゲット！':'ハンコ ゲット！'}</div></div>`;
+    if(ROUND_MODES.includes(pState.mode)){
+      const s=getRoundStats(currentRound), weak=s.total-s.ok, nx=nextRound(currentRound);
+      html+=`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">`;
+      if(weak>0) html+=`<button class="btn-primary" onclick="startPractice('weak')">💪 この回の にがて特訓（${weak}語）</button>`;
+      if(nx!==null) html+=`<button class="btn-primary" style="background:#4a9bd9" onclick="currentRound=${nx};goTab('write');startPractice('all')">📝 次の回へ：第${nx}回 ${ROUNDS[nx].theme}</button>`;
+      html+=`</div>`;
+    }
+    else if(isMini(stampN)) html+=`<div style="text-align:center;font-weight:800;color:#e08a2e;margin:4px 0">もうちょっとやる？</div><div style="display:flex;gap:10px;margin-bottom:10px">${miniPicker(true)}</div>`;
+    else html+=`<button class="btn-primary" style="margin-bottom:10px" onclick="startDailyReview()">${stampN===2?'3回目：順番の15問（王冠ハンコ👑）':'おかわり10語（キラキラハンコ）'}</button>`;
+  }
+  if(pState.wrongs.length>0){
+    html+=`<button class="btn-retry" onclick="retryWrongs()">間違えたやつだけ再練習</button>`;
+  }
+  html+=`<button class="btn-primary" style="margin-top:12px" onclick="goTab('${pState.mode==='daily'?'home':'write'}')">もどる</button>`;
+  html+=`</div>`;
+  area.innerHTML=html;
+
+  // だいふくちゃんコメント
+  if(perfect)daifukuSay('パーフェクト！すごすぎ！');
+  else if(pState.ok>pState.ng)daifukuSay('いい調子だよ！');
+  else daifukuSay('つぎはもっといけるよ！');
+}
+
+function retryWrongs(){
+  const qs=shuffle(pState.wrongs);
+  pState={qs,idx:0,ok:0,ng:0,streak:0,maxStreak:0,wrongs:[],mode:'retry',dotStatus:[]};
+  document.getElementById('result-area').style.display='none';
+  document.getElementById('practice-area').style.display='block';
+  renderQuestion();
+}
+
+// ===== DAILY REVIEW =====
+// 全回横断で「今日の10語」を自動で選ぶ（4回目以降は MINI_N 語）。
+// 優先順位：①テストで落とした漢字 ②間違いが多い漢字 ③マスター後しばらく見てない漢字 ④まだやってない漢字
+// ===== 3回目＝順番の15問（2026-10-18 あゆみ）=====
+// 1・2回目はいつもの「今日の復習」10問。3回目（王冠ハンコの回）は、第19回の1語目から順番に15問ずつ、書ける語も飛ばさずに出す（忘れている語を拾うため）。
+// どこまで進んだかは「10/19以降に王冠ハンコをもらった日の数」で決める（ハンコはクラウドに残るので、端末が変わってもずれない）。途中でやめた日は進まない。
+// ×だった語は、ふつうの記録どおり次の日の「今日の復習」に出る。回を足すと列の後ろにつながる
+const SEQ_START='2026-10-19', SEQ_N=15, SEQ_SWITCH='2026-11-07';
+function seqList(){const a=[];for(const[kai,data]of Object.entries(ROUNDS))for(const w of data.words)a.push({w,kai});return a;}
+function seqPos(){
+  const st=state.stamps||{}, today=ymd(Date.now());
+  const sd=state.seqDone||{};
+  let n=0; for(const k in st) if(k>=SEQ_START&&k<SEQ_SWITCH&&k<today&&st[k]>=3) n++;   // 11/7より前：王冠ハンコの日
+  for(const k in sd) if(k>=SEQ_SWITCH&&k<today) n++;                                 // 11/7から：順番の15問を実際にやった日
+  return (n*SEQ_N)%seqList().length;
+}
+function seqPick(){const all=seqList(),p=seqPos();let a=all.slice(p,p+SEQ_N);if(a.length<SEQ_N)a=a.concat(all.slice(0,SEQ_N-a.length));return a;}
+function seqLabel(){const p=seqPick(),a=p[0],b=p[p.length-1];return '第'+a.kai+'回「'+a.w.k+'」〜第'+b.kai+'回「'+b.w.k+'」';}
+function startSeqReview(){
+  const qs=seqPick().map(x=>({...x.w,_kai:x.kai}));   // 順番どおり（シャッフルしない）
+  goTab('write');
+  document.getElementById('write-title').textContent='📚 順番の15問（'+seqLabel()+'）';
+  document.getElementById('mode-select').style.display='none';
+  pState={qs,idx:0,ok:0,ng:0,streak:0,maxStreak:0,wrongs:[],mode:'daily',dotStatus:[],seq:true};
+  document.getElementById('practice-area').style.display='block';
+  document.getElementById('result-area').style.display='none';
+  renderQuestion();
+}
+function startDailyReview(pick){
+  const now=Date.now();
+  if(MINI_CHOICES.includes(pick)&&isMini()){state.miniPick=pick;saveState();}
+  if(((state.stamps||{})[ymd(now)]||0)===2) return startSeqReview();
+  const DAY=86400000;
+  const all=[];
+  for(const[kai,data]of Object.entries(ROUNDS)){
+    for(const w of data.words){
+      const rec=state.records[kai+'_'+w.k]||{correct:0,wrong:0,total:0,mastered:false};
+      all.push({w,kai,rec});
+    }
+  }
+  const days=r=>r.lastSeen?(now-r.lastSeen)/DAY:999;
+  const doneRecently=r=>r.lastSeen&&(now-r.lastSeen)<20*3600*1000; // 今日もうやった語は出さない
+
+  all.forEach(x=>ensureSched(x.rec));
+  const isDue=r=>r.total>0&&(r.due||0)<=now;
+  // ①🔥テストで落とした漢字（まだ書けない or 出す日が来た）— 最大3語、ランダム
+  const fire=shuffle(all.filter(x=>DROPPED.has(x.w.k)&&!doneRecently(x.rec)&&(!x.rec.last||isDue(x.rec))));
+  // ②出す日が来た「まだ書けない」漢字（前にまちがえた）
+  const dueWrong=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&isDue(x.rec)&&!x.rec.last&&!doneRecently(x.rec)));
+  // ③出す日が来た「書ける」漢字（3日後・1週間後・3週間後・2か月後の見直し）。待たせている順
+  const dueOk=all.filter(x=>!DROPPED.has(x.w.k)&&isDue(x.rec)&&x.rec.last&&!doneRecently(x.rec)).sort((a,b)=>a.rec.due-b.rec.due);
+  // ④まだ一度もやってない
+  const unseen=shuffle(all.filter(x=>!DROPPED.has(x.w.k)&&x.rec.total===0));
+
+  const N=dailySize();
+  const q=n=>Math.max(1,Math.round(n*N/10)); // 語数が少ない回は、①〜③の枠も同じ割合で小さく
+  const picked=[];
+  const seen=new Set();
+  const take=(arr,max)=>{
+    let added=0;
+    for(const x of arr){
+      if(picked.length>=N)break;
+      if(max&&added>=max)break;
+      const key=x.kai+'_'+x.w.k;
+      if(seen.has(key))continue;
+      seen.add(key);picked.push(x);added++;
+    }
+  };
+  // 出す日が来た語を先に。N語に足りなければ、まだやってない語で埋める
+  take(fire,q(3));take(dueWrong,q(4));take(dueOk,q(3));take(dueWrong);take(dueOk);take(unseen);
+
+  if(picked.length===0){alert('今日の分はぜんぶ終わってるよ！すごい！');return;}
+
+  const qs=shuffle(picked.map(x=>({...x.w,_kai:x.kai})));
+  goTab('write');
+  document.getElementById('write-title').textContent='🔥 今日の復習';
+  document.getElementById('mode-select').style.display='none';
+  pState={qs,idx:0,ok:0,ng:0,streak:0,maxStreak:0,wrongs:[],mode:'daily',dotStatus:[]};
+  document.getElementById('practice-area').style.display='block';
+  document.getElementById('result-area').style.display='none';
+  renderQuestion();
+  daifukuSay(isMini()?(N>=10?N+'語！やる気まんまんだね〜！':'ちょこっと'+N+'語、いってみよ〜！'):'きょうの10語、いってみよ〜！');
+}
+
+// ===== MAP =====
+// ぜんぶ合わせた到達ぐあい（あゆみが「どこまで書けるようになったか」を見るためのパネル）
+function renderOverall(){
+  const now=Date.now(), DAY=86400000;
+  let all=0, mastered=0, learning=0, unseen=0, todayCount=0, weak=[], okN=0;
+  let lastSeenMax=0;
+  for(const[kai,data]of Object.entries(ROUNDS)){
+    for(const w of data.words){
+      const r=state.records[kai+'_'+w.k]||{correct:0,wrong:0,total:0,mastered:false};
+      all++;
+      if(r.total>0&&canWrite(r))okN++;
+      if(r.mastered)mastered++;
+      else if(r.total>0)learning++;
+      else unseen++;
+      if(r.lastSeen){
+        if(r.lastSeen>lastSeenMax)lastSeenMax=r.lastSeen;
+        if(now-r.lastSeen < 20*3600*1000)todayCount++;
+      }
+      if(!r.mastered && r.wrong>=2) weak.push({k:w.k,r:w.r,wrong:r.wrong,correct:r.correct,kai});
+    }
+  }
+  const pct=n=>all?(n/all*100):0;
+  document.getElementById('ov-bar').innerHTML=
+    `<div style="width:${pct(mastered)}%;background:#f5a623"></div>`+
+    `<div style="width:${pct(learning)}%;background:#8fd3a8"></div>`+
+    `<div style="width:${pct(unseen)}%;background:#e6e6e6"></div>`;
+  document.getElementById('ov-legend').innerHTML=
+    `<span style="color:#f5a623">■</span>マスター　<span style="color:#8fd3a8">■</span>練習中　<span style="color:#ccc">■</span>まだ一度も`;
+
+  const box=(num,label,color)=>`<div style="flex:1;min-width:70px;background:#fff;border:1.5px solid ${color}33;border-radius:10px;padding:6px 4px;text-align:center;">
+    <div style="font-size:1.35em;font-weight:800;color:${color}">${num}</div>
+    <div style="font-size:0.62em;color:#8fa8bc;line-height:1.3">${label}</div></div>`;
+  document.getElementById('ov-nums').innerHTML=
+    box(okN,'書ける<br>(さいごに正解)','#e08a2e')+
+    box(mastered,'マスター<br>(5回正解)','#f5a623')+
+    box(learning,'れんしゅう中','#3fa96a')+
+    box(unseen,'まだ一度も<br>出てない','#8fa8bc')+
+    box(all,'ぜんぶで','#4a9bd9');
+
+  const days = lastSeenMax ? Math.floor((now-lastSeenMax)/DAY) : null;
+  let note = `今日やった漢字：<b>${todayCount}語</b>`;
+  if(days===null) note += `　／　この端末にはまだ記録がありません`;
+  else if(days===0) note += `　／　最後にやったのは今日`;
+  else note += `　／　最後にやったのは<b>${days}日前</b>`;
+  document.getElementById('ov-note').innerHTML=note;
+  renderMasterForecast();
+
+  weak.sort((a,b)=>b.wrong-a.wrong);
+  document.getElementById('ov-weak').innerHTML = weak.length
+    ? `<div style="font-size:0.75em;color:#c0392b;font-weight:700;margin-bottom:4px;">何度もまちがえてる漢字（${weak.length}語）</div>`+
+      `<div style="font-size:0.8em;line-height:1.9;">`+
+      weak.slice(0,15).map(x=>`<span style="display:inline-block;background:#fff0f0;border:1px solid #f5c6c6;border-radius:8px;padding:1px 8px;margin:1px 3px 1px 0;">${x.k}<span style="color:#c0392b;font-size:0.85em">×${x.wrong}</span></span>`).join('')+
+      (weak.length>15?`<span style="color:#999;font-size:0.9em">ほか${weak.length-15}語</span>`:'')+`</div>`
+    : `<div style="font-size:0.75em;color:#8fa8bc;">何度もまちがえてる漢字：まだなし</div>`;
+}
+
+// ===== マスターになれるか？！（2026-10-31 あゆみ）=====
+// 入試の日までに、ぜんぶの漢字が「マスター（5回正解）」になれるかの目安。
+// ・あと何回正解が要るか ÷ 正解率 ＝ あと何回書けばいいか。それを入試までの日数で割って「1日に必要な語数」
+// ・いまのペース＝この端末で、きのうまでの7日間に書いた数の平均（state.days。同期はしていない）
+// ・間隔（1・3・7・21日）をあけないと次の段に進まないので、ぜんぶ正解でも入試に間に合わない語も数える
+const DAY_GOAL=90;   // こころが決めた1日の語数（2026-10-31）。変えるときはここ
+const EXAM_DATE=(window.HUB_CONFIG&&window.HUB_CONFIG.examDate)||'2027-01-16';   // 三田・関大第一とも 1/16
+function renderMasterForecast(){
+  const box=document.getElementById('mp-body');if(!box)return;
+  const DAY=86400000, now=Date.now();
+  const t0=new Date();t0.setHours(0,0,0,0);
+  const [ey,em,ed]=EXAM_DATE.split('-').map(Number), exam=new Date(ey,em-1,ed).getTime();
+  const daysLeft=Math.round((exam-t0.getTime())/DAY);
+  if(daysLeft<=0){box.innerHTML='入試の日になりました。ここまでよくがんばったね！';return;}
+  let all=0,mastered=0,needOk=0,sumOk=0,sumTotal=0,late=0,unseen=0;
+  for(const[kai,data]of Object.entries(ROUNDS)){
+    for(const w of data.words){
+      const rec=state.records[kai+'_'+w.k]||{correct:0,wrong:0,total:0,mastered:false};
+      ensureSched(rec);all++;
+      sumOk+=rec.correct||0;sumTotal+=rec.total||0;
+      if(rec.mastered){mastered++;continue;}
+      if(!rec.total)unseen++;
+      const c=rec.correct||0;
+      needOk+=Math.max(1,5-c);
+      // ぜんぶ正解したとして、いちばん早くマスターになる日
+      let t=Math.max(now,rec.total?(rec.due||now):now), k=c, st=rec.step||0;
+      while(true){k++;if(k>=5)break;t+=INTERVAL_DAYS[st]*DAY;st=Math.min(st+1,INTERVAL_DAYS.length-1);}
+      if(t>exam)late++;
+    }
+  }
+  const acc=sumTotal>=20?Math.max(0.3,sumOk/sumTotal):0.7;   // 記録が少ないうちは正解率7割と仮定
+  const needWrite=Math.ceil(needOk/acc), perDay=Math.ceil(needWrite/daysLeft);
+  // いまのペース（きのうまでの7日間）
+  const dk=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+  let wrote=0;for(let i=1;i<=7;i++)wrote+=(state.days||{})[dk(t0.getTime()-i*DAY+DAY/2)]||0;
+  const pace=Math.round(wrote/7);
+  const md=ms=>{const d=new Date(ms);return (d.getMonth()+1)+'/'+d.getDate();};
+  const lastStart=exam-(1+3+7+21)*DAY;   // まだ出てない語は、この日までに1回目を書けば間に合う
+  // 先週（8〜14日前）のペースと、今日書いた数
+  let wrotePrev=0;for(let i=8;i<=14;i++)wrotePrev+=(state.days||{})[dk(t0.getTime()-i*DAY+DAY/2)]||0;
+  const pacePrev=Math.round(wrotePrev/7), todayN=(state.days||{})[dk(now)]||0;
+  // マスター数の記録（この端末・1日1つ）。1週間前と比べる
+  state.mpHist=state.mpHist||{};
+  if(state.mpHist[ymd(now)]!==mastered){state.mpHist[ymd(now)]=mastered;saveState();}
+  const wk=Object.keys(state.mpHist).filter(k=>k<=ymd(now-7*DAY)).sort().pop();
+  const gainWeek=wk!==undefined?mastered-state.mpHist[wk]:null;
+
+  if(mastered>=all){box.innerHTML='<b style="color:#3fa96a">🎉 ぜんぶマスター！あとは忘れないように「今日の復習」を続けよう</b>';return;}
+  // 今日の目標は2だん。①まずはいつものペース＋「ちょこっと」1回分（ここで一度ほめる）②こころが決めた1日 DAY_GOAL 語がゴール
+  // ①でほめても止まらないよう、ゴールまでの残りをいつも出す（2026-10-31 あゆみ：「今日はOK」で満足してしまったため）
+  const step=Math.min(perDay,Math.max(pace,10)+MINI_N), big=Math.max(DAY_GOAL,step);
+  const bar=`<div style="position:relative;height:10px;border-radius:5px;background:#d6e9f8;margin-top:6px;overflow:hidden">
+      <div style="height:100%;width:${Math.min(100,Math.round(todayN/big*100))}%;background:${todayN>=big?'#3fa96a':'#4a9bd9'}"></div>
+      ${step<big?`<div style="position:absolute;top:0;bottom:0;left:${Math.round(step/big*100)}%;width:2px;background:#fff"></div>`:''}</div>
+    <div style="display:flex;justify-content:space-between;font-size:0.8em;color:#8fa8bc;margin-top:2px"><span>0</span>${step<big?`<span>${step}</span>`:''}<span>${big}語</span></div>`;
+  let h;
+  if(todayN>=big) h=`<div style="text-align:center;padding:10px;border-radius:12px;background:#eafaf0">
+       <div style="font-size:1.5em;font-weight:900;color:#2d8a52">🏆 ${big}語 ゴール！</div>
+       <div style="color:#2d8a52;font-weight:700">今日 ${todayN}語。決めたことをやりきったね！</div>${bar}</div>`;
+  else if(todayN>=step) h=`<div style="text-align:center;padding:10px;border-radius:12px;background:#eef6fd">
+       <div style="color:#2d8a52;font-weight:800">🎉 ${step}語 クリア！いい調子</div>
+       <div style="font-size:1.25em;font-weight:900;color:#2f7fc1;margin-top:2px">${big}語まで あと ${big-todayN}語！</div>${bar}</div>`;
+  else h=`<div style="text-align:center;padding:10px;border-radius:12px;background:#eef6fd">
+       <div style="font-size:1.15em;font-weight:900;color:#2f7fc1">まずは ${step}語（あと ${step-todayN}語）</div>
+       <div style="color:#2f7fc1;font-weight:700">今日のゴール ${big}語まで あと ${big-todayN}語</div>${bar}</div>`;
+  // のびたところ（あるときだけ）
+  const up=[];
+  if(gainWeek>0)up.push(`この1週間で <b>+${gainWeek}語</b> マスター`);
+  if(pacePrev>0&&pace>pacePrev)up.push(`先週より1日 <b>+${pace-pacePrev}語</b> 多く書けてる`);
+  if(up.length)h+=`<div style="margin-top:6px;color:#3fa96a;font-weight:700">🌱 ${up.join('・')}</div>`;
+  // 現在地（いつも見える1行）
+  h+=`<div style="margin-top:6px">📍 いまの位置：マスター <b>${mastered}</b> / ${all}語・入試（${md(exam)}）まで ${daysLeft}日</div>`;
+  // くわしく（タップで開く）
+  const catchUp=perDay-pace;
+  h+=`<details style="margin-top:4px"><summary style="cursor:pointer;color:#8fa8bc">くわしく見る</summary><div style="margin-top:4px">
+    ぜんぶマスター（5回正解）にするには、あと約${needOk}回の正解（正解率${Math.round(acc*100)}%なら 約${needWrite}回書く）。<br>
+    入試までに間に合うペース：1日 <b>${perDay}語</b><br>
+    いまのペース：1日 <b>${pace}語</b>（きのうまでの7日間・この端末）${pacePrev?`／先週 ${pacePrev}語`:''}<br>
+    ${catchUp>0?`あと1日 <b>${catchUp}語</b> ふやせば追いつく。毎日 ${big}語 やりきれば、ぐっと近づくよ`:`このペースなら間に合う！（1日 ${-catchUp}語 よゆう）`}
+    ${unseen>0?`<br>まだ出てない漢字 ${unseen}語は、<b>${md(lastStart)}までに1回目</b>を書けば間に合う（1・3・7・21日の間隔で5回正解するため）`:''}
+    ${late>0?`<br>ぜんぶ正解しても間隔が足りない漢字：${late}語（入試のあとも続けよう）`:''}
+  </div></details>`;
+  box.innerHTML=h;
+}
+
+function renderMap(){
+  renderOverall();
+  // Round selector
+  const sel=document.getElementById('map-roundsel');
+  sel.innerHTML='';
+  for(const kai of Object.keys(ROUNDS)){
+    const b=document.createElement('button');
+    const rs=getRoundStats(parseInt(kai));
+    b.innerHTML='回'+kai+`<span style="font-size:0.85em;opacity:.75;margin-left:3px">${rs.mastered}/${rs.mastered+rs.learning+rs.yet}</span>`;
+    b.style.cssText='padding:6px 12px;margin:2px;border-radius:10px;border:2px solid '+(parseInt(kai)===currentRound?'#4a9bd9':'#e8f0f8')+';background:'+(parseInt(kai)===currentRound?'#4a9bd9':'#fff')+';color:'+(parseInt(kai)===currentRound?'#fff':'#8fa8bc')+';font-family:inherit;font-weight:700;font-size:0.75em;cursor:pointer;';
+    b.onclick=()=>{currentRound=parseInt(kai);renderMap();};
+    sel.appendChild(b);
+  }
+
+  const data=ROUNDS[currentRound];
+  document.getElementById('map-title').textContent='第'+currentRound+'回 — '+data.theme;
+  const s=getRoundStats(currentRound);
+  document.getElementById('m-master').textContent=s.mastered;
+  document.getElementById('m-learning').textContent=s.learning;
+  document.getElementById('m-yet').textContent=s.yet;
+
+  const grid=document.getElementById('kanji-grid');
+  grid.innerHTML='';
+  for(const w of data.words){
+    const rec=state.records[currentRound+'_'+w.k]||{correct:0,total:0,mastered:false};
+    const cls='kg-cell'+(rec.mastered?' mastered':rec.total>0?' learning':'');
+    const d=document.createElement('div');
+    d.className=cls;
+    d.innerHTML=`<div class="kg-char">${w.k}</div><div class="kg-read">${w.r}</div><div class="kg-status">${rec.mastered?'⭐':rec.total>0?rec.correct+'/5':'--'}</div>`;
+    grid.appendChild(d);
+  }
+}
+
+// ===== TROPHY =====
+function renderTrophy(){
+  const stats=getTotalStats();
+  const grid=document.getElementById('trophy-grid');
+  grid.innerHTML='';
+  for(const t of TROPHIES){
+    const unlocked=state.achievements.includes(t.id);
+    const d=document.createElement('div');
+    d.className='trophy-cell'+(unlocked?' unlocked':'');
+    d.innerHTML=`<div class="trophy-icon">${t.icon}</div><div class="trophy-name">${unlocked?t.name:'???'}</div>`;
+    if(unlocked)d.title=t.desc;
+    grid.appendChild(d);
+  }
+}
+
+// ===== ACHIEVEMENTS =====
+function checkAchievements(){
+  const stats=getTotalStats();
+  for(const t of TROPHIES){
+    if(!state.achievements.includes(t.id)&&t.check(stats)){
+      state.achievements.push(t.id);
+      saveState();
+      showAchievement(t.icon,t.name);
+    }
+  }
+}
+function showAchievement(icon,name){
+  document.getElementById('ach-icon').textContent=icon;
+  document.getElementById('ach-name').textContent=name;
+  const p=document.getElementById('ach-popup');
+  p.classList.add('show');
+  setTimeout(()=>p.classList.remove('show'),2500);
+}
+
+// ===== DAIFUKU =====
+const DAIFUKU_MSG = [
+  'がんばってるね！','その調子！','いっしょにがんばろ〜！',
+  'ピヨ！','すごいすごい！','もうちょっと！',
+  'マスターめざそ！','だいふく応援してるよ！',
+  'えらい！','ファイト〜！','だいふくもうれしい！'
+];
+let bubbleTimer;
+function daifukuTalk(){
+  daifukuSay(DAIFUKU_MSG[Math.floor(Math.random()*DAIFUKU_MSG.length)]);
+}
+function daifukuSay(msg){
+  const b=document.getElementById('bubble');
+  b.textContent=msg;b.classList.add('show');
+  clearTimeout(bubbleTimer);
+  bubbleTimer=setTimeout(()=>b.classList.remove('show'),2500);
+}
+
+// ===== BACKUP =====
+function exportData(){
+  const d=new Date();
+  const stamp=d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2);
+  const blob=new Blob([JSON.stringify(state,null,1)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='漢字マスター記録_'+stamp+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  daifukuSay('きろくをほぞんしたよ！');
+}
+function importData(ev){
+  const file=ev.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.records||typeof data.xp!=='number')throw new Error('形式が違う');
+      state=data;
+      saveState();
+      updateHeader();
+      renderHome();
+      goTab('home');
+      daifukuSay('きろくをもどしたよ！おかえり！');
+    }catch(err){
+      alert('このファイルは漢字マスターの記録ファイルじゃないみたい…');
+    }
+    ev.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+// ===== CLOUD SYNC (GitHub Gist) =====
+const GIST_FILENAME='kanji-master-data.json';
+
+// URLパラメータでGist IDを受け取れる: ?gist=xxxxx
+(function initGistFromUrl(){
+  const p=new URLSearchParams(location.search);
+  const g=p.get('gist');
+  if(g){
+    localStorage.setItem('kanji-gist-id',g);
+    history.replaceState(null,'',location.pathname);
+  }
+})();
+
+function getToken(){
+  let t=localStorage.getItem('kanji-gist-token');
+  if(!t){
+    t=prompt('GitHubトークンを入力してください（gist権限のみ）\n\n発行: GitHub→Settings→Developer settings→Personal access tokens→Tokens(classic)→Generate new token\nスコープは「gist」だけチェック');
+    if(!t)return null;
+    localStorage.setItem('kanji-gist-token',t.trim());
+  }
+  return t.trim();
+}
+
+async function cloudSave(){
+  const token=getToken();if(!token)return;
+  let gistId=localStorage.getItem('kanji-gist-id');
+  const content=JSON.stringify(state);
+  try{
+    let r;
+    if(gistId){
+      r=await fetch(`https://api.github.com/gists/${gistId}`,{
+        method:'PATCH',
+        headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({files:{[GIST_FILENAME]:{content}}})
+      });
+    }else{
+      r=await fetch('https://api.github.com/gists',{
+        method:'POST',
+        headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({description:'漢字マスター記録',public:false,files:{[GIST_FILENAME]:{content}}})
+      });
+    }
+    if(!r.ok){
+      const e=await r.text();
+      alert('保存できなかったよ ('+r.status+')\n'+e.slice(0,200));
+      return;
+    }
+    const d=await r.json();
+    if(!gistId){
+      gistId=d.id;
+      localStorage.setItem('kanji-gist-id',gistId);
+      const shareUrl=location.origin+location.pathname+'?gist='+gistId;
+      prompt('はじめての保存だよ！下のURLを他の端末（iPad・スマホ）で1回だけ開いてね。コピーしておうちの人に送って。\n\n（自動的にコピーされてるよ）',shareUrl);
+      try{await navigator.clipboard.writeText(shareUrl);}catch(e){}
+    }
+    daifukuSay('クラウドに保存したよ！☁️');
+  }catch(e){
+    alert('通信エラー: '+e.message);
+  }
+}
+
+async function cloudLoad(){
+  const token=getToken();if(!token)return;
+  let gistId=localStorage.getItem('kanji-gist-id');
+  if(!gistId){
+    gistId=prompt('GistのIDを入力してね（PCで保存したときに出てきたID）');
+    if(!gistId)return;
+    localStorage.setItem('kanji-gist-id',gistId.trim());
+  }
+  try{
+    const r=await fetch(`https://api.github.com/gists/${gistId}`,{
+      headers:{Authorization:`Bearer ${token}`}
+    });
+    if(!r.ok){
+      alert('取得できなかったよ ('+r.status+')');
+      return;
+    }
+    const d=await r.json();
+    const content=d.files[GIST_FILENAME]?.content;
+    if(!content){alert('データが見つからないよ');return;}
+    const newState=JSON.parse(content);
+    if(!newState.records||typeof newState.xp!=='number'){alert('データの形式が違うよ');return;}
+    if(!confirm('クラウドのきろくで上書きするよ。今のきろくは消えちゃうけどOK？'))return;
+    state=newState;
+    saveState();
+    updateHeader();
+    renderHome();
+    goTab('home');
+    daifukuSay('クラウドから取得したよ！☁️');
+  }catch(e){
+    alert('通信エラー: '+e.message);
+  }
+}
+
+function cloudSettings(){
+  const token=localStorage.getItem('kanji-gist-token');
+  const gistId=localStorage.getItem('kanji-gist-id');
+  const msg=`現在の設定:\n- トークン: ${token?'設定済み（'+token.slice(0,8)+'...）':'未設定'}\n- Gist ID: ${gistId||'未設定'}\n\nどうする？\n1=トークンをリセット\n2=Gist IDをリセット\n3=両方リセット\n4=共有URLをコピー\n（キャンセルで何もしない）`;
+  const c=prompt(msg);
+  if(c==='1'){localStorage.removeItem('kanji-gist-token');alert('トークンを消したよ');}
+  else if(c==='2'){localStorage.removeItem('kanji-gist-id');alert('Gist IDを消したよ');}
+  else if(c==='3'){localStorage.removeItem('kanji-gist-token');localStorage.removeItem('kanji-gist-id');alert('両方消したよ');}
+  else if(c==='4'){
+    if(!gistId){alert('Gist IDが未設定だよ。まず「クラウドに保存」してね');return;}
+    const url=location.origin+location.pathname+'?gist='+gistId;
+    prompt('このURLを他の端末で開いてね',url);
+    try{navigator.clipboard.writeText(url);}catch(e){}
+  }
+}
+
+// ===== 同期（ハブと同じGoogle Apps Script。トークン設定は不要） =====
+// GASの保存庫は「1キーあたり9KBまで」なので、記録を丸ごと1キーに入れると壊れる。
+// そこで 1語＝1キー（kM_<回>_<漢字>）に分け、値は [正解数, まちがい数, 出題数] の3つだけにする。
+// 記録は増える一方なので「出題数が多い方が進んでいる」とみなしてマージする。
+// これで iPad と Mac の記録は消し合わずに合流する。
+const SYNC_URL = (window.HUB_CONFIG && window.HUB_CONFIG.syncUrl) || "";
+const KP = "kM_";
+let syncQueue = {}, syncTimer = null, syncedAt = null;
+
+// 同期で送る中身：[正解, まちがい, 回数, 最後にやった時刻, 書ける(1/0), 間隔の段, 次に出す日, 書けるようになった日]
+function packV(r){ ensureSched(r); return [r.correct||0, r.wrong||0, r.total||0, r.lastSeen||0, r.last?1:0, r.step||0, r.due||0, r.okAt||0]; }
+// ハンコ（日付ごとの回数）も同期する。キーは kD_2026-09-30
+function syncQueueStamp(k){
+  if(!SYNC_URL) return;
+  syncQueue['kD_'+k]={v:[(state.stamps||{})[k]||0], t:Date.now()};
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncFlush, 1500);
+}
+function syncQueueWord(key){
+  if(!SYNC_URL) return;
+  const r = state.records[key]; if(!r) return;
+  syncQueue[KP+key] = {v:packV(r), t:Date.now()};
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncFlush, 1500);
+}
+
+function syncFlush(){
+  if(!SYNC_URL || !Object.keys(syncQueue).length) return;
+  const body = JSON.stringify(syncQueue); syncQueue = {};
+  fetch(SYNC_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:body})
+    .then(()=>{syncedAt=new Date(); syncBadge();}).catch(()=>{});
+}
+
+// 相手の方が進んでいる語は取り込み、こちらの方が進んでいる語は送り返す
+async function syncPull(){
+  if(!SYNC_URL) return;
+  try{
+    const r = await fetch(SYNC_URL);
+    const remote = await r.json();
+    let changed = false; const back = {};
+    state.stamps=state.stamps||{};
+    for(const rk in remote){
+      if(rk.indexOf('kD_')===0){             // ハンコ：多い方を残す
+        const dk=rk.slice(3), rn=(remote[rk].v||[])[0]||0, cn=state.stamps[dk]||0;
+        if(rn>cn){state.stamps[dk]=rn;changed=true;}
+        else if(cn>rn) back[rk]={v:[cn],t:Date.now()};
+        continue;
+      }
+      if(rk.indexOf(KP)!==0) continue;
+      const key = rk.slice(KP.length);
+      const v = remote[rk] && remote[rk].v;
+      if(!Array.isArray(v)) continue;
+      const cur = state.records[key];
+      if(!cur) continue;                       // いまの収録語にない語は無視
+      const rt=v[2]||0, ct=cur.total||0;
+      if(rt>ct || (rt===ct && (v[0]||0)>(cur.correct||0))){
+        cur.correct=v[0]||0; cur.wrong=v[1]||0; cur.total=rt;
+        cur.mastered = cur.correct>=5;
+        // lastSeen＝実際に学習した時刻（v[3]）。同期した時刻(t)を入れると
+        // 「今日やったばかり」扱いになり、翌日まで出題されなくなるので使わない
+        if(v[3]) cur.lastSeen = v[3];
+        // 5番目以降＝くりかえし出題の予定（2026-09-30から）。古い端末の記録には無いので作り直す
+        if(v.length>=7){ cur.last=!!v[4]; cur.step=v[5]||0; cur.due=v[6]||0; if(v[7]) cur.okAt=v[7]; }
+        else { delete cur.step; ensureSched(cur); }
+        changed = true;
+      }else if(ct>rt){
+        back[rk] = {v:packV(cur), t:Date.now()};
+      }
+    }
+    // 相手が持っていないこちらの記録を送る（初回の引っこしもこれで済む）
+    for(const key in state.records){
+      const c = state.records[key];
+      if((c.total||0)>0 && !(KP+key in remote)) back[KP+key]={v:packV(c), t:Date.now()};
+    }
+    // 同期先は45日で古いものを消すので、送り直すのは40日以内のハンコだけ
+    const cut40=ymd(Date.now()-40*86400000);
+    for(const dk in state.stamps){ if(dk>=cut40 && !(('kD_'+dk) in remote)) back['kD_'+dk]={v:[state.stamps[dk]],t:Date.now()}; }
+    if(Object.keys(back).length){ Object.assign(syncQueue, back); syncFlush(); }
+    syncedAt = new Date(); syncBadge();
+    if(changed){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      updateHeader(); renderHome();
+      const m=document.getElementById('tab-map');
+      if(m && m.classList.contains('active')) renderMap();
+    }
+  }catch(e){}
+}
+
+function syncBadge(){
+  let el=document.getElementById('sync-badge');
+  if(!el){
+    el=document.createElement('div'); el.id='sync-badge';
+    el.style.cssText='position:fixed;bottom:6px;left:8px;font-size:0.62em;color:#9bb;z-index:50;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  el.textContent = SYNC_URL ? ('☁️ '+(syncedAt?('同期 '+String(syncedAt.getHours()).padStart(2,'0')+':'+String(syncedAt.getMinutes()).padStart(2,'0')):'…')) : '';
+}
+
+// ===== INIT =====
+loadState();
+// ensure all records exist
+for(const[kai,data]of Object.entries(ROUNDS)){
+  for(const w of data.words){
+    const key=kai+'_'+w.k;
+    if(!state.records[key])state.records[key]={correct:0,wrong:0,total:0,mastered:false};
+  }
+}
+saveState();
+updateHeader();
+renderHome();
+syncBadge();
+syncPull();                                   // 起動時に他の端末の記録を取り込む
+setInterval(syncPull, 5*60*1000);             // 開いている間は5分ごと
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) syncPull(); });
+setTimeout(()=>daifukuSay('きょうもいっしょにがんばろ！'),1200);
+</script>
+</body>
+</html>

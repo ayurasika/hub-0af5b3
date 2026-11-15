@@ -14,8 +14,8 @@ function boot(search){
  return {context,result,accesses,unmodifiedNow};
 }
 
-test('preview accepts every day 1–60 and supplies the real collection counts across pet boundaries',()=>{
- for(let days=1;days<=60;days++){
+test('preview accepts every day 1–93 and supplies the real collection counts across pet boundaries',()=>{
+ for(let days=1;days<=93;days++){
   const f=boot('?days='+days),{room,status,pets}=f.result;
   assert.equal(status.started,true);assert.equal(status.days,days);assert.equal(status.collectionDays,days);
   assert.equal(room.ledger.config.startDate,'2026-10-15');assert.equal(Object.keys(room.ledger.rewards).length,days);
@@ -37,7 +37,7 @@ test('preview past furniture remains excluded from seasonal and pet achievement 
 });
 
 test('out-of-range or malformed preview days never fabricate progress or change the review clock',()=>{
- for(const search of ['', '?days=0','?days=61','?days=999','?days=01','?days=-1','?days=1.5','?days=20x','?days=abc']){
+ for(const search of ['', '?days=0','?days=94','?days=999','?days=01','?days=-1','?days=1.5','?days=20x','?days=abc']){
   const f=boot(search);
   assert.equal(f.result.now,f.unmodifiedNow);assert.equal(f.result.room.ledger.config,null);
   assert.deepEqual(f.result.room.ledger.rewards,{});assert.deepEqual(f.result.status,{started:false,days:0,collectionDays:0});

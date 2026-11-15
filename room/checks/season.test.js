@@ -1,6 +1,45 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
 const S=require('../season'),R=require('../core'),D=require('../device');
+test('winter rewards count only completed days starting November 14',()=>{
+ const rewards={
+  '2026-10-15':'furniture-1',
+  '2026-11-13':'furniture-2',
+  '2026-11-14':'furniture-3',
+  '2026-11-16':'furniture-4'
+ };
+ function status(today){
+  return {started:true,collectionDays:30,winterDays:S.winterEligibleDays(rewards,today)};
+ }
+ assert.equal(S.winterCollection(status('2026-11-13')).total,0);
+ assert.deepEqual(S.winterCollection(status('2026-11-14')).owned,{'winter-snowman':true});
+ assert.equal(S.winterCollection(status('2026-11-15')).total,1);
+ assert.equal(S.winterCollection(status('2026-11-16')).total,2);
+ assert.equal(S.winterCollection({started:true,collectionDays:40}).total,0);
+ assert.equal(S.autumnCollection(status('2026-11-13')).total,9);
+});
+test('winter stock unlocks one item per winter achievement day and saves unlocked outfits',()=>{
+ const status=day=>({started:true,collectionDays:95,winterDays:day});
+ assert.equal(S.winterRewards.length,63);
+ assert.equal(new Set(S.winterRewards.map(item=>item.id)).size,63);
+ assert.deepEqual(S.winterOutfits.map(item=>item.day),[7,14,21,28,35,42,49,56,63]);
+
+ for(let day=0;day<=63;day++){
+  const winter=S.winterCollection(status(day));
+  assert.equal(winter.total,day);
+  assert.equal(winter.next?.day,day<63?day+1:undefined);
+ }
+ const outfit=S.winterOutfits[0];
+ const initial=S.initial();
+ initial.decor['winter-snowman']={x:68,y:80};
+ assert.throws(()=>S.dress(initial,outfit.id,status(6)),/まだもらっていません/);
+ const {storage}=fixture(),store=S.create(storage,false);
+ store.save(S.dress(initial,outfit.id,status(7)),store.read().token);
+ const restored=S.create(fixture().storage,false).restore(store.exportJSON()).state;
+ assert.equal(S.appearance(restored,status(7)).asset,outfit.asset);
+ assert.deepEqual(restored.decor,initial.decor);
+ assert.equal(S.appearance(restored,status(6)).outfit,'green-knit');
+});
 function fixture(){const data={kanji_master_v2:JSON.stringify({stamps:{'2026-10-15':3}}),'shared-cache':'{}'};return {data,storage:{get length(){return Object.keys(data).length},key:i=>Object.keys(data)[i],getItem:k=>data[k]??null,setItem:(k,v)=>{data[k]=v}}};}
 test('outfit, character and decorations survive recreation; original outfit can be restored',()=>{
  const {storage}=fixture(),s=S.create(storage,false);let a=s.read();a.state.hat=true;a.state.cape=true;a.state.character={x:63,y:70};a.state.decor.pumpkin={x:22,y:80};s.save(a.state,a.token);
