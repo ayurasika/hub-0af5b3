@@ -139,8 +139,9 @@ body::before{
 .write-example{font-size:1em;color:#5a7a99;background:#fff7e6;border:2px dashed #f5c25a;padding:10px 14px;border-radius:12px;margin:0 auto 16px;max-width:300px;line-height:1.6;}
 .write-example .ex-label{font-size:0.75em;color:#c08820;font-weight:700;display:block;margin-bottom:2px;}
 .write-example .ex-blank{color:#e67e22;font-weight:900;}
-.kanji-reveal{font-size:3.5em;font-weight:900;color:#2c3e50;margin:12px 0;filter:blur(18px);transition:filter 0.4s;user-select:none;}
-.kanji-reveal.show{filter:blur(0);}
+.kanji-reveal{font-size:3.5em;font-weight:900;color:#2c3e50;margin:12px 0;filter:blur(18px);user-select:none;}
+/* 2026-11-19 ぼかしは「答えを見る」のときだけゆっくり外す。次の問題ではすぐぼかす（前は0.4秒かけてぼかしたので、新しい答えが一瞬見えていた） */
+.kanji-reveal.show{filter:blur(0);transition:filter 0.4s;}
 .compare-hint{font-size:0.8em;color:#8fa8bc;margin-bottom:8px;display:none;}
 .compare-hint.show{display:block;}
 .practice-count{font-size:0.8em;color:#8fa8bc;margin:12px 0;}
@@ -609,14 +610,14 @@ const ROUNDS = {
     {k:"道路標識",r:"ドウロヒョウシキ",ex:"〜を見る"},
     {k:"支柱",r:"シチュウ",ex:"〜を立てる"},
     {k:"機能",r:"キノウ",ex:"便利な〜"},
+    {k:"技法",r:"ギホウ",ex:"新しい〜を使って絵を描いた"},
     {k:"故障",r:"コショウ",ex:"機械の〜"},
-    {k:"鏡",r:"かがみ",ex:"〜を見る"},
+    {k:"鏡",r:"カガミ",ex:"わたしは〜に姿を映してみた"},
     {k:"姿",r:"スガタ",ex:"〜を映す"},
-    {k:"映る",r:"うつる",ex:"鏡に〜る"},
+    {k:"映す",r:"ウツす",ex:"鏡に姿を〜す"},
     {k:"乱暴",r:"ランボウ",ex:"〜な言葉"},
     {k:"傷",r:"キズ",ex:"〜がつく"},
     {k:"縦横",r:"ジュウオウ",ex:"〜無尽"},
-    {k:"金糸",r:"キンシ",ex:"〜の刺繍"},
     {k:"砂糖",r:"サトウ",ex:"〜と塩"},
     {k:"保証",r:"ホショウ",ex:"〜書"},
     {k:"普及",r:"フキュウ",ex:"スマホの〜"},
@@ -1700,6 +1701,13 @@ const ROUNDS = {
     {k:"孝行",r:"コウコウ",ex:"将来、しっかりと親〜ができるようになりたい"},
   ]},
   99:{theme:"🔥テストで落とした漢字",words:[
+    // 2026-11-15 合格力実践テスト（第9回）で落とした漢字。和む・招待・関心は元の回の読み・例文を使う
+    {k:"軽口",r:"カルクチ",ex:"友だちと〜をたたき合う（気軽に言う、おもしろい話や冗談）"},
+    {k:"独学",r:"ドクガク",ex:"ピアノを〜で身につけた（先生につかず、ひとりで学ぶこと）"},
+    // 2026-11-14 読解で書けなかった漢字（Ayumi）。絶好・臨むは元の回の読み・例文を使う
+    {k:"児童",r:"ジドウ",ex:"公園で〜たちが元気に遊んでいる（小学校に通う子ども）"},
+    {k:"価値観",r:"カチカン",ex:"人によって〜はちがう（何を大切だと思うかという考え方）"},
+    {k:"視点",r:"シテン",ex:"ちがう〜から考えてみる（ものを見たり考えたりする立場）"},
     {k:"確信",r:"カクシン",ex:"自分が正しいと〜している（かたく信じる）"},
     {k:"同乗",r:"ドウジョウ",ex:"父の車に〜させてもらう（同じ乗り物に乗る）"},
     {k:"存命",r:"ゾンメイ",ex:"祖母が〜のうちに聞いておきたい（生きていること）"},
@@ -1781,6 +1789,10 @@ const ROUNDS = {
 
 // 公開模試・育成テストで実際に落とした漢字（最優先で復習に出す）
 const DROPPED = new Set([
+  // 2026-11-15 合格力実践テスト第9回で落とした漢字（全国正答率70%以上で×）。和む＝読み93%／軽口92・独学84・招待77・関心70＝書き
+  "和む","軽口","独学","招待","関心",
+  // 2026-11-14 読解で書けなかった漢字（Ayumi「漢字ハブに足しておいて」）。「絶好」の行楽日和・試験に「臨む」
+  "臨む","絶好","視点","価値観","児童",
   // 2026-10-18 合格力実践テスト6で落とした漢字（書き）。必至・同乗＝白紙／口頭＝「口答」と書いた／確信＝×。読みの「急く・面・委細」は読みの扱いを決めてから
   "必至","口頭","確信","同乗",
   // 2026-10-11 育成テストV第5回で落とした漢字（消防署＝「所」と書いた／親善＝「耕善」と書いた／復旧＝塾の採点で×）
@@ -1895,6 +1907,8 @@ function loadState(){
   const saved = localStorage.getItem(STORAGE_KEY);
   if(saved){
     state=JSON.parse(saved);
+    // 2026-11-14 第25回を本と照合：「映る」→「映す」に直したので記録を写す（古い記録は残す）
+    if(state.records&&!state.records["25_映す"]&&state.records["25_映る"]) state.records["25_映す"]={...state.records["25_映る"]};
     // 第99回を第94回〜に分けたので（2026-11-07）、前の「99_語」の記録を新しい回のキーへ写す（1回だけ・古い記録は残す）
     for(const[kai,d]of Object.entries(ROUNDS)){ if(Number(kai)<DROP_FIRST)continue;
       for(const w of d.words){const nk=kai+'_'+w.k, ok='99_'+w.k;
@@ -2278,8 +2292,9 @@ function renderQuestion(){
   }else{
     exEl.style.display='none';
   }
-  document.getElementById('w-kanji').textContent=q.k;
+  // 先にぼかしてから字を入れる（答えが一瞬見えないように）
   document.getElementById('w-kanji').classList.remove('show');
+  document.getElementById('w-kanji').textContent=q.k;
   document.getElementById('w-compare').classList.remove('show');
   document.getElementById('w-count').textContent=rec.total;
   document.getElementById('w-reveal-btn').style.display='block';
