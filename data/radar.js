@@ -1,6 +1,6 @@
 // 自動で作られるファイル（tests/build_radar.py）。手で直さず tests/kiroku.json を直す
 window.RADAR = {
- "updated": "2026-11-21",
+ "updated": "2026-11-22",
  "subjects": {
   "sansu": {
    "axes": [
@@ -62,8 +62,8 @@ window.RADAR = {
     {
      "u": "立体",
      "now": {
-      "got": 51,
-      "of": 65
+      "got": 55,
+      "of": 69
      },
      "before": {
       "got": 2,
@@ -86,8 +86,8 @@ window.RADAR = {
     {
      "u": "立体",
      "before": 11,
-     "now": 78,
-     "diff": 67,
+     "now": 80,
+     "diff": 69,
      "why": {
       "date": "2026-11-19",
       "label": "6年後期補充プリント 第12回（体積の単位換算・水位①〜④・棒を沈める）",
@@ -161,7 +161,7 @@ window.RADAR = {
      "got": 0,
      "of": 1,
      "was": 8,
-     "count": 24
+     "count": 28
     },
     "counts": [
      {
@@ -178,7 +178,7 @@ window.RADAR = {
      },
      {
       "u": "立体",
-      "count": 24
+      "count": 28
      },
      {
       "u": "速さ",
@@ -223,7 +223,7 @@ window.RADAR = {
     {
      "u": "場合の数",
      "lastPrint": "2026-11-15",
-     "daysAgo": 6,
+     "daysAgo": 7,
      "rate": 50,
      "of": 26,
      "setsumei": []
@@ -231,7 +231,7 @@ window.RADAR = {
     {
      "u": "速さ",
      "lastPrint": "2026-11-18",
-     "daysAgo": 3,
+     "daysAgo": 4,
      "rate": 49,
      "of": 68,
      "setsumei": []
@@ -592,7 +592,7 @@ window.RADAR = {
     {
      "u": "化学",
      "lastPrint": "2026-11-17",
-     "daysAgo": 4,
+     "daysAgo": 5,
      "rate": 56,
      "of": 144,
      "setsumei": [
@@ -605,7 +605,7 @@ window.RADAR = {
     {
      "u": "気象",
      "lastPrint": "2026-11-07",
-     "daysAgo": 14,
+     "daysAgo": 15,
      "rate": 29,
      "of": 17,
      "setsumei": []
