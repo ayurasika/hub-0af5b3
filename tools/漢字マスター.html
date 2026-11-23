@@ -1869,6 +1869,55 @@ const DROPPED = new Set([
   "故障","揮発","忠誠","仏頂面","朗らか","蒸し暑い"
 ]);
 
+// ===== ☀️夏期講習を約30語ずつ7回にまとめる（2026-11-23 あゆみ「夏期講習の問題をもっとまとめて」）=====
+// もとの22回（第51〜72回・3〜16語）はそのまま残し、ここで第51〜57回の7回に組みなおす。語の中身・順番は変えない。
+// 前の「回_語」の記録は migrateSummer() で新しい回のキーへ写す（古い記録は残す）。
+const SUMMER_GROUPS=[
+  {olds:[51,52],          name:'① その1・その2'},
+  {olds:[53,54,55,56,57], name:'② その3〜その7'},
+  {olds:[58,59,60],       name:'③ その8〜その10'},
+  {olds:[61,62,63],       name:'④ その11・書き取り（大問四 2枚）'},
+  {olds:[64,65,66],       name:'⑤ その12・その13・書き取り（8/5分①）'},
+  {olds:[67,68,69],       name:'⑥ 書き取り（8/5分②）・その14・その15'},
+  {olds:[70,71,72],       name:'⑦ その16〜その18'},
+];
+const SUMMER_SRC={};   // 新しいキー → 前のキーの一覧
+(function(){
+  const old={}; for(const g of SUMMER_GROUPS) for(const k of g.olds){ old[k]=ROUNDS[k]; delete ROUNDS[k]; }
+  SUMMER_GROUPS.forEach((g,i)=>{
+    const nk=51+i, seen=new Set(), words=[];
+    for(const k of g.olds) for(const w of old[k].words){
+      const key=nk+'_'+w.k; (SUMMER_SRC[key]=SUMMER_SRC[key]||[]).push(k+'_'+w.k);
+      if(!seen.has(w.k)){ seen.add(w.k); words.push(w); }
+    }
+    ROUNDS[nk]={theme:'☀️夏期講習 '+g.name, words};
+  });
+})();
+// 前のキーの記録のうちいちばん進んでいるものを、新しいキーへ写す（新しいキーの方が進んでいれば何もしない）
+function migrateSummer(){
+  let changed=false;
+  for(const nk in SUMMER_SRC){
+    let best=null;
+    for(const ok of SUMMER_SRC[nk]){ const r=state.records[ok]; if(!r||!(r.total>0))continue;
+      if(!best||r.total>best.total||(r.total===best.total&&(r.correct||0)>(best.correct||0))) best=r; }
+    if(!best)continue;
+    const cur=state.records[nk];
+    if(!cur||(best.total||0)>(cur.total||0)){ state.records[nk]={...best}; changed=true; }
+  }
+  // 1回だけ：回の番号が変わったので「終えた回」「続きの回」「途中の回」を新しい番号に直す
+  if(!state.summerMerged){
+    const rd=state.roundDone||{}, newRd={};
+    SUMMER_GROUPS.forEach((g,i)=>{ const ds=g.olds.map(k=>rd[k]); if(ds.every(d=>d)) newRd[51+i]=ds.sort().pop(); });
+    for(let k=51;k<=72;k++) delete rd[k];
+    Object.assign(rd,newRd); if(state.roundDone) state.roundDone=rd;
+    const lr=Number(state.lastRound);
+    if(lr>=51&&lr<=72){ const gi=SUMMER_GROUPS.findIndex(g=>g.olds.includes(lr)); state.lastRound=51+gi; }
+    if(state.inProg&&state.inProg.round>=51&&state.inProg.round<=72) state.inProg=null;
+    state.summerMerged=1; changed=true;
+  }
+  return changed;
+}
+
 // ===== 🔥テストで落とした漢字を「回」にする（2026-11-07 あゆみ・こころ「回を選んでやる」）=====
 // DROPPED の全語（180語）を古いテストから順に DROP_PER 語ずつ、第94回〜に分ける。新しいテストで落とした語は
 // DROPPED の上に足すので、列の最後（いちばん大きい回）に入る。前の回の中身は動かない。
@@ -1916,6 +1965,7 @@ function loadState(){
     for(const[kai,d]of Object.entries(ROUNDS)){ if(Number(kai)<DROP_FIRST)continue;
       for(const w of d.words){const nk=kai+'_'+w.k, ok='99_'+w.k;
         if(!state.records[nk]&&state.records[ok]) state.records[nk]={...state.records[ok]};}}
+    migrateSummer();   // 2026-11-23 夏期講習を7回にまとめた
     return;
   }
   state = {xp:0, achievements:[], records:{}};
@@ -2990,6 +3040,7 @@ async function syncPull(){
         back[rk] = {v:packV(cur), t:Date.now()};
       }
     }
+    if(migrateSummer()) changed=true;   // 古い端末が前の回番号で送ってきた記録も新しい回へ
     // 相手が持っていないこちらの記録を送る（初回の引っこしもこれで済む）
     for(const key in state.records){
       const c = state.records[key];
