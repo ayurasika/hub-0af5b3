@@ -141,14 +141,20 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 .q.said .qhead{color:#7b2ff7;}
 .q.open .ans{display:block;}
 
-/* 四字熟語ぜんぶ */
+/* 四字熟語ぜんぶ（意味から当てるクイズ形式） */
 .ylist{margin-top:10px;display:none;}
 .ylist.open{display:block;}
-.y{border-bottom:1px dashed #e8e2d5;padding:9px 4px;cursor:pointer;}
-.y .yw{font-weight:900;font-size:1rem;}
-.y .yw .cau{color:#d32f2f;font-size:.72rem;margin-left:6px;}
-.y .yd{display:none;font-size:.8rem;color:#555;line-height:1.6;margin-top:4px;}
-.y.open .yd{display:block;}
+.ylist .ylead{font-size:.75rem;color:#b8860b;font-weight:700;margin-bottom:4px;}
+.y{border-bottom:1px dashed #e8e2d5;padding:10px 4px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.y .yi{font-size:.9rem;font-weight:700;line-height:1.6;}
+.y .yi .no{display:inline-block;min-width:2em;font-size:.68rem;color:#b8860b;font-weight:900;}
+.y .ytap{font-size:.7rem;color:#c9a75a;font-weight:700;margin-top:3px;}
+.y .ya{display:none;margin-top:6px;background:#fdf6e0;border-radius:10px;padding:8px 10px;}
+.y.open .ya{display:block;}
+.y.open .ytap{display:none;}
+.y .yw{font-weight:900;font-size:1.25rem;letter-spacing:.08em;}
+.y .yw .cau{color:#d32f2f;font-size:.72rem;margin-left:6px;letter-spacing:0;}
+.y .yd{font-size:.8rem;color:#555;line-height:1.6;margin-top:4px;}
 .y .yd b{color:#b8860b;}
 
 /* ママ用 */
@@ -321,7 +327,7 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
     <div id="yj-list"></div>
     <div class="btnrow" style="justify-content:flex-start;">
       <button class="btn gold" onclick="yjShuffle()">🎲 べつの問題</button>
-      <button class="btn" onclick="toggle('ylist')">ぜんぶ見る（37語）</button>
+      <button class="btn" id="ylist-btn" onclick="toggle('ylist')">ぜんぶ見る（37語）</button>
     </div>
     <div class="ylist" id="ylist"></div>
   </div>
@@ -691,12 +697,14 @@ function yjRender(){
 }
 function yjShuffle(){ store.set("yoji-shuffle", store.get("yoji-shuffle",0)+1); yjRender(); }
 
-// 四字熟語ぜんぶ（静的・1回だけ構築）
+// 四字熟語ぜんぶ（意味だけ見せる→タップで四字熟語が出る→もう一度タップでかくす）
 const ylist = document.getElementById("ylist");
-YOJI.forEach(w => {
+document.getElementById("ylist-btn").textContent = `ぜんぶ見る（${YOJI.length}語）`;
+ylist.innerHTML = '<div class="ylead">意味を読んで、四字熟語を思い出してからタップ！</div>';
+YOJI.forEach((w,i) => {
   const div = document.createElement("div");
   div.className = "y";
-  div.innerHTML = `<div class="yw">${w.y} <span style="font-size:.7rem;color:#b8860b;font-weight:400">${w.yomi}</span>${w.cau?'<span class="cau">✍注意</span>':""}</div><div class="yd"><b>意味：</b>${w.imi}<br><b>例：</b>「${w.rei}」</div>`;
+  div.innerHTML = `<div class="yi"><span class="no">${i+1}.</span>${w.imi}</div><div class="ytap">👆 タップで答え</div><div class="ya"><div class="yw">${w.y} <span style="font-size:.7rem;color:#b8860b;font-weight:400;letter-spacing:0">${w.yomi}</span>${w.cau?'<span class="cau">✍注意</span>':""}</div><div class="yd"><b>例：</b>「${w.rei}」</div></div>`;
   div.onclick = () => div.classList.toggle("open");
   ylist.appendChild(div);
 });
