@@ -157,6 +157,16 @@ a.btn{text-decoration:none;display:inline-block;text-align:center;}
 .y .yd{font-size:.8rem;color:#555;line-height:1.6;margin-top:4px;}
 .y .yd b{color:#b8860b;}
 
+.ylist .ytools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.ylist .ycount{font-size:.8rem;font-weight:900;color:#1f9d52;}
+.ylist .yfilter{border:none;border-radius:14px;background:#eef4fb;color:#2a7cc7;font-family:inherit;font-weight:900;font-size:.72rem;padding:5px 12px;cursor:pointer;}
+.y .obtn{margin-top:7px;border:none;border-radius:14px;background:#eafaf0;color:#1f9d52;font-family:inherit;font-weight:900;font-size:.75rem;padding:6px 14px;cursor:pointer;}
+.y.learned{background:#f3fbf5;}
+.y.learned .yi{color:#6a8f76;}
+.y .ok{display:none;color:#1f9d52;font-weight:900;font-size:.75rem;margin-left:4px;}
+.y.learned .ok{display:inline;}
+.ylist.hidelearned .y.learned{display:none;}
+
 /* ママ用 */
 .mama{border:2px dashed #f2c4d5;}
 .mlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
@@ -698,16 +708,34 @@ function yjRender(){
 function yjShuffle(){ store.set("yoji-shuffle", store.get("yoji-shuffle",0)+1); yjRender(); }
 
 // 四字熟語ぜんぶ（意味だけ見せる→タップで四字熟語が出る→もう一度タップでかくす）
+// 「覚えた」の印は yoji-oboe-<語>（今日のクイズの卒業 yoji-<語> とは別。どちらも消さない）
 const ylist = document.getElementById("ylist");
 document.getElementById("ylist-btn").textContent = `ぜんぶ見る（${YOJI.length}語）`;
-ylist.innerHTML = '<div class="ylead">意味を読んで、四字熟語を思い出してからタップ！</div>';
-YOJI.forEach((w,i) => {
-  const div = document.createElement("div");
-  div.className = "y";
-  div.innerHTML = `<div class="yi"><span class="no">${i+1}.</span>${w.imi}</div><div class="ytap">👆 タップで答え</div><div class="ya"><div class="yw">${w.y} <span style="font-size:.7rem;color:#b8860b;font-weight:400;letter-spacing:0">${w.yomi}</span>${w.cau?'<span class="cau">✍注意</span>':""}</div><div class="yd"><b>例：</b>「${w.rei}」</div></div>`;
-  div.onclick = () => div.classList.toggle("open");
-  ylist.appendChild(div);
-});
+const ylOboeKey = y => `yoji-oboe-${y}`;
+function ylRender(){
+  const openW = new Set([...ylist.querySelectorAll(".y.open")].map(el => el.dataset.w));
+  const learnedN = YOJI.filter(w => store.get(ylOboeKey(w.y), false)).length;
+  const hide = store.get("yoji-oboe-hide", false);
+  ylist.classList.toggle("hidelearned", hide);
+  ylist.innerHTML = `<div class="ylead">意味を読んで、四字熟語を思い出してからタップ！</div>
+    <div class="ytools"><span class="ycount">✅ 覚えた ${learnedN} / ${YOJI.length}</span>
+    <button class="yfilter">${hide ? "覚えたのも見せる" : "覚えたのをかくす"}</button></div>`;
+  ylist.querySelector(".yfilter").onclick = () => { store.set("yoji-oboe-hide", !hide); ylRender(); };
+  YOJI.forEach((w,i) => {
+    const learned = store.get(ylOboeKey(w.y), false);
+    const div = document.createElement("div");
+    div.className = "y" + (learned ? " learned" : "") + (openW.has(w.y) ? " open" : "");
+    div.dataset.w = w.y;
+    div.innerHTML = `<div class="yi"><span class="no">${i+1}.</span>${w.imi}<span class="ok">✅覚えた</span></div><div class="ytap">👆 タップで答え</div><div class="ya"><div class="yw">${w.y} <span style="font-size:.7rem;color:#b8860b;font-weight:400;letter-spacing:0">${w.yomi}</span>${w.cau?'<span class="cau">✍注意</span>':""}</div><div class="yd"><b>例：</b>「${w.rei}」</div><button class="obtn">${learned ? "↩ 覚えたを取り消す" : "✅ 覚えた！"}</button></div>`;
+    div.onclick = () => div.classList.toggle("open");
+    div.querySelector(".obtn").onclick = (e) => {
+      e.stopPropagation();
+      store.set(ylOboeKey(w.y), !learned);
+      ylRender();
+    };
+    ylist.appendChild(div);
+  });
+}
 
 // ===== 理科カンペ =====
 document.getElementById("rika-week").textContent = `${RIKA.week} の25問`;
@@ -1019,6 +1047,7 @@ function renderAll(){
   renderChecklist(CFG.checklist?.kokoro_pm, "chk-pm", "dots-pm");
   renderChecklist(CFG.checklist?.ayumi, "chk-mama", null);
   yjRender();
+  ylRender();
   buildRika();
   buildNaoshi();
   kmRenderResult();
